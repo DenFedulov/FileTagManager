@@ -1,3 +1,6 @@
+*.txt
+!CMakeLists.txt
+
 # Prerequisites
 *.d
 

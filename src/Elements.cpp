@@ -275,6 +275,16 @@ UIText::UIText(std::string name, FileTagManager *app, std::string text, std::sha
     this->parentElement = parentElement;
 }
 
+void UIText::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)
+{
+    SDL_Rect dest;
+    dest.x = this->calcTextX();
+    dest.y = this->calcTextY();
+    dest.w = this->w;
+    dest.h = this->h;
+    SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
+}
+
 UIText::~UIText()
 {
     TTF_CloseFont(this->font);
@@ -301,18 +311,8 @@ void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip fl
     SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
     if (this->textElement != NULL)
     {
-        this->drawTextElement(rotationPoint, angle, flip);
+        this->textElement->draw(rotationPoint, angle, flip);
     }
-}
-
-void UIElement::drawTextElement(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)
-{
-    SDL_Rect dest;
-    dest.x = this->textElement->calcTextX();
-    dest.y = this->textElement->calcTextY();
-    dest.w = this->textElement->w;
-    dest.h = this->textElement->h;
-    SDL_RenderCopyEx(this->app->renderer, this->textElement->texture, NULL, &dest, angle, rotationPoint, flip);
 }
 
 SDL_Texture *UIPictureElement::loadPictureTexture(std::string path)
@@ -468,3 +468,5 @@ FileTagManager *UIElement::getApp()
 {
     return this->app;
 }
+
+

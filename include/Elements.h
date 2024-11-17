@@ -28,25 +28,28 @@ protected:
     int h = 0;
 
 public:
+    std::shared_ptr<UIElement> parentElement = NULL;
+    std::shared_ptr<UIText> textElement = NULL;
+
     int x = 0;
     int y = 0;
     const std::string name;
     intPair pivot = intPair(0, 0);
     PivotPosition pivotPositionV = PivotPosition::None;
     PivotPosition pivotPositionH = PivotPosition::None;
+
+    EventManager<std::shared_ptr<UIElement> &, AppEvent &> events;
+
     int calcPivotPosition(PivotPosition p, bool vertical);
     int calcX();
     int calcY();
     int getW();
     int getH();
-    std::shared_ptr<UIText> textElement = NULL;
     FileTagManager *getApp();
-    EventManager<std::shared_ptr<UIElement> &, AppEvent &> events;
     virtual bool checkCollision(int x, int y);
     void freeSurface();
     void freeTexture();
     virtual void draw(SDL_Point *rotationPoint = nullptr, double angle = 0, SDL_RendererFlip flip = SDL_FLIP_NONE);
-    void drawTextElement(SDL_Point *rotationPoint = nullptr, double angle = 0, SDL_RendererFlip flip = SDL_FLIP_NONE);
     UIElement(std::string name, FileTagManager *app);
     virtual ~UIElement();
     SDL_Texture *getTexture();
@@ -77,7 +80,6 @@ protected:
 
 public:
     bool editable = false;
-    std::shared_ptr<UIElement> parentElement = NULL;
     int calcTextX();
     int calcTextY();
     int getFontSize();
@@ -91,6 +93,7 @@ public:
     int getCursorIndex();
     void setCursorIndex(int cursorIndex);
 
+    void draw(SDL_Point *rotationPoint = nullptr, double angle = 0, SDL_RendererFlip flip = SDL_FLIP_NONE) override;
     UIText(std::string name, FileTagManager *app, std::string text, int fontSize = 24, RGBA color = {0, 0, 0});
     UIText(std::string name, FileTagManager *app, std::string text, std::shared_ptr<UIElement> parentElement, int fontSize = 24, RGBA color = {0, 0, 0});
     ~UIText() override;

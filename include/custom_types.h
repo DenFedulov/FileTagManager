@@ -18,3 +18,11 @@ struct RGB
     uint8_t g = 255;
     uint8_t b = 255;
 };
+
+enum Direction
+{
+    Up,
+    Right,
+    Down,
+    Left
+};

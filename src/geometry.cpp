@@ -210,16 +210,16 @@ intPair Geometry::BorderMaker::getPixelInDirection(int x, int y, int &direction)
 {
     switch (this->calcRealCurrentDirection(direction))
     {
-    case Geometry::Direction::Down:
+    case Direction::Down:
         y++;
         break;
-    case Geometry::Direction::Up:
+    case Direction::Up:
         y--;
         break;
-    case Geometry::Direction::Left:
+    case Direction::Left:
         x--;
         break;
-    case Geometry::Direction::Right:
+    case Direction::Right:
         x++;
         break;
     }
@@ -230,19 +230,19 @@ intPair Geometry::BorderMaker::getPixelFromInTurn(int x, int y, int &direction)
 {
     switch (this->calcRealCurrentDirection(direction, this->turnDirection))
     {
-    case Geometry::Direction::Down:
+    case Direction::Down:
         x--;
         y++;
         break;
-    case Geometry::Direction::Up:
+    case Direction::Up:
         x++;
         y--;
         break;
-    case Geometry::Direction::Left:
+    case Direction::Left:
         x--;
         y--;
         break;
-    case Geometry::Direction::Right:
+    case Direction::Right:
         x++;
         y++;
         break;
@@ -254,16 +254,16 @@ intPair Geometry::BorderMaker::getPixelFromOutTurn(int x, int y, int &currentDir
 {
     switch (this->calcRealCurrentDirection(currentDirection, this->turnDirection))
     {
-    case Geometry::Direction::Down:
+    case Direction::Down:
         x++;
         break;
-    case Geometry::Direction::Up:
+    case Direction::Up:
         x--;
         break;
-    case Geometry::Direction::Left:
+    case Direction::Left:
         y++;
         break;
-    case Geometry::Direction::Right:
+    case Direction::Right:
         y--;
         break;
     }

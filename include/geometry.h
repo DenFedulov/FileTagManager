@@ -34,13 +34,6 @@ namespace Geometry
         Outer,
         Both
     };
-    enum Direction
-    {
-        Up,
-        Right,
-        Down,
-        Left
-    };
     Direction getOppositeDirection(Direction d);
     CoordsVector arrayToCoordsVector(Array2D<bool> &arr);
     intPair getDimentions(CoordsVector coords);

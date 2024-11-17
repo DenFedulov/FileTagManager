@@ -76,12 +76,41 @@ void UIElement::freeSurface()
     }
 }
 
+SDL_Texture *UIElement::getTexture()
+{
+    return this->texture;
+}
+
 void UIElement::freeTexture()
 {
     if (this->texture != nullptr)
     {
         SDL_DestroyTexture(this->texture);
         this->texture = nullptr;
+    }
+}
+
+FileTagManager *UIElement::getApp()
+{
+    return this->app;
+}
+
+UIElement::~UIElement()
+{
+    this->freeTexture();
+}
+
+void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)
+{
+    SDL_Rect dest;
+    dest.x = this->calcX();
+    dest.y = this->calcY();
+    dest.w = this->w;
+    dest.h = this->h;
+    SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
+    if (this->textElement != NULL)
+    {
+        this->textElement->draw(rotationPoint, angle, flip);
     }
 }
 
@@ -304,25 +333,6 @@ UIPictureElement::UIPictureElement(std::string name, FileTagManager *app) : UIEl
     SDL_QueryTexture(this->texture, NULL, NULL, &this->w, &this->h);
 }
 
-UIElement::~UIElement()
-{
-    this->freeTexture();
-}
-
-void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)
-{
-    SDL_Rect dest;
-    dest.x = this->calcX();
-    dest.y = this->calcY();
-    dest.w = this->w;
-    dest.h = this->h;
-    SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
-    if (this->textElement != NULL)
-    {
-        this->textElement->draw(rotationPoint, angle, flip);
-    }
-}
-
 SDL_Texture *UIPictureElement::loadPictureTexture(std::string path)
 {
     if (this->texture != nullptr)
@@ -335,11 +345,6 @@ SDL_Texture *UIPictureElement::loadPictureTexture(std::string path)
 
 UIPictureElement::UIPictureElement() : UIElement(name, app)
 {
-}
-
-SDL_Texture *UIElement::getTexture()
-{
-    return this->texture;
 }
 
 SDL_Surface *UIDynamicElement::makeSurface()
@@ -470,9 +475,4 @@ UIBox::UIBox(std::string name, FileTagManager *app, int w, int h,
     this->borderWidth = borderWidth;
     this->borderColor = borderColor;
     this->updateSurface();
-}
-
-FileTagManager *UIElement::getApp()
-{
-    return this->app;
 }

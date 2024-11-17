@@ -102,7 +102,15 @@ void UIText::updateSurface()
         }
         finalText.insert(this->cursorIndex, "|");
     }
-    SDL_Surface *defaultSurface = TTF_RenderUTF8_Blended(this->font, finalText.c_str(), color);
+    SDL_Surface *defaultSurface;
+    if (this->parentElement != NULL)
+    {
+        defaultSurface = TTF_RenderUTF8_Blended_Wrapped(this->font, finalText.c_str(), color, this->parentElement->getW());
+    }
+    else
+    {
+        defaultSurface = TTF_RenderUTF8_Blended(this->font, finalText.c_str(), color);
+    }
     this->surface = SDL_ConvertSurfaceFormat(defaultSurface, SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32, 0);
     SDL_FreeSurface(defaultSurface);
     this->w = this->surface->w;
@@ -468,5 +476,3 @@ FileTagManager *UIElement::getApp()
 {
     return this->app;
 }
-
-

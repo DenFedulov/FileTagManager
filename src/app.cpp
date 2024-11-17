@@ -96,8 +96,9 @@ void FileTagManager::initElements()
 {
     int w, h;
     SDL_GetWindowSize(this->window, &w, &h);
-    auto element = std::make_shared<UIBox>("button", this, w, App::HEADER_HEIGHT, 0, RGBA(), 10, RGBA(100, 100, 100));
+    auto element = std::make_shared<UIBox>("button", this, w, App::HEADER_HEIGHT + 50, 0, RGBA(), 10, RGBA(100, 100, 100));
     element->textElement = std::make_shared<UIText>("text", this, "test text", element);
+    element->textElement->pivotPositionV = PivotPosition::End;
     // element->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, AppEvent &e)
     // 						   { Mix_PlayChannel(-1, el->getApp()->getSound("failsound.mp3"), 0); });
 

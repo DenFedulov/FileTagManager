@@ -47,6 +47,7 @@ public:
     std::unordered_map<std::string, std::shared_ptr<UIElement>> loadedElements;
     std::unordered_map<std::string, Mix_Chunk *> loadedSounds;
     std::unordered_map<std::string, Mix_Music *> loadedMusic;
+    std::shared_ptr<UIElement> mainElement;
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
 

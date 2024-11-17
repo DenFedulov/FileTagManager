@@ -29,7 +29,7 @@ protected:
 
 public:
     std::shared_ptr<UIElement> parentElement = NULL;
-    std::shared_ptr<UIText> textElement = NULL;
+    std::vector<std::shared_ptr<UIElement>> childElements;
 
     int x = 0;
     int y = 0;
@@ -37,6 +37,7 @@ public:
     intPair pivot = intPair(0, 0);
     PivotPosition pivotPositionV = PivotPosition::None;
     PivotPosition pivotPositionH = PivotPosition::None;
+    bool visible = true;
 
     EventManager<std::shared_ptr<UIElement> &, AppEvent &> events;
 
@@ -50,7 +51,7 @@ public:
     void freeSurface();
     void freeTexture();
     virtual void draw(SDL_Point *rotationPoint = nullptr, double angle = 0, SDL_RendererFlip flip = SDL_FLIP_NONE);
-    UIElement(std::string name, FileTagManager *app);
+    UIElement(std::string name, FileTagManager *app, bool isMainElement = false);
     virtual ~UIElement();
     SDL_Texture *getTexture();
 };

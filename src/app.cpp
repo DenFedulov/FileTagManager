@@ -94,16 +94,20 @@ void FileTagManager::initResize()
 
 void FileTagManager::initElements()
 {
+    this->mainElement = std::make_shared<UIElement>("main", this, true);
     int w, h;
     SDL_GetWindowSize(this->window, &w, &h);
     auto element = std::make_shared<UIBox>("button", this, w, App::HEADER_HEIGHT + 50, 0, RGBA(), 10, RGBA(100, 100, 100));
-    element->textElement = std::make_shared<UIText>("text", this, "test text", element);
-    element->textElement->pivotPositionV = PivotPosition::End;
+    auto text = std::make_shared<UIText>("text", this, "test text", element);
+    element->childElements.push_back(text);
+    text->pivotPositionV = PivotPosition::End;
     // element->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, AppEvent &e)
     // 						   { Mix_PlayChannel(-1, el->getApp()->getSound("failsound.mp3"), 0); });
-
-    element->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, AppEvent &e)
-                               { el->textElement->setText(std::to_string(e.mouseEvent.pos.first) + "," + std::to_string(e.mouseEvent.pos.second)); });
+    auto setTextToCoords = [text](std::shared_ptr<UIElement> &el, AppEvent &e)
+    {
+        text->setText(std::to_string(e.mouseEvent.pos.first) + "," + std::to_string(e.mouseEvent.pos.second));
+    };
+    element->events.addHandler(AppEvent::mouse_button_down, setTextToCoords);
 }
 
 void FileTagManager::drawCoordsVector(CoordsVector coords, int xC, int yC, bool fill)
@@ -158,7 +162,6 @@ bool FileTagManager::loop()
     SDL_RenderClear(this->renderer);
     SDL_Event evt;
     SDL_SetRenderDrawColor(this->renderer, 255, 255, 255, 255);
-    std::shared_ptr<UIElement> element = this->getElement("button");
     while (SDL_PollEvent(&evt))
     {
         switch (evt.type)
@@ -193,7 +196,7 @@ bool FileTagManager::loop()
             break;
         }
     }
-    element->draw();
+    this->mainElement->draw();
     SDL_RenderPresent(this->renderer);
 
     return true;

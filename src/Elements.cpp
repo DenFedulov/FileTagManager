@@ -1,7 +1,20 @@
 #include "Elements.h"
 
-UIElement::UIElement(std::string name, FileTagManager *app) : name(name), app(app)
+UIElement::UIElement(std::string name, FileTagManager *app, bool isMainElement) : name(name), app(app)
 {
+    if (!isMainElement)
+    {
+        this->parentElement = this->app->mainElement;
+        this->app->mainElement->childElements.push_back(std::shared_ptr<UIElement>(this));
+    }
+    else
+    {
+        int width, hight;
+        SDL_GetWindowSize(this->app->window, &w, &h);
+        this->visible = false;
+        this->w = width;
+        this->h = hight;
+    }
     this->app->loadedElements.emplace(name, std::shared_ptr<UIElement>(this));
 }
 
@@ -102,15 +115,18 @@ UIElement::~UIElement()
 
 void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)
 {
-    SDL_Rect dest;
-    dest.x = this->calcX();
-    dest.y = this->calcY();
-    dest.w = this->w;
-    dest.h = this->h;
-    SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
-    if (this->textElement != NULL)
+    if (this->texture != NULL && this->visible)
     {
-        this->textElement->draw(rotationPoint, angle, flip);
+        SDL_Rect dest;
+        dest.x = this->calcX();
+        dest.y = this->calcY();
+        dest.w = this->w;
+        dest.h = this->h;
+        SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
+    }
+    for (auto &childElement : this->childElements)
+    {
+        childElement->draw(rotationPoint, angle, flip);
     }
 }
 
@@ -314,6 +330,10 @@ UIText::UIText(std::string name, FileTagManager *app, std::string text, std::sha
 
 void UIText::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)
 {
+    if (!this->visible)
+    {
+        return;
+    }
     SDL_Rect dest;
     dest.x = this->calcTextX();
     dest.y = this->calcTextY();

@@ -6,7 +6,6 @@ UIElement::UIElement(std::string name, FileTagManager *app, bool isMainElement) 
     {
         int width, hight;
         SDL_GetWindowSize(this->app->window, &width, &hight);
-        this->visible = false;
         this->w = width;
         this->h = hight;
     }
@@ -213,7 +212,11 @@ std::shared_ptr<UIElement> UIElement::getChild(std::string name)
 
 void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)
 {
-    if (this->texture != NULL && this->visible)
+    if (!this->visible)
+    {
+        return;
+    }
+    if (this->texture != NULL)
     {
         SDL_Rect dest;
         dest.x = this->calcX();
@@ -221,6 +224,10 @@ void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip fl
         dest.w = this->calcW();
         dest.h = this->calcH();
         SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
+    }
+    if (this->z > -1)
+    {
+        return;
     }
     for (auto &childElement : this->childDrawElements)
     {

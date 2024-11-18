@@ -3,6 +3,7 @@
 #include <bitset>
 #include <optional>
 #include <memory>
+#include <algorithm>
 #include "AppElementsCommon.h"
 #include "SDL.h"
 #include "SDL_image.h"
@@ -19,7 +20,7 @@ namespace App
 {
     const int WIDTH = 1280, HEIGHT = 720;
     const int HEADER_HEIGHT = 32;
-    const int RESIZE_PADDING = 8;
+    const int RESIZE_PADDING = 6;
     const std::string APP_NAME = "FileTagManager";
     const std::string RESOURCES_PATH = "resources/";
     const std::string IMAGES_PATH = RESOURCES_PATH + "images/";
@@ -43,6 +44,8 @@ private:
     std::unordered_map<std::string, std::shared_ptr<UIElement>> loadedElements;
     std::unordered_map<std::string, Mix_Chunk *> loadedSounds;
     std::unordered_map<std::string, Mix_Music *> loadedMusic;
+    std::vector<std::shared_ptr<UIElement>> elementsToDraw;
+    void fillElementsToDraw();
 
 public:
     Logger *logger;

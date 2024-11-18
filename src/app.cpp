@@ -134,6 +134,20 @@ void FileTagManager::initElements()
                        text});
 }
 
+void FileTagManager::fillElementsToDraw()
+{
+    this->elementsToDraw.clear();
+    for (auto &[name, element] : this->loadedElements)
+    {
+        this->elementsToDraw.push_back(element);
+    }
+    auto sortByZ = [](std::shared_ptr<UIElement> a, std::shared_ptr<UIElement> b) -> bool
+    {
+        return a->z < b->z;
+    };
+    std::sort(this->elementsToDraw.begin(), this->elementsToDraw.end(), sortByZ);
+}
+
 void FileTagManager::addElements(std::vector<std::shared_ptr<UIElement>> elements)
 {
     for (const auto &element : elements)
@@ -144,6 +158,7 @@ void FileTagManager::addElements(std::vector<std::shared_ptr<UIElement>> element
         }
         this->loadedElements.emplace(element->name, element);
     }
+    this->fillElementsToDraw();
 }
 
 void FileTagManager::drawCoordsVector(CoordsVector coords, int xC, int yC, bool fill)
@@ -241,7 +256,10 @@ bool FileTagManager::loop()
             break;
         }
     }
-    this->mainElement->draw();
+    for (auto &element : this->elementsToDraw)
+    {
+        element->draw();
+    }
     SDL_RenderPresent(this->renderer);
 
     return true;

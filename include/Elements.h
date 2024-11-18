@@ -34,6 +34,7 @@ protected:
 public:
     int x = 0;
     int y = 0;
+    int z = -1;
     const std::string name;
     intPair pivot = intPair(0, 0);
     RelativePosition pivotPositionV = RelativePosition::None;

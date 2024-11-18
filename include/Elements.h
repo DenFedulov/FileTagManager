@@ -32,6 +32,7 @@ protected:
     std::unordered_map<std::string, std::shared_ptr<UIElement>> childElements;
 
 public:
+    int id = -1;
     int x = 0;
     int y = 0;
     int z = -1;

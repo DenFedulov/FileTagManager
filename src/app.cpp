@@ -134,31 +134,28 @@ void FileTagManager::initElements()
                        text});
 }
 
-void FileTagManager::fillElementsToDraw()
+void FileTagManager::sortLoadedElements()
 {
-    this->elementsToDraw.clear();
-    for (auto &[name, element] : this->loadedElements)
-    {
-        this->elementsToDraw.push_back(element);
-    }
     auto sortByZ = [](std::shared_ptr<UIElement> a, std::shared_ptr<UIElement> b) -> bool
     {
         return a->z < b->z;
     };
-    std::sort(this->elementsToDraw.begin(), this->elementsToDraw.end(), sortByZ);
+    std::sort(this->loadedElements.begin(), this->loadedElements.end(), sortByZ);
 }
 
 void FileTagManager::addElements(std::vector<std::shared_ptr<UIElement>> elements)
 {
     for (const auto &element : elements)
     {
+        int id = this->loadedElements.size();
+        element->id = id;
         if (element->getParent() == NULL && element->name != "main")
         {
             element->setParent(this->mainElement);
         }
-        this->loadedElements.emplace(element->name, element);
+        this->loadedElements.push_back(element);
     }
-    this->fillElementsToDraw();
+    this->sortLoadedElements();
 }
 
 void FileTagManager::drawCoordsVector(CoordsVector coords, int xC, int yC, bool fill)
@@ -179,7 +176,7 @@ void FileTagManager::drawCoordsVector(CoordsVector coords, int xC, int yC, bool 
 
 void FileTagManager::triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
 {
-    for (auto &[name, element] : this->loadedElements)
+    for (auto &element : this->loadedElements)
     {
         AppEvent e;
         e.type = eventEnum;
@@ -196,7 +193,7 @@ void FileTagManager::triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
 
 void FileTagManager::triggerKeyEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
 {
-    for (auto &[name, element] : this->loadedElements)
+    for (auto &element : this->loadedElements)
     {
         AppEvent e;
         e.type = eventEnum;
@@ -256,7 +253,7 @@ bool FileTagManager::loop()
             break;
         }
     }
-    for (auto &element : this->elementsToDraw)
+    for (auto &element : this->loadedElements)
     {
         element->draw();
     }
@@ -265,11 +262,11 @@ bool FileTagManager::loop()
     return true;
 }
 
-std::shared_ptr<UIElement> FileTagManager::getElement(std::string name)
+std::shared_ptr<UIElement> FileTagManager::getElement(int id)
 {
-    if (this->loadedElements.contains(name))
+    if (id < this->loadedElements.size())
     {
-        return this->loadedElements.at(name);
+        return this->loadedElements.at(id);
     }
     return nullptr;
 }

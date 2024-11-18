@@ -348,52 +348,67 @@ UIText::UIText(std::string name, FileTagManager *app, std::string text, int font
     this->fontPath = this->app->config->defaultFont;
     this->loadFont(this->fontPath);
 
-    this->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, AppEvent &e)
-                            { 
-                                std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
-                                if (el->checkCollision(e.mouseEvent.pos.first, e.mouseEvent.pos.second)){
-                                    textEl->cursorIndex = -1;
-                                    textEl->editable = true;
-                            } else {
-                                    textEl->editable = false;
-                            } });
-    this->events.addHandler(AppEvent::text_input, [](std::shared_ptr<UIElement> &el, AppEvent &e)
-                            {
-                                std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
-                                if (!textEl->editable)
-                                {
-                                    return;
-                                }
-                                if (e.keyEvent.text.length() > 0)
-                                {
-                                    std::string curText = textEl->getText();
-                                    curText.insert(textEl->getCursorIndex(), e.keyEvent.text);
-                                    textEl->setText(curText);
-                                    textEl->setCursorIndex(textEl->getCursorIndex() + e.keyEvent.text.length());
-                                } });
-    this->events.addHandler(AppEvent::keyboard_button_down, [](std::shared_ptr<UIElement> &el, AppEvent &e)
-                            { 
-                                std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
-                                if(!textEl->editable){
-                                    return;
-                                }
-                                if(e.keyEvent.keycode == SDLK_BACKSPACE && textEl->getText().length() > 0 && textEl->getCursorIndex() > 0){
-                                    std::string curText = textEl->getText();
-                                    curText.erase(textEl->getCursorIndex() - 1, 1);
-                                    textEl->setCursorIndex(textEl->getCursorIndex() - 1);
-                                    textEl->setText(curText);
-                                } 
-                                if(e.keyEvent.keycode == SDLK_DELETE && textEl->getText().length() > 0 && textEl->getCursorIndex() < textEl->getText().length()){
-                                    std::string curText = textEl->getText();
-                                    curText.erase(textEl->getCursorIndex(), 1);
-                                    textEl->setText(curText);
-                                } 
-                                if(e.keyEvent.keycode == 1073741904 && textEl->getCursorIndex() > 0){
-                                    textEl->setCursorIndex(textEl->getCursorIndex() - 1);
-                                } 
-                                if(e.keyEvent.keycode == 1073741903){
-                                    textEl->setCursorIndex(textEl->getCursorIndex() + 1);
-                                } });
+    auto editEnable = [](std::shared_ptr<UIElement> &el, AppEvent &e)
+    {
+        std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
+        if (el->checkCollision(e.mouseEvent.pos.first, e.mouseEvent.pos.second))
+        {
+            textEl->cursorIndex = -1;
+            textEl->editable = true;
+        }
+        else
+        {
+            textEl->editable = false;
+        }
+        textEl->updateSurface();
+    };
+    this->events.addHandler(AppEvent::mouse_button_down, editEnable);
+    auto textInput = [](std::shared_ptr<UIElement> &el, AppEvent &e)
+    {
+        std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
+        if (!textEl->editable)
+        {
+            return;
+        }
+        if (e.keyEvent.text.length() > 0)
+        {
+            std::string curText = textEl->getText();
+            curText.insert(textEl->getCursorIndex(), e.keyEvent.text);
+            textEl->setText(curText);
+            textEl->setCursorIndex(textEl->getCursorIndex() + e.keyEvent.text.length());
+        }
+    };
+    this->events.addHandler(AppEvent::text_input, textInput);
+    auto specialKeysInput = [](std::shared_ptr<UIElement> &el, AppEvent &e)
+    {
+        std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
+        if (!textEl->editable)
+        {
+            return;
+        }
+        if (e.keyEvent.keycode == SDLK_BACKSPACE && textEl->getText().length() > 0 && textEl->getCursorIndex() > 0)
+        {
+            std::string curText = textEl->getText();
+            curText.erase(textEl->getCursorIndex() - 1, 1);
+            textEl->setCursorIndex(textEl->getCursorIndex() - 1);
+            textEl->setText(curText);
+        }
+        if (e.keyEvent.keycode == SDLK_DELETE && textEl->getText().length() > 0 && textEl->getCursorIndex() < textEl->getText().length())
+        {
+            std::string curText = textEl->getText();
+            curText.erase(textEl->getCursorIndex(), 1);
+            textEl->setText(curText);
+        }
+        if (e.keyEvent.keycode == 1073741904 && textEl->getCursorIndex() > 0)
+        {
+            textEl->setCursorIndex(textEl->getCursorIndex() - 1);
+        }
+        if (e.keyEvent.keycode == 1073741903)
+        {
+            textEl->setCursorIndex(textEl->getCursorIndex() + 1);
+        }
+    };
+    this->events.addHandler(AppEvent::keyboard_button_down, specialKeysInput);
 
     this->updateSurface();
 }

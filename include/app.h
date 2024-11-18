@@ -41,11 +41,10 @@ private:
     MouseSelection mSelection;
     void triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE);
     void triggerKeyEvent(AppEvent::Type eventEnum, SDL_Event sdlE);
-    std::unordered_map<std::string, std::shared_ptr<UIElement>> loadedElements;
     std::unordered_map<std::string, Mix_Chunk *> loadedSounds;
     std::unordered_map<std::string, Mix_Music *> loadedMusic;
-    std::vector<std::shared_ptr<UIElement>> elementsToDraw;
-    void fillElementsToDraw();
+    std::vector<std::shared_ptr<UIElement>> loadedElements;
+    void sortLoadedElements();
 
 public:
     Logger *logger;
@@ -61,7 +60,7 @@ public:
     void initResize();
     void initElements();
     void addElements(std::vector<std::shared_ptr<UIElement>> elements);
-    std::shared_ptr<UIElement> getElement(std::string name);
+    std::shared_ptr<UIElement> getElement(int id);
     Mix_Chunk *getSound(std::string filename);
     Mix_Music *getMusic(std::string filename);
     void drawCoordsVector(CoordsVector coords, int xC, int yC, bool fill = false);

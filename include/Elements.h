@@ -38,6 +38,7 @@ public:
     intPair pivot = intPair(0, 0);
     PivotPosition pivotPositionV = PivotPosition::None;
     PivotPosition pivotPositionH = PivotPosition::None;
+    bool anchors[4] = {0, 0, 0, 0};
     bool visible = true;
 
     EventManager<std::shared_ptr<UIElement> &, AppEvent &> events;
@@ -45,8 +46,12 @@ public:
     int calcPivotPosition(PivotPosition p, bool vertical);
     int calcX();
     int calcY();
+    int calcW();
+    int calcH();
     int getW();
     int getH();
+    virtual void setW(int w);
+    virtual void setH(int h);
     void addChild(std::shared_ptr<UIElement> childElement, bool firstCall = true);
     void removeChild(std::string name, bool firstCall = true);
     void setParent(std::shared_ptr<UIElement> parent, bool firstCall = true);
@@ -124,8 +129,8 @@ protected:
     ~UIDynamicElement() override;
 
 public:
-    void setW(int w);
-    void setH(int h);
+    void setW(int w) override;
+    void setH(int h) override;
 };
 
 class UIBox : public UIDynamicElement

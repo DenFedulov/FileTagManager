@@ -39,7 +39,6 @@ private:
     MouseSelection mSelection;
     void triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE);
     void triggerKeyEvent(AppEvent::Type eventEnum, SDL_Event sdlE);
-    SDL_HitTestResult currentHittest = SDL_HITTEST_NORMAL;
     std::unordered_map<std::string, std::shared_ptr<UIElement>> loadedElements;
     std::unordered_map<std::string, Mix_Chunk *> loadedSounds;
     std::unordered_map<std::string, Mix_Music *> loadedMusic;

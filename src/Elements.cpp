@@ -5,7 +5,7 @@ UIElement::UIElement(std::string name, FileTagManager *app, bool isMainElement) 
     if (isMainElement)
     {
         int width, hight;
-        SDL_GetWindowSize(this->app->window, &w, &h);
+        SDL_GetWindowSize(this->app->window, &width, &hight);
         this->visible = false;
         this->w = width;
         this->h = hight;
@@ -14,12 +14,38 @@ UIElement::UIElement(std::string name, FileTagManager *app, bool isMainElement) 
 
 int UIElement::calcX()
 {
+    if (this->anchors[Direction::Left] && this->parentElement != NULL)
+    {
+        return this->parentElement->calcX();
+    }
     return this->x - this->calcPivotPosition(this->pivotPositionH, false);
 }
 
 int UIElement::calcY()
 {
+    if (this->anchors[Direction::Up] && this->parentElement != NULL)
+    {
+        return this->parentElement->calcY();
+    }
     return this->y - this->calcPivotPosition(this->pivotPositionV, true);
+}
+
+int UIElement::calcW()
+{
+    if (this->anchors[Direction::Right] && this->parentElement != NULL)
+    {
+        return this->parentElement->calcW();
+    }
+    return this->w;
+}
+
+int UIElement::calcH()
+{
+    if (this->anchors[Direction::Down] && this->parentElement != NULL)
+    {
+        return this->parentElement->calcH();
+    }
+    return this->h;
 }
 
 int UIElement::getW()
@@ -30,6 +56,16 @@ int UIElement::getW()
 int UIElement::getH()
 {
     return this->h;
+}
+
+void UIElement::setW(int w)
+{
+    this->w = w;
+}
+
+void UIElement::setH(int h)
+{
+    this->h = h;
 }
 
 int UIElement::calcPivotPosition(PivotPosition p, bool vertical)
@@ -174,8 +210,8 @@ void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip fl
         SDL_Rect dest;
         dest.x = this->calcX();
         dest.y = this->calcY();
-        dest.w = this->w;
-        dest.h = this->h;
+        dest.w = this->calcW();
+        dest.h = this->calcH();
         SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
     }
     for (auto &childElement : this->childDrawElements)
@@ -391,8 +427,8 @@ void UIText::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)
     SDL_Rect dest;
     dest.x = this->calcTextX();
     dest.y = this->calcTextY();
-    dest.w = this->w;
-    dest.h = this->h;
+    dest.w = this->calcW();
+    dest.h = this->calcH();
     SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
 }
 

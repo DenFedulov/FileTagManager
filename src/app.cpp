@@ -86,7 +86,6 @@ void FileTagManager::initResize()
             result = SDL_HITTEST_DRAGGABLE;
         }
 
-        app->currentHittest = result;
         return result;
     };
     SDL_SetWindowHitTest(this->window, HitTestCallback, this);
@@ -98,6 +97,7 @@ void FileTagManager::initElements()
     int w, h;
     SDL_GetWindowSize(this->window, &w, &h);
     auto header = std::make_shared<UIBox>("header", this, w, App::HEADER_HEIGHT, 0, RGBA(60, 60, 60));
+    header->anchors[Direction::Right] = true;
     auto element = std::make_shared<UIBox>("button", this, w, 40, 0, RGBA(), 10, RGBA(100, 100, 100));
     element->y = App::HEADER_HEIGHT;
     auto text = std::make_shared<UIText>("text", this, "test text", element);
@@ -206,6 +206,12 @@ bool FileTagManager::loop()
         case SDL_TEXTINPUT:
             this->triggerKeyEvent(AppEvent::text_input, evt);
             break;
+        case SDL_WINDOWEVENT:
+            std::cout << (int)evt.window.event << ' ' << evt.window.data1 << ' ' << evt.window.data2 << '\n';
+            if(evt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED){
+                this->mainElement->setW(evt.window.data1);
+                this->mainElement->setH(evt.window.data2);
+            }
         default:
             break;
         }

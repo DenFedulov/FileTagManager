@@ -40,13 +40,14 @@ private:
     void triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE);
     void triggerKeyEvent(AppEvent::Type eventEnum, SDL_Event sdlE);
     SDL_HitTestResult currentHittest = SDL_HITTEST_NORMAL;
+    std::unordered_map<std::string, std::shared_ptr<UIElement>> loadedElements;
+    std::unordered_map<std::string, Mix_Chunk *> loadedSounds;
+    std::unordered_map<std::string, Mix_Music *> loadedMusic;
 
 public:
     Logger *logger;
     Config *config;
-    std::unordered_map<std::string, std::shared_ptr<UIElement>> loadedElements;
-    std::unordered_map<std::string, Mix_Chunk *> loadedSounds;
-    std::unordered_map<std::string, Mix_Music *> loadedMusic;
+
     std::shared_ptr<UIElement> mainElement;
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
@@ -56,6 +57,7 @@ public:
     void initSDL();
     void initResize();
     void initElements();
+    void addElements(std::vector<std::shared_ptr<UIElement>> elements);
     std::shared_ptr<UIElement> getElement(std::string name);
     Mix_Chunk *getSound(std::string filename);
     Mix_Music *getMusic(std::string filename);

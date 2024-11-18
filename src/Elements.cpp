@@ -2,12 +2,7 @@
 
 UIElement::UIElement(std::string name, FileTagManager *app, bool isMainElement) : name(name), app(app)
 {
-    if (!isMainElement)
-    {
-        this->parentElement = this->app->mainElement;
-        this->app->mainElement->childElements.push_back(std::shared_ptr<UIElement>(this));
-    }
-    else
+    if (isMainElement)
     {
         int width, hight;
         SDL_GetWindowSize(this->app->window, &w, &h);
@@ -15,7 +10,6 @@ UIElement::UIElement(std::string name, FileTagManager *app, bool isMainElement) 
         this->w = width;
         this->h = hight;
     }
-    this->app->loadedElements.emplace(name, std::shared_ptr<UIElement>(this));
 }
 
 int UIElement::calcX()
@@ -113,6 +107,66 @@ UIElement::~UIElement()
     this->freeTexture();
 }
 
+void UIElement::fillChildDrawElements()
+{
+    this->childDrawElements.clear();
+    for (const auto &childPair : this->childElements)
+    {
+        this->childDrawElements.push_back(childPair.second);
+    }
+}
+
+void UIElement::addChild(std::shared_ptr<UIElement> childElement, bool firstCall)
+{
+    if (!this->childElements.contains(childElement->name))
+    {
+        this->childElements.emplace(childElement->name, childElement);
+        this->fillChildDrawElements();
+    }
+    if (firstCall)
+    {
+        childElement->setParent(std::shared_ptr<UIElement>(this), false);
+    }
+}
+
+void UIElement::removeChild(std::string name, bool firstCall)
+{
+    if (!this->childElements.contains(name))
+    {
+        return;
+    }
+    auto childElement = this->childElements.at(name);
+    this->childElements.erase(name);
+    this->fillChildDrawElements();
+    if (firstCall)
+    {
+        childElement->setParent(this->app->mainElement, false);
+    }
+}
+
+void UIElement::setParent(std::shared_ptr<UIElement> parent, bool firstCall)
+{
+    this->parentElement = parent;
+    if (firstCall)
+    {
+        this->parentElement->addChild(std::shared_ptr<UIElement>(this), false);
+    }
+}
+
+std::shared_ptr<UIElement> UIElement::getParent()
+{
+    return this->parentElement;
+}
+
+std::shared_ptr<UIElement> UIElement::getChild(std::string name)
+{
+    if (this->childElements.contains(name))
+    {
+        return this->childElements.at(name);
+    }
+    return nullptr;
+}
+
 void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)
 {
     if (this->texture != NULL && this->visible)
@@ -124,7 +178,7 @@ void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip fl
         dest.h = this->h;
         SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
     }
-    for (auto &childElement : this->childElements)
+    for (auto &childElement : this->childDrawElements)
     {
         childElement->draw(rotationPoint, angle, flip);
     }
@@ -325,7 +379,7 @@ UIText::UIText(std::string name, FileTagManager *app, std::string text, int font
 UIText::UIText(std::string name, FileTagManager *app, std::string text, std::shared_ptr<UIElement> parentElement, int fontSize, RGBA color)
     : UIText(name, app, text, fontSize, color)
 {
-    this->parentElement = parentElement;
+    this->setParent(parentElement);
 }
 
 void UIText::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)

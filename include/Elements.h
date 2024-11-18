@@ -26,11 +26,12 @@ protected:
     FileTagManager *app;
     int w = 0;
     int h = 0;
+    std::shared_ptr<UIElement> parentElement = NULL;
+    std::vector<std::shared_ptr<UIElement>> childDrawElements;
+    void fillChildDrawElements();
+    std::unordered_map<std::string, std::shared_ptr<UIElement>> childElements;
 
 public:
-    std::shared_ptr<UIElement> parentElement = NULL;
-    std::vector<std::shared_ptr<UIElement>> childElements;
-
     int x = 0;
     int y = 0;
     const std::string name;
@@ -46,13 +47,18 @@ public:
     int calcY();
     int getW();
     int getH();
+    void addChild(std::shared_ptr<UIElement> childElement, bool firstCall = true);
+    void removeChild(std::string name, bool firstCall = true);
+    void setParent(std::shared_ptr<UIElement> parent, bool firstCall = true);
+    std::shared_ptr<UIElement> getParent();
+    std::shared_ptr<UIElement> getChild(std::string name);
     FileTagManager *getApp();
     virtual bool checkCollision(int x, int y);
     void freeSurface();
     void freeTexture();
     virtual void draw(SDL_Point *rotationPoint = nullptr, double angle = 0, SDL_RendererFlip flip = SDL_FLIP_NONE);
     UIElement(std::string name, FileTagManager *app, bool isMainElement = false);
-    virtual ~UIElement();
+    ~UIElement() override;
     SDL_Texture *getTexture();
 };
 

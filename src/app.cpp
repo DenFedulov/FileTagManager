@@ -97,9 +97,10 @@ void FileTagManager::initElements()
     this->mainElement = std::make_shared<UIElement>("main", this, true);
     int w, h;
     SDL_GetWindowSize(this->window, &w, &h);
-    auto element = std::make_shared<UIBox>("button", this, w, App::HEADER_HEIGHT + 50, 0, RGBA(), 10, RGBA(100, 100, 100));
+    auto header = std::make_shared<UIBox>("header", this, w, App::HEADER_HEIGHT, 0, RGBA(60, 60, 60));
+    auto element = std::make_shared<UIBox>("button", this, w, 40, 0, RGBA(), 10, RGBA(100, 100, 100));
+    element->y = App::HEADER_HEIGHT;
     auto text = std::make_shared<UIText>("text", this, "test text", element);
-    element->childElements.push_back(text);
     text->pivotPositionV = PivotPosition::End;
     // element->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, AppEvent &e)
     // 						   { Mix_PlayChannel(-1, el->getApp()->getSound("failsound.mp3"), 0); });
@@ -108,6 +109,19 @@ void FileTagManager::initElements()
         text->setText(std::to_string(e.mouseEvent.pos.first) + "," + std::to_string(e.mouseEvent.pos.second));
     };
     element->events.addHandler(AppEvent::mouse_button_down, setTextToCoords);
+    this->addElements({this->mainElement, header, element, text});
+}
+
+void FileTagManager::addElements(std::vector<std::shared_ptr<UIElement>> elements)
+{
+    for (const auto &element : elements)
+    {
+        if (element->getParent() == NULL && element->name != "main")
+        {
+            element->setParent(this->mainElement);
+        }
+        this->loadedElements.emplace(element->name, element);
+    }
 }
 
 void FileTagManager::drawCoordsVector(CoordsVector coords, int xC, int yC, bool fill)

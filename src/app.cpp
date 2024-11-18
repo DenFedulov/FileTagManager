@@ -98,10 +98,14 @@ void FileTagManager::initElements()
     SDL_GetWindowSize(this->window, &w, &h);
     auto header = std::make_shared<UIBox>("header", this, w, App::HEADER_HEIGHT, 0, RGBA(60, 60, 60));
     header->anchors[Direction::Right] = true;
+    auto close = std::make_shared<UIPictureElement>(App::IMAGES_PATH + "close.png", this);
+    close->alignPositionH = RelativePosition::End;
+    close->setParent(header);
     auto element = std::make_shared<UIBox>("button", this, w, 40, 0, RGBA(), 10, RGBA(100, 100, 100));
     element->y = App::HEADER_HEIGHT;
     auto text = std::make_shared<UIText>("text", this, "test text", element);
-    text->pivotPositionV = PivotPosition::End;
+    text->alignPositionH = RelativePosition::Center;
+    text->alignPositionV = RelativePosition::End;
     // element->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, AppEvent &e)
     // 						   { Mix_PlayChannel(-1, el->getApp()->getSound("failsound.mp3"), 0); });
     auto setTextToCoords = [text](std::shared_ptr<UIElement> &el, AppEvent &e)
@@ -109,7 +113,11 @@ void FileTagManager::initElements()
         text->setText(std::to_string(e.mouseEvent.pos.first) + "," + std::to_string(e.mouseEvent.pos.second));
     };
     element->events.addHandler(AppEvent::mouse_button_down, setTextToCoords);
-    this->addElements({this->mainElement, header, element, text});
+    this->addElements({this->mainElement,
+                       header,
+                       close,
+                       element,
+                       text});
 }
 
 void FileTagManager::addElements(std::vector<std::shared_ptr<UIElement>> elements)
@@ -172,10 +180,12 @@ void FileTagManager::triggerKeyEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
 
 bool FileTagManager::loop()
 {
-    SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
+    if (!this->running)
+    {
+        return false;
+    }
     SDL_RenderClear(this->renderer);
     SDL_Event evt;
-    SDL_SetRenderDrawColor(this->renderer, 255, 255, 255, 255);
     while (SDL_PollEvent(&evt))
     {
         switch (evt.type)
@@ -185,14 +195,14 @@ bool FileTagManager::loop()
             return false;
         case SDL_KEYDOWN:
             this->triggerKeyEvent(AppEvent::keyboard_button_down, evt);
-            std::cout << evt.key.keysym.sym << '\n';
+            // std::cout << evt.key.keysym.sym << '\n';
             break;
         case SDL_KEYUP:
             this->triggerKeyEvent(AppEvent::keyboard_button_up, evt);
-            std::cout << evt.key.keysym.sym << '\n';
+            // std::cout << evt.key.keysym.sym << '\n';
             break;
         case SDL_MOUSEBUTTONDOWN:
-            std::cout << evt.button.button << '\n';
+            // std::cout << evt.button.button << '\n';
             this->triggerMouseEvent(AppEvent::mouse_button_down, evt);
             break;
         case SDL_MOUSEBUTTONUP:
@@ -207,8 +217,9 @@ bool FileTagManager::loop()
             this->triggerKeyEvent(AppEvent::text_input, evt);
             break;
         case SDL_WINDOWEVENT:
-            std::cout << (int)evt.window.event << ' ' << evt.window.data1 << ' ' << evt.window.data2 << '\n';
-            if(evt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED){
+            // std::cout << (int)evt.window.event << ' ' << evt.window.data1 << ' ' << evt.window.data2 << '\n';
+            if (evt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+            {
                 this->mainElement->setW(evt.window.data1);
                 this->mainElement->setH(evt.window.data2);
             }
@@ -266,6 +277,7 @@ Mix_Music *FileTagManager::getMusic(std::string filename)
 
 void FileTagManager::quitSDL()
 {
+    this->running = false;
     for (auto const &[filename, sound] : this->loadedSounds)
     {
         Mix_FreeChunk(sound);

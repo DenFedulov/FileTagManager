@@ -9,7 +9,7 @@ class UIPictureElement;
 class UIDynamicElement;
 class UIBox;
 
-enum class PivotPosition
+enum class RelativePosition
 {
     None,
     Start,

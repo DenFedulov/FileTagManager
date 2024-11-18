@@ -18,7 +18,11 @@ int UIElement::calcX()
     {
         return this->parentElement->calcX();
     }
-    return this->x - this->calcPivotPosition(this->pivotPositionH, false);
+    if (this->parentElement != NULL && this->alignPositionH != RelativePosition::None)
+    {
+        return this->parentElement->calcX() + this->parentElement->calcRelativePosition(this->alignPositionH, false) - this->calcRelativePosition(this->alignPositionH, false);
+    }
+    return this->x - this->calcRelativePosition(this->pivotPositionH, false);
 }
 
 int UIElement::calcY()
@@ -27,7 +31,11 @@ int UIElement::calcY()
     {
         return this->parentElement->calcY();
     }
-    return this->y - this->calcPivotPosition(this->pivotPositionV, true);
+    if (this->parentElement != NULL && this->alignPositionV != RelativePosition::None)
+    {
+        return this->parentElement->calcY() + this->parentElement->calcRelativePosition(this->alignPositionV, true) - this->calcRelativePosition(this->alignPositionV, true);
+    }
+    return this->y - this->calcRelativePosition(this->pivotPositionV, true);
 }
 
 int UIElement::calcW()
@@ -68,13 +76,13 @@ void UIElement::setH(int h)
     this->h = h;
 }
 
-int UIElement::calcPivotPosition(PivotPosition p, bool vertical)
+int UIElement::calcRelativePosition(RelativePosition p, bool vertical)
 {
     switch (p)
     {
-    case PivotPosition::Start:
+    case RelativePosition::Start:
         return 0;
-    case PivotPosition::Center:
+    case RelativePosition::Center:
         if (!vertical)
         {
             return this->w / 2;
@@ -84,7 +92,7 @@ int UIElement::calcPivotPosition(PivotPosition p, bool vertical)
             return this->h / 2;
         }
         break;
-    case PivotPosition::End:
+    case RelativePosition::End:
         if (!vertical)
         {
             return this->w - 1;
@@ -254,30 +262,6 @@ void UIText::updateSurface()
     this->texture = surfaceToTexture(this->app, this->surface);
 }
 
-int UIText::calcTextX()
-{
-    if (this->parentElement == NULL)
-    {
-        return this->calcX();
-    }
-    else
-    {
-        return this->parentElement->calcX() + this->parentElement->calcPivotPosition(this->pivotPositionH, false) - this->calcPivotPosition(this->pivotPositionH, false);
-    }
-}
-
-int UIText::calcTextY()
-{
-    if (this->parentElement == NULL)
-    {
-        return this->calcY();
-    }
-    else
-    {
-        return this->parentElement->calcY() + this->parentElement->calcPivotPosition(this->pivotPositionV, true) - this->calcPivotPosition(this->pivotPositionV, true);
-    }
-}
-
 int UIText::getFontSize()
 {
     return this->fontSize;
@@ -336,11 +320,6 @@ void UIText::setColor(RGBA color)
     this->updateSurface();
 }
 
-bool UIText::checkCollision(int x, int y)
-{
-    return x >= this->calcTextX() && x < this->calcTextX() + this->w && y >= this->calcTextY() && y < this->calcTextY() + this->h;
-}
-
 int UIText::getCursorIndex()
 {
     return this->cursorIndex;
@@ -357,8 +336,8 @@ UIText::UIText(std::string name, FileTagManager *app, std::string text, int font
                                                                                                     fontSize(fontSize),
                                                                                                     color(color)
 {
-    this->pivotPositionH = PivotPosition::Center;
-    this->pivotPositionV = PivotPosition::Center;
+    this->pivotPositionH = RelativePosition::Center;
+    this->pivotPositionV = RelativePosition::Center;
     this->fontPath = this->app->config->defaultFont;
     this->loadFont(this->fontPath);
 
@@ -416,20 +395,6 @@ UIText::UIText(std::string name, FileTagManager *app, std::string text, std::sha
     : UIText(name, app, text, fontSize, color)
 {
     this->setParent(parentElement);
-}
-
-void UIText::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)
-{
-    if (!this->visible)
-    {
-        return;
-    }
-    SDL_Rect dest;
-    dest.x = this->calcTextX();
-    dest.y = this->calcTextY();
-    dest.w = this->calcW();
-    dest.h = this->calcH();
-    SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
 }
 
 UIText::~UIText()

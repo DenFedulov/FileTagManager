@@ -18,8 +18,8 @@
 namespace App
 {
     const int WIDTH = 1280, HEIGHT = 720;
-    const int HEADER_HEIGHT = 50;
-    const int RESIZE_PADDING = 10;
+    const int HEADER_HEIGHT = 32;
+    const int RESIZE_PADDING = 8;
     const std::string APP_NAME = "FileTagManager";
     const std::string RESOURCES_PATH = "resources/";
     const std::string IMAGES_PATH = RESOURCES_PATH + "images/";
@@ -36,6 +36,7 @@ struct MouseSelection
 class FileTagManager
 {
 private:
+    bool running = true;
     MouseSelection mSelection;
     void triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE);
     void triggerKeyEvent(AppEvent::Type eventEnum, SDL_Event sdlE);

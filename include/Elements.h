@@ -36,14 +36,16 @@ public:
     int y = 0;
     const std::string name;
     intPair pivot = intPair(0, 0);
-    PivotPosition pivotPositionV = PivotPosition::None;
-    PivotPosition pivotPositionH = PivotPosition::None;
+    RelativePosition pivotPositionV = RelativePosition::None;
+    RelativePosition pivotPositionH = RelativePosition::None;
+    RelativePosition alignPositionV = RelativePosition::None;
+    RelativePosition alignPositionH = RelativePosition::None;
     bool anchors[4] = {0, 0, 0, 0};
     bool visible = true;
 
     EventManager<std::shared_ptr<UIElement> &, AppEvent &> events;
 
-    int calcPivotPosition(PivotPosition p, bool vertical);
+    int calcRelativePosition(RelativePosition p, bool vertical);
     int calcX();
     int calcY();
     int calcW();
@@ -92,8 +94,6 @@ protected:
 
 public:
     bool editable = false;
-    int calcTextX();
-    int calcTextY();
     int getFontSize();
     std::string getFontPath();
     void setFont(std::optional<int> fontSize = std::nullopt, std::optional<std::string> path = std::nullopt);
@@ -101,11 +101,9 @@ public:
     void setText(std::string text);
     RGBA getColor();
     void setColor(RGBA color);
-    bool checkCollision(int x, int y) override;
     int getCursorIndex();
     void setCursorIndex(int cursorIndex);
 
-    void draw(SDL_Point *rotationPoint = nullptr, double angle = 0, SDL_RendererFlip flip = SDL_FLIP_NONE) override;
     UIText(std::string name, FileTagManager *app, std::string text, int fontSize = 24, RGBA color = {0, 0, 0});
     UIText(std::string name, FileTagManager *app, std::string text, std::shared_ptr<UIElement> parentElement, int fontSize = 24, RGBA color = {0, 0, 0});
     ~UIText() override;

@@ -85,21 +85,21 @@ int UIElement::calcRelativePosition(RelativePosition p, bool vertical)
     case RelativePosition::Center:
         if (!vertical)
         {
-            return this->w / 2;
+            return this->calcW() / 2;
         }
         else
         {
-            return this->h / 2;
+            return this->calcH() / 2;
         }
         break;
     case RelativePosition::End:
         if (!vertical)
         {
-            return this->w - 1;
+            return this->calcW() - 1;
         }
         else
         {
-            return this->h - 1;
+            return this->calcH() - 1;
         }
     default:
         if (!vertical)
@@ -115,7 +115,7 @@ int UIElement::calcRelativePosition(RelativePosition p, bool vertical)
 
 bool UIElement::checkCollision(int x, int y)
 {
-    return x >= this->calcX() && x < this->calcX() + this->w && y >= this->calcY() && y < this->calcY() + this->h;
+    return x >= this->calcX() && x < this->calcX() + this->calcW() && y >= this->calcY() && y < this->calcY() + this->calcH();
 }
 
 void UIElement::freeSurface()

@@ -4,6 +4,19 @@
 #include <string>
 #include <functional>
 
+namespace Events
+{
+    enum MouseButtons
+    {
+        None,
+        Left,
+        Middle,
+        Right,
+        Back,
+        Forward
+    };
+}
+
 struct KeyEvent
 {
     int pressState;
@@ -18,10 +31,10 @@ struct MouseEvent
 {
     int pressState;
     intPair pos;
-    int32_t which;
+    int32_t button;
     MouseEvent() : pressState(-1),
                    pos({-1, -1}),
-                   which(-1) {};
+                   button(-1) {};
 };
 
 struct AppEvent

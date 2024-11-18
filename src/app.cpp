@@ -81,6 +81,10 @@ void FileTagManager::initResize()
         {
             result = SDL_HITTEST_RESIZE_RIGHT;
         }
+        else if (x > w - App::HEADER_HEIGHT)
+        {
+            result = SDL_HITTEST_NORMAL;
+        }
         else if (y < App::HEADER_HEIGHT)
         {
             result = SDL_HITTEST_DRAGGABLE;
@@ -96,16 +100,26 @@ void FileTagManager::initElements()
     this->mainElement = std::make_shared<UIElement>("main", this, true);
     int w, h;
     SDL_GetWindowSize(this->window, &w, &h);
+
     auto header = std::make_shared<UIBox>("header", this, w, App::HEADER_HEIGHT, 0, RGBA(60, 60, 60));
     header->anchors[Direction::Right] = true;
     auto close = std::make_shared<UIPictureElement>(App::IMAGES_PATH + "close.png", this);
     close->alignPositionH = RelativePosition::End;
     close->setParent(header);
+    auto closeApp = [this](std::shared_ptr<UIElement> &el, AppEvent &e)
+    {
+        if (e.mouseEvent.button == Events::MouseButtons::Left)
+        {
+            this->quitSDL();
+        }
+    };
+    close->events.addHandler(AppEvent::mouse_click, closeApp);
+
     auto element = std::make_shared<UIBox>("button", this, w, 40, 0, RGBA(), 10, RGBA(100, 100, 100));
     element->y = App::HEADER_HEIGHT;
     auto text = std::make_shared<UIText>("text", this, "test text", element);
     text->alignPositionH = RelativePosition::Center;
-    text->alignPositionV = RelativePosition::End;
+    text->alignPositionV = RelativePosition::Center;
     // element->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, AppEvent &e)
     // 						   { Mix_PlayChannel(-1, el->getApp()->getSound("failsound.mp3"), 0); });
     auto setTextToCoords = [text](std::shared_ptr<UIElement> &el, AppEvent &e)
@@ -156,7 +170,7 @@ void FileTagManager::triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
         e.type = eventEnum;
         e.mouseEvent.pos = {sdlE.button.x, sdlE.button.y};
         e.mouseEvent.pressState = sdlE.button.state;
-        e.mouseEvent.which = sdlE.button.which;
+        e.mouseEvent.button = sdlE.button.button;
         element->events.triggerEvent(eventEnum, element, e);
         if (eventEnum == AppEvent::mouse_button_down && element->checkCollision(sdlE.button.x, sdlE.button.y))
         {

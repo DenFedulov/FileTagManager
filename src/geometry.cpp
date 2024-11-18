@@ -349,9 +349,16 @@ CoordsVector Geometry::BorderMaker::_make(int currentDirection)
     this->lastTurn = 0;
     this->pickedCoords.clear();
     intPair nextPixel = this->getFirstPixel();
-
-    CoordsVector contour = arrayToCoordsVector(this->grid);
-    std::set<intPair> newCoords(contour.begin(), contour.end());
+    std::set<intPair> newCoords;
+    if (this->width > 0)
+    {
+        CoordsVector contour = arrayToCoordsVector(this->grid);
+        for (const auto &coord : contour)
+        {
+            newCoords.insert(coord);
+        }
+    }
+    newCoords;
     for (int i = 0; i < this->grid.rows * this->grid.cols; i++)
     {
         intPair prevPixel = nextPixel;

@@ -24,3 +24,12 @@ private:
 public:
     HeaderBar(FileTagManager *app);
 };
+
+class MainContents : public ElementGroup
+{
+private:
+    void createElementGroup();
+
+public:
+    MainContents(FileTagManager *app);
+};

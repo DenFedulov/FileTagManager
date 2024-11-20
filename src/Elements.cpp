@@ -646,14 +646,13 @@ void UIBox::updateSurface()
     CoordsVector left = Geometry::line({0, this->radius}, {0, this->h - 1 - this->radius});
     CoordsVector right = Geometry::line({this->w - 1, this->radius}, {this->w - 1, this->h - 1 - this->radius});
     CoordsVector down = Geometry::line({this->radius, this->h - 1}, {this->w - 1 - this->radius, this->h - 1});
+
     CoordsVector countor = Vect::concat({topLeft, topRight, bottomLeft, bottomRight, top, left, right, down});
     Geometry::BorderMaker borderMaker(countor, this->borderWidth);
     CoordsVector border = borderMaker.make();
-    // CoordsArray arr2d(this->w, this->h);
-    // Geometry::coordsVectorFillArray(border, arr2d);
-    // print2DArray(arr2d);
     editor.setDrawColor(this->borderColor);
     editor.drawWithCoordsVector(border);
+    
     this->freeTexture();
     this->texture = surfaceToTexture(this->app, this->surface);
 }

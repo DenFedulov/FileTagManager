@@ -1,4 +1,4 @@
-#include "Elements.h"
+#include "BaseElements.h"
 
 UIElement::UIElement(std::string name, FileTagManager *app, bool isMainElement) : name(name), app(app)
 {
@@ -652,7 +652,7 @@ void UIBox::updateSurface()
     CoordsVector border = borderMaker.make();
     editor.setDrawColor(this->borderColor);
     editor.drawWithCoordsVector(border);
-    
+
     this->freeTexture();
     this->texture = surfaceToTexture(this->app, this->surface);
 }

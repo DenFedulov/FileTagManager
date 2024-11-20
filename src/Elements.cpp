@@ -17,11 +17,32 @@ int UIElement::calcX()
     {
         return this->parentElement->calcX();
     }
-    if (this->parentElement != NULL && this->alignPositionH != RelativePosition::None)
+    if (this->parentElement != NULL)
     {
-        return this->parentElement->calcX() + this->parentElement->calcRelativePosition(this->alignPositionH, false) - this->calcRelativePosition(this->alignPositionH, false);
+        if (this->parentElement->displayMode == DisplayMode::Distribute)
+        {
+            if (this->parentElement->distDirection == DistDirection::column)
+            {
+                if (this->distPosH != RelPos::None ||
+                    (this->distPosH == RelPos::None && this->parentElement->childrenDistPos != RelPos::None))
+                {
+                    return this->calcDistPosH(
+                        this->distPosH != RelPos::None ? this->distPosH : this->parentElement->childrenDistPos);
+                }
+            }
+            else
+            {
+                if (this->alignPosV != RelPos::None ||
+                    (this->alignPosV == RelPos::None && this->parentElement->childrenAlignPos != RelPos::None))
+                {
+                    return this->calcAlignPosV(
+                        this->alignPosV != RelPos::None ? this->alignPosV : this->parentElement->childrenAlignPos);
+                }
+            }
+        }
+        return this->x + this->parentElement->calcX() - this->calcPivotOffsetH(this->pivotPosH);
     }
-    return this->x - this->calcRelativePosition(this->pivotPositionH, false);
+    return this->x - this->calcPivotOffsetH(this->pivotPosH);
 }
 
 int UIElement::calcY()
@@ -30,11 +51,32 @@ int UIElement::calcY()
     {
         return this->parentElement->calcY();
     }
-    if (this->parentElement != NULL && this->alignPositionV != RelativePosition::None)
+    if (this->parentElement != NULL)
     {
-        return this->parentElement->calcY() + this->parentElement->calcRelativePosition(this->alignPositionV, true) - this->calcRelativePosition(this->alignPositionV, true);
+        if (this->parentElement->displayMode == DisplayMode::Distribute)
+        {
+            if (this->parentElement->distDirection == DistDirection::row)
+            {
+                if (this->distPosV != RelPos::None ||
+                    (this->distPosV == RelPos::None && this->parentElement->childrenDistPos != RelPos::None))
+                {
+                    return this->calcDistPosV(
+                        this->distPosV != RelPos::None ? this->distPosV : this->parentElement->childrenDistPos);
+                }
+            }
+            else
+            {
+                if (this->alignPosH != RelPos::None ||
+                    (this->alignPosH == RelPos::None && this->parentElement->childrenAlignPos != RelPos::None))
+                {
+                    return this->calcAlignPosH(
+                        this->alignPosH != RelPos::None ? this->alignPosH : this->parentElement->childrenAlignPos);
+                }
+            }
+        }
+        return this->y + this->parentElement->calcY() - this->calcPivotOffsetV(this->pivotPosV);
     }
-    return this->y - this->calcRelativePosition(this->pivotPositionV, true);
+    return this->y - this->calcPivotOffsetV(this->pivotPosV);
 }
 
 int UIElement::calcW()
@@ -75,41 +117,138 @@ void UIElement::setH(int h)
     this->h = h;
 }
 
-int UIElement::calcRelativePosition(RelativePosition p, bool vertical)
+int UIElement::calcPivotOffsetH(RelPos p)
 {
-    switch (p)
+    return calcPivotOffset(p, this->calcW(), this->pivot.first);
+}
+
+int UIElement::calcPivotOffsetV(RelPos p)
+{
+    return calcPivotOffset(p, this->calcH(), this->pivot.second);
+}
+
+int UIElement::getChildWSum(int upTo)
+{
+    if (upTo < -9)
     {
-    case RelativePosition::Start:
-        return 0;
-    case RelativePosition::Center:
-        if (!vertical)
+        upTo = this->childElements.size() - 1;
+    }
+    int sum = 0;
+    for (int i = 0; i <= upTo; i++)
+    {
+        sum += this->childElements[i]->w;
+    }
+    return sum;
+}
+
+int UIElement::getChildHSum(int upTo)
+{
+    if (upTo < -9)
+    {
+        upTo = this->childElements.size() - 1;
+    }
+    int sum = 0;
+    for (int i = 0; i <= upTo; i++)
+    {
+        sum += this->childElements[i]->h;
+    }
+    return sum;
+}
+
+int UIElement::getChildMaxW()
+{
+    int max = 0;
+    for (const auto &child : this->childElements)
+    {
+        int width = child->calcW();
+        if (max < width)
         {
-            return this->calcW() / 2;
-        }
-        else
-        {
-            return this->calcH() / 2;
-        }
-        break;
-    case RelativePosition::End:
-        if (!vertical)
-        {
-            return this->calcW() - 1;
-        }
-        else
-        {
-            return this->calcH() - 1;
-        }
-    default:
-        if (!vertical)
-        {
-            return this->pivot.first;
-        }
-        else
-        {
-            return this->pivot.second;
+            max = width;
         }
     }
+    return max;
+}
+
+int UIElement::getChildMaxH()
+{
+    int max = 0;
+    for (const auto &child : this->childElements)
+    {
+        int height = child->calcH();
+        if (max < height)
+        {
+            max = height;
+        }
+    }
+    return max;
+}
+
+int UIElement::calcDistPosH(RelPos p)
+{
+    int childCount = this->parentElement->childElements.size();
+    int wSum = this->parentElement->getChildWSum();
+    int wOffset = this->parentElement->getChildWSum(this->childIndex - 1);
+    return calcRelPos(
+        p,
+        this->parentElement->calcX(),
+        this->parentElement->calcW(),
+        this->childIndex,
+        childCount,
+        wSum,
+        wOffset,
+        this->pivot.first);
+}
+
+int UIElement::calcDistPosV(RelPos p)
+{
+    int childCount = this->parentElement->childElements.size();
+    int hSum = this->parentElement->getChildHSum();
+    int hOffset = this->parentElement->getChildHSum(this->childIndex - 1);
+    return calcRelPos(
+        p,
+        this->parentElement->calcY(),
+        this->parentElement->calcH(),
+        this->childIndex,
+        childCount,
+        hSum,
+        hOffset,
+        this->pivot.second);
+}
+
+int UIElement::calcAlignPosH(RelPos p)
+{
+    RelPos pivotPos = this->pivotPosV != RelPos::None ? this->pivotPosV : this->parentElement->childrenPivotPos;
+    int maxH = this->parentElement->getChildMaxH();
+    int parentOffset = calcPivotOffset(pivotPos, this->parentElement->calcH(), this->pivot.second, maxH) + this->parentElement->calcY();
+    
+    int result = calcRelPos(
+        p,
+        parentOffset,
+        this->parentElement->getChildMaxH(),
+        0,
+        1,
+        this->calcH(),
+        0,
+        this->pivot.second);
+    return result;
+}
+
+int UIElement::calcAlignPosV(RelPos p)
+{
+    RelPos pivotPos = this->pivotPosH != RelPos::None ? this->pivotPosH : this->parentElement->childrenPivotPos;
+    int maxW = this->parentElement->getChildMaxW();
+    int parentOffset = calcPivotOffset(pivotPos, this->parentElement->calcW(), this->pivot.first, maxW) + this->parentElement->calcX();
+
+    int result = calcRelPos(
+        p,
+        parentOffset,
+        maxW,
+        0,
+        1,
+        this->calcW(),
+        0,
+        this->pivot.first);
+    return result;
 }
 
 bool UIElement::checkCollision(int x, int y)
@@ -150,41 +289,28 @@ UIElement::~UIElement()
     this->freeTexture();
 }
 
-void UIElement::fillChildDrawElements()
+void UIElement::addChildren(std::vector<std::shared_ptr<UIElement>> childElements, bool firstCall)
 {
-    this->childDrawElements.clear();
-    for (const auto &childPair : this->childElements)
+    for (auto &childElement : childElements)
     {
-        this->childDrawElements.push_back(childPair.second);
+        childElement->childIndex = this->childElements.size();
+        this->childElements.push_back(childElement);
+        if (firstCall)
+        {
+            childElement->setParent(std::shared_ptr<UIElement>(this), false);
+        }
     }
 }
 
-void UIElement::addChild(std::shared_ptr<UIElement> childElement, bool firstCall)
+void UIElement::removeChild(int id)
 {
-    if (!this->childElements.contains(childElement->name))
-    {
-        this->childElements.emplace(childElement->name, childElement);
-        this->fillChildDrawElements();
-    }
-    if (firstCall)
-    {
-        childElement->setParent(std::shared_ptr<UIElement>(this), false);
-    }
-}
-
-void UIElement::removeChild(std::string name, bool firstCall)
-{
-    if (!this->childElements.contains(name))
+    if (id >= this->childElements.size())
     {
         return;
     }
-    auto childElement = this->childElements.at(name);
-    this->childElements.erase(name);
-    this->fillChildDrawElements();
-    if (firstCall)
-    {
-        childElement->setParent(this->app->mainElement, false);
-    }
+    auto childElement = this->childElements.at(id);
+    this->childElements.erase(this->childElements.begin() + id);
+    childElement->setParent(this->app->mainElement, false);
 }
 
 void UIElement::setParent(std::shared_ptr<UIElement> parent, bool firstCall)
@@ -192,7 +318,7 @@ void UIElement::setParent(std::shared_ptr<UIElement> parent, bool firstCall)
     this->parentElement = parent;
     if (firstCall)
     {
-        this->parentElement->addChild(std::shared_ptr<UIElement>(this), false);
+        this->parentElement->addChildren({std::shared_ptr<UIElement>(this)}, false);
     }
 }
 
@@ -201,11 +327,11 @@ std::shared_ptr<UIElement> UIElement::getParent()
     return this->parentElement;
 }
 
-std::shared_ptr<UIElement> UIElement::getChild(std::string name)
+std::shared_ptr<UIElement> UIElement::getChild(int id)
 {
-    if (this->childElements.contains(name))
+    if (id < this->childElements.size())
     {
-        return this->childElements.at(name);
+        return this->childElements.at(id);
     }
     return nullptr;
 }
@@ -229,7 +355,7 @@ void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip fl
     {
         return;
     }
-    for (auto &childElement : this->childDrawElements)
+    for (auto &childElement : this->childElements)
     {
         childElement->draw(rotationPoint, angle, flip);
     }
@@ -343,8 +469,8 @@ UIText::UIText(std::string name, FileTagManager *app, std::string text, int font
                                                                                                     fontSize(fontSize),
                                                                                                     color(color)
 {
-    this->pivotPositionH = RelativePosition::Center;
-    this->pivotPositionV = RelativePosition::Center;
+    this->pivotPosH = RelPos::Center;
+    this->pivotPosV = RelPos::Center;
     this->fontPath = this->app->config->defaultFont;
     this->loadFont(this->fontPath);
 

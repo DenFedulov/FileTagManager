@@ -10,6 +10,7 @@
 #include "geometry.h"
 #include "Setter.h"
 #include "SDL_Helpers.h"
+#include "Layout.h"
 
 class Drawable
 {
@@ -27,27 +28,42 @@ protected:
     int w = 0;
     int h = 0;
     std::shared_ptr<UIElement> parentElement = NULL;
-    std::vector<std::shared_ptr<UIElement>> childDrawElements;
-    void fillChildDrawElements();
-    std::unordered_map<std::string, std::shared_ptr<UIElement>> childElements;
+    std::vector<std::shared_ptr<UIElement>> childElements;
+    int getChildWSum(int upTo = -10);
+    int getChildHSum(int upTo = -10);
+    int getChildMaxW();
+    int getChildMaxH();
 
 public:
     int id = -1;
+    int childIndex = -1;
     int x = 0;
     int y = 0;
     int z = -1;
     const std::string name;
     intPair pivot = intPair(0, 0);
-    RelativePosition pivotPositionV = RelativePosition::None;
-    RelativePosition pivotPositionH = RelativePosition::None;
-    RelativePosition alignPositionV = RelativePosition::None;
-    RelativePosition alignPositionH = RelativePosition::None;
+    RelPos pivotPosH = RelPos::None;
+    RelPos pivotPosV = RelPos::None;
+    RelPos childrenPivotPos = RelPos::None;
+    RelPos distPosH = RelPos::None;
+    RelPos distPosV = RelPos::None;
+    RelPos childrenDistPos = RelPos::None;
+    RelPos alignPosH = RelPos::None;
+    RelPos alignPosV = RelPos::None;
+    RelPos childrenAlignPos = RelPos::None;
     bool anchors[4] = {0, 0, 0, 0};
     bool visible = true;
+    DisplayMode displayMode = DisplayMode::Normal;
+    DistDirection distDirection = DistDirection::column;
 
     EventManager<std::shared_ptr<UIElement> &, AppEvent &> events;
 
-    int calcRelativePosition(RelativePosition p, bool vertical);
+    int calcPivotOffsetH(RelPos p);
+    int calcPivotOffsetV(RelPos p);
+    int calcDistPosH(RelPos p);
+    int calcDistPosV(RelPos p);
+    int calcAlignPosH(RelPos p);
+    int calcAlignPosV(RelPos p);
     int calcX();
     int calcY();
     int calcW();
@@ -56,11 +72,11 @@ public:
     int getH();
     virtual void setW(int w);
     virtual void setH(int h);
-    void addChild(std::shared_ptr<UIElement> childElement, bool firstCall = true);
-    void removeChild(std::string name, bool firstCall = true);
+    void addChildren(std::vector<std::shared_ptr<UIElement>> childElements, bool firstCall = true);
+    void removeChild(int id);
     void setParent(std::shared_ptr<UIElement> parent, bool firstCall = true);
     std::shared_ptr<UIElement> getParent();
-    std::shared_ptr<UIElement> getChild(std::string name);
+    std::shared_ptr<UIElement> getChild(int id);
     FileTagManager *getApp();
     virtual bool checkCollision(int x, int y);
     void freeSurface();

@@ -103,8 +103,9 @@ void FileTagManager::initElements()
 
     auto header = std::make_shared<UIBox>("header", this, w, App::HEADER_HEIGHT, 0, RGBA(60, 60, 60));
     header->anchors[Direction::Right] = true;
+    header->displayMode = DisplayMode::Distribute;
     auto close = std::make_shared<UIPictureElement>(App::IMAGES_PATH + "close.png", this);
-    close->alignPositionH = RelativePosition::End;
+    close->distPosH = RelPos::End;
     close->setParent(header);
     auto closeApp = [this](std::shared_ptr<UIElement> &el, AppEvent &e)
     {
@@ -115,23 +116,39 @@ void FileTagManager::initElements()
     };
     close->events.addHandler(AppEvent::mouse_click, closeApp);
 
-    auto element = std::make_shared<UIBox>("button", this, w, 40, 0, RGBA(), 10, RGBA(100, 100, 100));
+    auto element = std::make_shared<UIBox>("box", this, w, 400, 0, RGBA(), 10, RGBA(100, 100, 100));
+    element->displayMode = DisplayMode::Distribute;
     element->y = App::HEADER_HEIGHT;
-    auto text = std::make_shared<UIText>("text", this, "test text", element);
-    text->alignPositionH = RelativePosition::Center;
-    text->alignPositionV = RelativePosition::Center;
-    // element->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, AppEvent &e)
-    // 						   { Mix_PlayChannel(-1, el->getApp()->getSound("failsound.mp3"), 0); });
-    auto setTextToCoords = [text](std::shared_ptr<UIElement> &el, AppEvent &e)
-    {
-        text->setText(std::to_string(e.mouseEvent.pos.first) + "," + std::to_string(e.mouseEvent.pos.second));
-    };
-    element->events.addHandler(AppEvent::mouse_button_down, setTextToCoords);
-    this->addElements({this->mainElement,
-                       header,
-                       close,
-                       element,
-                       text});
+    // auto text = std::make_shared<UIText>("text", this, "test text", element);
+    // text->distPosH = RelPos::Center;
+    // text->distPosV = RelPos::Center;
+    // // element->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, AppEvent &e)
+    // // 						   { Mix_PlayChannel(-1, el->getApp()->getSound("failsound.mp3"), 0); });
+    // auto setTextToCoords = [text](std::shared_ptr<UIElement> &el, AppEvent &e)
+    // {
+    //     text->setText(std::to_string(e.mouseEvent.pos.first) + "," + std::to_string(e.mouseEvent.pos.second));
+    // };
+    // element->events.addHandler(AppEvent::mouse_button_down, setTextToCoords);
+    // element->childrenDistPos = RelPos::Start;
+    // element->childrenAlignPos = RelPos::End;
+    element->distDirection = DistDirection::row;
+    element->childrenDistPos = RelPos::Start;
+    element->childrenAlignPos = RelPos::Center;
+    element->childrenPivotPos = RelPos::End;
+    auto child1 = std::make_shared<UIBox>("child1", this, 200, 80, 0, RGBA(255, 0, 0), 5);
+    auto child2 = std::make_shared<UIBox>("child2", this, 100, 30, 0, RGBA(0, 255, 0), 5);
+    auto child3 = std::make_shared<UIBox>("child2", this, 50, 70, 0, RGBA(0, 0, 255), 5);
+    element->addChildren({child1, child2, child3});
+    this->addElements({
+        this->mainElement,
+        header,
+        close,
+        element,
+        child1,
+        child2,
+        child3,
+        // text,
+    });
 }
 
 void FileTagManager::sortLoadedElements()

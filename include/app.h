@@ -15,6 +15,7 @@
 #include "Elements.h"
 #include "config.h"
 #include "EventManager.h"
+#include "Layout.h"
 
 namespace App
 {

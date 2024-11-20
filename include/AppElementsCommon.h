@@ -8,11 +8,3 @@ class UIText;
 class UIPictureElement;
 class UIDynamicElement;
 class UIBox;
-
-enum class RelativePosition
-{
-    None,
-    Start,
-    Center,
-    End
-};

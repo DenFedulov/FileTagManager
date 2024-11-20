@@ -201,7 +201,7 @@ void FileTagManager::triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
         e.mouseEvent.pressState = sdlE.button.state;
         e.mouseEvent.button = sdlE.button.button;
         element->events.triggerEvent(eventEnum, element, e);
-        if (eventEnum == AppEvent::mouse_button_down && element->checkCollision(sdlE.button.x, sdlE.button.y))
+        if (eventEnum == AppEvent::mouse_button_up && element->checkCollision(sdlE.button.x, sdlE.button.y))
         {
             element->events.triggerEvent(AppEvent::mouse_click, element, e);
         }

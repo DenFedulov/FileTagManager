@@ -220,7 +220,7 @@ int UIElement::calcAlignPosH(RelPos p)
     RelPos pivotPos = this->pivotPosV != RelPos::None ? this->pivotPosV : this->parentElement->childrenPivotPos;
     int maxH = this->parentElement->getChildMaxH();
     int parentOffset = calcPivotOffset(pivotPos, this->parentElement->calcH(), this->pivot.second, maxH) + this->parentElement->calcY();
-    
+
     int result = calcRelPos(
         p,
         parentOffset,
@@ -289,16 +289,13 @@ UIElement::~UIElement()
     this->freeTexture();
 }
 
-void UIElement::addChildren(std::vector<std::shared_ptr<UIElement>> childElements, bool firstCall)
+void UIElement::addChildren(std::vector<std::shared_ptr<UIElement>> childElements)
 {
     for (auto &childElement : childElements)
     {
         childElement->childIndex = this->childElements.size();
+        childElement->parentElement = std::shared_ptr<UIElement>(this);
         this->childElements.push_back(childElement);
-        if (firstCall)
-        {
-            childElement->setParent(std::shared_ptr<UIElement>(this), false);
-        }
     }
 }
 
@@ -310,21 +307,7 @@ void UIElement::removeChild(int id)
     }
     auto childElement = this->childElements.at(id);
     this->childElements.erase(this->childElements.begin() + id);
-    childElement->setParent(this->app->mainElement, false);
-}
-
-void UIElement::setParent(std::shared_ptr<UIElement> parent, bool firstCall)
-{
-    this->parentElement = parent;
-    if (firstCall)
-    {
-        this->parentElement->addChildren({std::shared_ptr<UIElement>(this)}, false);
-    }
-}
-
-std::shared_ptr<UIElement> UIElement::getParent()
-{
-    return this->parentElement;
+    this->parentElement = this->app->mainElement;
 }
 
 std::shared_ptr<UIElement> UIElement::getChild(int id)
@@ -537,12 +520,6 @@ UIText::UIText(std::string name, FileTagManager *app, std::string text, int font
     this->events.addHandler(AppEvent::keyboard_button_down, specialKeysInput);
 
     this->updateSurface();
-}
-
-UIText::UIText(std::string name, FileTagManager *app, std::string text, std::shared_ptr<UIElement> parentElement, int fontSize, RGBA color)
-    : UIText(name, app, text, fontSize, color)
-{
-    this->setParent(parentElement);
 }
 
 UIText::~UIText()

@@ -106,7 +106,7 @@ void FileTagManager::initElements()
     header->displayMode = DisplayMode::Distribute;
     auto close = std::make_shared<UIPictureElement>(App::IMAGES_PATH + "close.png", this);
     close->distPosH = RelPos::End;
-    close->setParent(header);
+    header->addChildren({close});
     auto closeApp = [this](std::shared_ptr<UIElement> &el, AppEvent &e)
     {
         if (e.mouseEvent.button == Events::MouseButtons::Left)
@@ -137,16 +137,12 @@ void FileTagManager::initElements()
     element->childrenPivotPos = RelPos::End;
     auto child1 = std::make_shared<UIBox>("child1", this, 200, 80, 0, RGBA(255, 0, 0), 5);
     auto child2 = std::make_shared<UIBox>("child2", this, 100, 30, 0, RGBA(0, 255, 0), 5);
-    auto child3 = std::make_shared<UIBox>("child2", this, 50, 70, 0, RGBA(0, 0, 255), 5);
+    auto child3 = std::make_shared<UIBox>("child3", this, 50, 70, 0, RGBA(0, 0, 255), 5);
     element->addChildren({child1, child2, child3});
     this->addElements({
         this->mainElement,
         header,
-        close,
         element,
-        child1,
-        child2,
-        child3,
         // text,
     });
 }
@@ -160,19 +156,27 @@ void FileTagManager::sortLoadedElements()
     std::sort(this->loadedElements.begin(), this->loadedElements.end(), sortByZ);
 }
 
-void FileTagManager::addElements(std::vector<std::shared_ptr<UIElement>> elements)
+void FileTagManager::addElements(std::vector<std::shared_ptr<UIElement>> elements, bool sortElements)
 {
     for (const auto &element : elements)
     {
+        if (element->id > -1)
+        {
+            continue;
+        }
+        this->addElements(element->childElements, false);
         int id = this->loadedElements.size();
         element->id = id;
-        if (element->getParent() == NULL && element->name != "main")
+        if (element->parentElement == NULL && element->name != "main")
         {
-            element->setParent(this->mainElement);
+            element->parentElement = this->mainElement;
         }
         this->loadedElements.push_back(element);
     }
-    this->sortLoadedElements();
+    if (sortElements)
+    {
+        this->sortLoadedElements();
+    }
 }
 
 void FileTagManager::drawCoordsVector(CoordsVector coords, int xC, int yC, bool fill)

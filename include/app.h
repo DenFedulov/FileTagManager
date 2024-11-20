@@ -60,7 +60,7 @@ public:
     void initSDL();
     void initResize();
     void initElements();
-    void addElements(std::vector<std::shared_ptr<UIElement>> elements);
+    void addElements(std::vector<std::shared_ptr<UIElement>> elements, bool sortElements = true);
     std::shared_ptr<UIElement> getElement(int id);
     Mix_Chunk *getSound(std::string filename);
     Mix_Music *getMusic(std::string filename);

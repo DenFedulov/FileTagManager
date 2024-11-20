@@ -27,8 +27,6 @@ protected:
     FileTagManager *app;
     int w = 0;
     int h = 0;
-    std::shared_ptr<UIElement> parentElement = NULL;
-    std::vector<std::shared_ptr<UIElement>> childElements;
     int getChildWSum(int upTo = -10);
     int getChildHSum(int upTo = -10);
     int getChildMaxW();
@@ -55,6 +53,8 @@ public:
     bool visible = true;
     DisplayMode displayMode = DisplayMode::Normal;
     DistDirection distDirection = DistDirection::column;
+    std::shared_ptr<UIElement> parentElement = NULL;
+    std::vector<std::shared_ptr<UIElement>> childElements;
 
     EventManager<std::shared_ptr<UIElement> &, AppEvent &> events;
 
@@ -72,10 +72,8 @@ public:
     int getH();
     virtual void setW(int w);
     virtual void setH(int h);
-    void addChildren(std::vector<std::shared_ptr<UIElement>> childElements, bool firstCall = true);
+    void addChildren(std::vector<std::shared_ptr<UIElement>> childElements);
     void removeChild(int id);
-    void setParent(std::shared_ptr<UIElement> parent, bool firstCall = true);
-    std::shared_ptr<UIElement> getParent();
     std::shared_ptr<UIElement> getChild(int id);
     FileTagManager *getApp();
     virtual bool checkCollision(int x, int y);
@@ -123,7 +121,6 @@ public:
     void setCursorIndex(int cursorIndex);
 
     UIText(std::string name, FileTagManager *app, std::string text, int fontSize = 24, RGBA color = {0, 0, 0});
-    UIText(std::string name, FileTagManager *app, std::string text, std::shared_ptr<UIElement> parentElement, int fontSize = 24, RGBA color = {0, 0, 0});
     ~UIText() override;
 };
 

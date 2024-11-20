@@ -101,20 +101,7 @@ void FileTagManager::initElements()
     int w, h;
     SDL_GetWindowSize(this->window, &w, &h);
 
-    auto header = std::make_shared<UIBox>("header", this, w, App::HEADER_HEIGHT, 0, RGBA(60, 60, 60));
-    header->anchors[Direction::Right] = true;
-    header->displayMode = DisplayMode::Distribute;
-    auto close = std::make_shared<UIPictureElement>(App::IMAGES_PATH + "close.png", this);
-    close->distPosH = RelPos::End;
-    header->addChildren({close});
-    auto closeApp = [this](std::shared_ptr<UIElement> &el, AppEvent &e)
-    {
-        if (e.mouseEvent.button == Events::MouseButtons::Left)
-        {
-            this->quitSDL();
-        }
-    };
-    close->events.addHandler(AppEvent::mouse_click, closeApp);
+    HeaderBar headerBar(this);
 
     auto element = std::make_shared<UIBox>("box", this, w, 400, 0, RGBA(), 10, RGBA(100, 100, 100));
     element->displayMode = DisplayMode::Distribute;
@@ -141,7 +128,7 @@ void FileTagManager::initElements()
     element->addChildren({child1, child2, child3});
     this->addElements({
         this->mainElement,
-        header,
+        headerBar.getParentElement(),
         element,
         // text,
     });

@@ -13,6 +13,7 @@
 #include "Str.h"
 #include "geometry.h"
 #include "Elements.h"
+#include "ElementGroups.h"
 #include "config.h"
 #include "EventManager.h"
 #include "Layout.h"

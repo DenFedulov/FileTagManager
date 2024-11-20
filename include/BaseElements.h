@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <string>
+#include <format>
 #include "AppElementsCommon.h"
 #include "SDL.h"
 #include "custom_types.h"
@@ -31,6 +32,29 @@ protected:
     int getChildHSum(int upTo = -10);
     int getChildMaxW();
     int getChildMaxH();
+    int calcCoordRelToParent(
+        int baseCoord,
+        std::function<int()> pCalc,
+        DistDirection mainDistDirection,
+        std::function<int(RelPos)> calcDistPos,
+        RelPos distPos,
+        std::function<int(RelPos)> calcAlignPos,
+        RelPos alignPos,
+        RelPos pivotPos,
+        int pivotDim,
+        int pivotDefault);
+    int calcCoord(int baseCoord,
+                  Direction anchorDirection,
+                  std::function<int()> pCalc,
+                  DistDirection mainDistDirection,
+                  std::function<int(RelPos)> calcDistPos,
+                  RelPos distPos,
+                  std::function<int(RelPos)> calcAlignPos,
+                  RelPos alignPos,
+                  RelPos pivotPos,
+                  int pivotDim,
+                  int pivotDefault,
+                  Direction marginDirection);
 
 public:
     int id = -1;
@@ -38,6 +62,7 @@ public:
     int x = 0;
     int y = 0;
     int z = -1;
+    int margin[4] = {0, 0, 0, 0};
     const std::string name;
     intPair pivot = intPair(0, 0);
     RelPos pivotPosH = RelPos::None;

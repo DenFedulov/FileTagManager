@@ -11,72 +11,120 @@ UIElement::UIElement(std::string name, FileTagManager *app, bool isMainElement) 
     }
 }
 
-int UIElement::calcX()
+int UIElement::calcCoordRelToParent(
+    int baseCoord,
+    std::function<int()> pCalc,
+    DistDirection mainDistDirection,
+    std::function<int(RelPos)> calcDistPos,
+    RelPos distPos,
+    std::function<int(RelPos)> calcAlignPos,
+    RelPos alignPos,
+    RelPos pivotPos,
+    int pivotDim,
+    int pivotDefault)
 {
-    if (this->anchors[Direction::Left] && this->parentElement != NULL)
+    if (this->parentElement->displayMode == DisplayMode::Distribute)
     {
-        return this->parentElement->calcX();
-    }
-    if (this->parentElement != NULL)
-    {
-        if (this->parentElement->displayMode == DisplayMode::Distribute)
+        if (this->parentElement->distDirection == mainDistDirection)
         {
-            if (this->parentElement->distDirection == DistDirection::column)
+            if (distPos != RelPos::None ||
+                (distPos == RelPos::None && this->parentElement->childrenDistPos != RelPos::None))
             {
-                if (this->distPosH != RelPos::None ||
-                    (this->distPosH == RelPos::None && this->parentElement->childrenDistPos != RelPos::None))
-                {
-                    return this->calcDistPosH(
-                        this->distPosH != RelPos::None ? this->distPosH : this->parentElement->childrenDistPos);
-                }
-            }
-            else
-            {
-                if (this->alignPosV != RelPos::None ||
-                    (this->alignPosV == RelPos::None && this->parentElement->childrenAlignPos != RelPos::None))
-                {
-                    return this->calcAlignPosV(
-                        this->alignPosV != RelPos::None ? this->alignPosV : this->parentElement->childrenAlignPos);
-                }
+                return calcDistPos(
+                    distPos != RelPos::None ? distPos : this->parentElement->childrenDistPos);
             }
         }
-        return this->x + this->parentElement->calcX() - this->calcPivotOffsetH(this->pivotPosH);
+        else
+        {
+            if (alignPos != RelPos::None ||
+                (alignPos == RelPos::None && this->parentElement->childrenAlignPos != RelPos::None))
+            {
+                return calcAlignPos(
+                    alignPos != RelPos::None ? alignPos : this->parentElement->childrenAlignPos);
+            }
+        }
     }
-    return this->x - this->calcPivotOffsetH(this->pivotPosH);
+    return baseCoord + pCalc() - calcPivotOffset(pivotPos, pivotDim, pivotDefault);
+}
+
+int UIElement::calcCoord(
+    int baseCoord,
+    Direction anchorDirection,
+    std::function<int()> pCalc,
+    DistDirection mainDistDirection,
+    std::function<int(RelPos)> calcDistPos,
+    RelPos distPos,
+    std::function<int(RelPos)> calcAlignPos,
+    RelPos alignPos,
+    RelPos pivotPos,
+    int pivotDim, // potential overhang
+    int pivotDefault,
+    Direction marginDirection)
+{
+    int result;
+    if (this->anchors[anchorDirection] && this->parentElement != NULL)
+    {
+        result = pCalc();
+    }
+    else if (this->parentElement != NULL)
+    {
+        result = this->calcCoordRelToParent(
+            baseCoord,
+            pCalc,
+            mainDistDirection,
+            calcDistPos,
+            distPos,
+            calcAlignPos,
+            alignPos,
+            pivotPos,
+            pivotDim,
+            pivotDefault);
+    }
+    else
+    {
+        result = baseCoord - calcPivotOffset(pivotPos, pivotDim, pivotDefault);
+    }
+    return result + this->margin[marginDirection];
+}
+
+int UIElement::calcX()
+{
+    return this->calcCoord(
+        this->x,
+        Direction::Left,
+        [this]()
+        { return this->parentElement != NULL ? this->parentElement->calcX() : 0; },
+        DistDirection::column,
+        [this](RelPos p)
+        { return this->calcDistPosH(p); },
+        this->distPosH,
+        [this](RelPos p)
+        { return this->calcAlignPosV(p); },
+        this->alignPosV,
+        this->pivotPosH,
+        this->calcW(),
+        this->pivot.first,
+        Direction::Left);
 }
 
 int UIElement::calcY()
 {
-    if (this->anchors[Direction::Up] && this->parentElement != NULL)
-    {
-        return this->parentElement->calcY();
-    }
-    if (this->parentElement != NULL)
-    {
-        if (this->parentElement->displayMode == DisplayMode::Distribute)
-        {
-            if (this->parentElement->distDirection == DistDirection::row)
-            {
-                if (this->distPosV != RelPos::None ||
-                    (this->distPosV == RelPos::None && this->parentElement->childrenDistPos != RelPos::None))
-                {
-                    return this->calcDistPosV(
-                        this->distPosV != RelPos::None ? this->distPosV : this->parentElement->childrenDistPos);
-                }
-            }
-            else
-            {
-                if (this->alignPosH != RelPos::None ||
-                    (this->alignPosH == RelPos::None && this->parentElement->childrenAlignPos != RelPos::None))
-                {
-                    return this->calcAlignPosH(
-                        this->alignPosH != RelPos::None ? this->alignPosH : this->parentElement->childrenAlignPos);
-                }
-            }
-        }
-        return this->y + this->parentElement->calcY() - this->calcPivotOffsetV(this->pivotPosV);
-    }
-    return this->y - this->calcPivotOffsetV(this->pivotPosV);
+    return this->calcCoord(
+        this->y,
+        Direction::Up,
+        [this]()
+        { return this->parentElement != NULL ? this->parentElement->calcY() : 0; },
+        DistDirection::row,
+        [this](RelPos p)
+        { return this->calcDistPosV(p); },
+        this->distPosV,
+        [this](RelPos p)
+        { return this->calcAlignPosH(p); },
+        this->alignPosH,
+        this->pivotPosV,
+        this->calcH(),
+        this->pivot.second,
+        Direction::Left);
 }
 
 int UIElement::calcW()

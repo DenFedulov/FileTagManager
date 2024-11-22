@@ -337,7 +337,7 @@ UIElement::~UIElement()
     this->freeTexture();
 }
 
-void UIElement::addChildren(std::vector<std::shared_ptr<UIElement>> childElements)
+void UIElement::addChildren(const std::vector<std::shared_ptr<UIElement>> &childElements)
 {
     for (auto &childElement : childElements)
     {
@@ -695,7 +695,7 @@ void UIBox::updateSurface()
     CoordsVector right = Geometry::line({this->w - 1, this->radius}, {this->w - 1, this->h - 1 - this->radius});
     CoordsVector down = Geometry::line({this->radius, this->h - 1}, {this->w - 1 - this->radius, this->h - 1});
 
-    CoordsVector countor = Vect::concat({topLeft, topRight, bottomLeft, bottomRight, top, left, right, down});
+    CoordsVector countor = Vect::concat<intPair>(topLeft, topRight, bottomLeft, bottomRight, top, left, right, down);
     Geometry::BorderMaker borderMaker(countor, this->borderWidth);
     CoordsVector border = borderMaker.make();
     editor.setDrawColor(this->borderColor);

@@ -128,7 +128,6 @@ void FileTagManager::initElements()
     // auto child3 = std::make_shared<UIBox>("child3", this, 50, 70, 0, RGBA(0, 0, 255), 5);
     // element->addChildren({child1, child2, child3});
 
-
     this->addElements({
         this->mainElement,
         headerBar.getParentElement(),
@@ -147,7 +146,7 @@ void FileTagManager::sortLoadedElements()
     std::sort(this->loadedElements.begin(), this->loadedElements.end(), sortByZ);
 }
 
-void FileTagManager::addElements(std::vector<std::shared_ptr<UIElement>> elements, bool sortElements)
+void FileTagManager::addElements(const std::vector<std::shared_ptr<UIElement>> &elements, bool sortElements)
 {
     for (const auto &element : elements)
     {
@@ -170,10 +169,10 @@ void FileTagManager::addElements(std::vector<std::shared_ptr<UIElement>> element
     }
 }
 
-void FileTagManager::drawCoordsVector(CoordsVector coords, int xC, int yC, bool fill)
+void FileTagManager::drawCoordsVector(const CoordsVector &coords, int xC, int yC, bool fill)
 {
-    coords = Geometry::addToCoords(coords, xC, yC);
-    for (auto pair : coords)
+    CoordsVector addedCoords = Geometry::addToCoords(coords, xC, yC);
+    for (auto pair : addedCoords)
     {
         if (fill)
         {

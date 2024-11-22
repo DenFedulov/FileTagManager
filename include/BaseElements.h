@@ -97,7 +97,7 @@ public:
     int getH();
     virtual void setW(int w);
     virtual void setH(int h);
-    void addChildren(std::vector<std::shared_ptr<UIElement>> childElements);
+    void addChildren(const std::vector<std::shared_ptr<UIElement>> &childElements);
     void removeChild(int id);
     std::shared_ptr<UIElement> getChild(int id);
     FileTagManager *getApp();

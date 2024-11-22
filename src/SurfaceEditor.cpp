@@ -84,7 +84,7 @@ void SurfaceEditor::fillRectangle(int x1, int y1, int x2, int y2)
     SDL_UnlockSurface(this->surface);
 }
 
-void SurfaceEditor::drawWithCoordsVector(CoordsVector coords, int x1, int y1, int x2, int y2)
+void SurfaceEditor::drawWithCoordsVector(const CoordsVector &coords, int x1, int y1, int x2, int y2)
 {
     SDL_LockSurface(this->surface);
     Setter::setIf(x2, this->surface->w, x2 < 0);
@@ -101,7 +101,7 @@ void SurfaceEditor::drawWithCoordsVector(CoordsVector coords, int x1, int y1, in
     SDL_UnlockSurface(this->surface);
 }
 
-void SurfaceEditor::fillWithCoordsVector(CoordsVector coords, int baseLine, bool vertical, int x1, int y1, int x2, int y2)
+void SurfaceEditor::fillWithCoordsVector(const CoordsVector &coords, int baseLine, bool vertical, int x1, int y1, int x2, int y2)
 {
     SDL_LockSurface(this->surface);
     Setter::setIf(x2, this->surface->w, x2 < 0);

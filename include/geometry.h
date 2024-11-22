@@ -15,7 +15,7 @@
 
 struct CoordsArray : public Array2D<bool>
 {
-    CoordsArray(CoordsVector coords);
+    CoordsArray(const CoordsVector &coords);
     CoordsArray(int cols, int rows);
     CoordsArray();
 };
@@ -36,9 +36,9 @@ namespace Geometry
     };
     Direction getOppositeDirection(Direction d);
     CoordsVector arrayToCoordsVector(Array2D<bool> &arr);
-    intPair getDimentions(CoordsVector coords);
+    intPair getDimentions(const CoordsVector &coords);
 
-    void coordsVectorFillArray(CoordsVector vec, Array2D<bool> &arr);
+    void coordsVectorFillArray(const CoordsVector &vec, Array2D<bool> &arr);
 
     CoordsVector mirrorCoords(CoordsVector coords, MirrorDirection direction);
     CoordsVector mirrorAndAddCoords(CoordsVector coords, int x, int y, MirrorDirection direction);
@@ -47,8 +47,8 @@ namespace Geometry
     CoordsVector circleQuater(int r);
     CoordsVector circle(int r);
     CoordsVector line(intPair start, intPair end);
-    int findMaxX(CoordsVector coords);
-    int findMaxY(CoordsVector coords);
+    int findMaxX(const CoordsVector &coords);
+    int findMaxY(const CoordsVector &coords);
     template <typename T>
     void getSubArray(Array2D<T> &array, Array2D<T> &subArray, int x, int y)
     {
@@ -85,7 +85,7 @@ namespace Geometry
         CoordsArray grid;
         int width;
         BorderType borderType;
-        BorderMaker(CoordsVector contour, int width, BorderType borderType = BorderType::Inner);
+        BorderMaker(const CoordsVector &contour, int width, BorderType borderType = BorderType::Inner);
         BorderMaker(CoordsArray &grid, int width, BorderType borderType = BorderType::Inner);
         CoordsVector make();
     };

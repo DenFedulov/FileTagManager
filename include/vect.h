@@ -4,15 +4,17 @@
 
 namespace Vect
 {
-    template <typename T>
-    std::vector<T> concat(std::initializer_list<std::vector<T>> vectors)
+    template <typename T, typename... Vectors>
+    std::vector<T> concat(const Vectors &...vectors)
     {
+        size_t total_size = (vectors.size() + ...);
+
         std::vector<T> result;
-        for (const auto &vec : vectors)
-        {
-            result.reserve(vec.size());
-            result.insert(result.end(), vec.begin(), vec.end());
-        }
+        result.reserve(total_size);
+
+        ([&result](const auto &vec)
+         { result.insert(result.end(), vec.begin(), vec.end()); }(vectors), ...);
+
         return result;
     }
 }

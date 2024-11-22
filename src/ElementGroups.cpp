@@ -56,7 +56,7 @@ void MainContents::createElementGroup()
     this->parentElement->childrenDistPos = RelPos::Start;
     this->parentElement->y = App::HEADER_HEIGHT;
 
-    auto sidebar = std::make_shared<UIBox>("sidebar", this->app, 350, h - App::HEADER_HEIGHT, 0, RGBA(100, 100, 100));
+    auto sidebar = std::make_shared<UIBox>("sidebar", this->app, 350, h - App::HEADER_HEIGHT, 10, RGBA(100, 100, 100));
     sidebar->anchors[Direction::Down] = true;
 
     this->parentElement->addChildren({sidebar});

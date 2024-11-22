@@ -61,11 +61,11 @@ public:
     void initSDL();
     void initResize();
     void initElements();
-    void addElements(std::vector<std::shared_ptr<UIElement>> elements, bool sortElements = true);
+    void addElements(const std::vector<std::shared_ptr<UIElement>> &elements, bool sortElements = true);
     std::shared_ptr<UIElement> getElement(int id);
     Mix_Chunk *getSound(std::string filename);
     Mix_Music *getMusic(std::string filename);
-    void drawCoordsVector(CoordsVector coords, int xC, int yC, bool fill = false);
+    void drawCoordsVector(const CoordsVector &coords, int xC, int yC, bool fill = false);
     bool loop();
     void quitSDL();
 };

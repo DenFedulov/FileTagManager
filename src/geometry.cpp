@@ -1,6 +1,6 @@
 #include "geometry.h"
 
-CoordsArray::CoordsArray(CoordsVector coords) : Array2D()
+CoordsArray::CoordsArray(const CoordsVector &coords) : Array2D()
 {
     intPair dims = Geometry::getDimentions(coords);
     this->cols = dims.first;
@@ -19,7 +19,6 @@ CoordsArray::CoordsArray()
 
 CoordsVector Geometry::mirrorCoords(CoordsVector coords, MirrorDirection direction)
 {
-    CoordsVector mirroredCoords;
     for (auto &pair : coords)
     {
         switch (direction)
@@ -36,26 +35,22 @@ CoordsVector Geometry::mirrorCoords(CoordsVector coords, MirrorDirection directi
             pair.second = t;
             break;
         }
-        mirroredCoords.push_back(pair);
     }
-    return mirroredCoords;
+    return coords;
 }
 
 CoordsVector Geometry::addToCoords(CoordsVector coords, int x, int y)
 {
-    CoordsVector addedCoords;
     for (auto &elem : coords)
     {
         elem.first += x;
         elem.second += y;
-        addedCoords.push_back(elem);
     }
-    return addedCoords;
+    return coords;
 }
 
 CoordsVector Geometry::mirrorAndAddCoords(CoordsVector coords, int x, int y, MirrorDirection direction)
 {
-    CoordsVector mirroredCoords;
     for (auto &pair : coords)
     {
         switch (direction)
@@ -76,9 +71,8 @@ CoordsVector Geometry::mirrorAndAddCoords(CoordsVector coords, int x, int y, Mir
             pair.second += y;
             break;
         }
-        mirroredCoords.push_back(pair);
     }
-    return mirroredCoords;
+    return coords;
 }
 
 CoordsVector Geometry::circleOctant(int r)
@@ -105,14 +99,14 @@ CoordsVector Geometry::circleOctant(int r)
 CoordsVector Geometry::circleQuater(int r)
 {
     CoordsVector octate = Geometry::circleOctant(r);
-    return Vect::concat({octate, Geometry::mirrorCoords(octate, Diagonal)});
+    return Vect::concat<intPair>(octate, Geometry::mirrorCoords(octate, Diagonal));
 }
 
 CoordsVector Geometry::circle(int r)
 {
     CoordsVector quater = Geometry::circleQuater(r);
-    CoordsVector half = Vect::concat({quater, Geometry::mirrorCoords(quater, Vertical)});
-    return Vect::concat({half, Geometry::mirrorCoords(half, Horizontal)});
+    CoordsVector half = Vect::concat<intPair>(quater, Geometry::mirrorCoords(quater, Vertical));
+    return Vect::concat<intPair>(half, Geometry::mirrorCoords(half, Horizontal));
 }
 
 CoordsVector Geometry::line(intPair start, intPair end)
@@ -151,7 +145,7 @@ CoordsVector Geometry::line(intPair start, intPair end)
     return CoordsVector(line.begin(), line.end());
 }
 
-int Geometry::findMaxX(CoordsVector coords)
+int Geometry::findMaxX(const CoordsVector &coords)
 {
     int max = 0;
     for (auto &coord : coords)
@@ -164,7 +158,7 @@ int Geometry::findMaxX(CoordsVector coords)
     return max;
 }
 
-int Geometry::findMaxY(CoordsVector coords)
+int Geometry::findMaxY(const CoordsVector &coords)
 {
     int max = 0;
     for (auto &coord : coords)
@@ -193,12 +187,12 @@ CoordsVector Geometry::arrayToCoordsVector(Array2D<bool> &arr)
     return vec;
 }
 
-intPair Geometry::getDimentions(CoordsVector coords)
+intPair Geometry::getDimentions(const CoordsVector &coords)
 {
     return {Geometry::findMaxX(coords) + 1, Geometry::findMaxY(coords) + 1};
 }
 
-void Geometry::coordsVectorFillArray(CoordsVector vec, Array2D<bool> &arr)
+void Geometry::coordsVectorFillArray(const CoordsVector &vec, Array2D<bool> &arr)
 {
     for (auto &coord : vec)
     {
@@ -329,7 +323,7 @@ intPair Geometry::BorderMaker::pickNextBorderPixel(intPair currentPixel, int &cu
     return {-1, -1};
 }
 
-Geometry::BorderMaker::BorderMaker(CoordsVector contour, int width, BorderType borderType) : width(width), borderType(borderType)
+Geometry::BorderMaker::BorderMaker(const CoordsVector &contour, int width, BorderType borderType) : width(width), borderType(borderType)
 {
     this->grid = CoordsArray(contour);
 }

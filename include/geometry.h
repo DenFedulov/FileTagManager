@@ -6,7 +6,7 @@
 #include <cmath>
 #include <memory>
 #include <optional>
-#include "math.h"
+#include "custom_math.h"
 #include "vect.h"
 #include "custom_types.h"
 #include "Setter.h"

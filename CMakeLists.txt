@@ -2,17 +2,17 @@ cmake_minimum_required(VERSION 3.30)
 
 project("FileTagManager"
         VERSION 0.0.1
-        LANGUAGES CXX)
+        LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 # staticly linking standart ligraries  
-set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++ ${CMAKE_CSS_STANDARD_LIBRARIES} -Wl,-Bstatic -lstdc++ -lpthread") 
+set(CMAKE_CXX_STANDARD_LIBRARIES "-static-libgcc -static-libstdc++ ${CMAKE_CSS_STANDARD_LIBRARIES} -Wl,-Bstatic -lstdc++ -lpthread")
 set(FullBinDir "${CMAKE_CURRENT_SOURCE_DIR}/../bin/${CMAKE_BUILD_TYPE}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${FullBinDir}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${FullBinDir}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${FullBinDir}")
 
-file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
+file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/*.c)
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/resources" DESTINATION "${FullBinDir}/")
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/config.json" DESTINATION "${FullBinDir}/")
 

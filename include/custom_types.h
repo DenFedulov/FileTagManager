@@ -4,6 +4,7 @@
 
 typedef std::pair<int, int> intPair;
 typedef std::vector<intPair> CoordsVector;
+
 struct RGBA
 {
     uint8_t r = 255;

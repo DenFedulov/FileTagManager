@@ -6,9 +6,9 @@
 class Logger
 {
 private:
-    std::string logFilename;
-    std::string logHistory;
-    int errorCount = 0;
+    std::string _logFilename;
+    std::string _logHistory;
+    int _errorCount = 0;
 
 public:
     Logger(std::string logFilename);

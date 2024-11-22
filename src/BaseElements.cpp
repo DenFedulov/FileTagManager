@@ -1,11 +1,11 @@
 #include "BaseElements.h"
 
-UIElement::UIElement(std::string name, FileTagManager *app, bool isMainElement) : name(name), app(app)
+UIElement::UIElement(std::string name, FileTagManager *app, bool isMainElement) : name(name), _app(app)
 {
     if (isMainElement)
     {
         int width, hight;
-        SDL_GetWindowSize(this->app->window, &width, &hight);
+        SDL_GetWindowSize(this->_app->window, &width, &hight);
         this->w = width;
         this->h = hight;
     }
@@ -306,30 +306,30 @@ bool UIElement::checkCollision(int x, int y)
 
 void UIElement::freeSurface()
 {
-    if (this->surface != nullptr)
+    if (this->_surface != nullptr)
     {
-        SDL_FreeSurface(this->surface);
-        this->surface = nullptr;
+        SDL_FreeSurface(this->_surface);
+        this->_surface = nullptr;
     }
 }
 
 SDL_Texture *UIElement::getTexture()
 {
-    return this->texture;
+    return this->_texture;
 }
 
 void UIElement::freeTexture()
 {
-    if (this->texture != nullptr)
+    if (this->_texture != nullptr)
     {
-        SDL_DestroyTexture(this->texture);
-        this->texture = nullptr;
+        SDL_DestroyTexture(this->_texture);
+        this->_texture = nullptr;
     }
 }
 
 FileTagManager *UIElement::getApp()
 {
-    return this->app;
+    return this->_app;
 }
 
 UIElement::~UIElement()
@@ -355,7 +355,7 @@ void UIElement::removeChild(int id)
     }
     auto childElement = this->childElements.at(id);
     this->childElements.erase(this->childElements.begin() + id);
-    this->parentElement = this->app->mainElement;
+    this->parentElement = this->_app->mainElement;
 }
 
 std::shared_ptr<UIElement> UIElement::getChild(int id)
@@ -373,14 +373,14 @@ void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip fl
     {
         return;
     }
-    if (this->texture != NULL)
+    if (this->_texture != NULL)
     {
         SDL_Rect dest;
         dest.x = this->calcX();
         dest.y = this->calcY();
         dest.w = this->calcW();
         dest.h = this->calcH();
-        SDL_RenderCopyEx(this->app->renderer, this->texture, NULL, &dest, angle, rotationPoint, flip);
+        SDL_RenderCopyEx(this->_app->renderer, this->_texture, NULL, &dest, angle, rotationPoint, flip);
     }
     if (this->z > -1)
     {
@@ -395,53 +395,53 @@ void UIElement::draw(SDL_Point *rotationPoint, double angle, SDL_RendererFlip fl
 void UIText::updateSurface()
 {
     this->freeSurface();
-    SDL_Color color = {this->color.r, this->color.g, this->color.b};
-    std::string finalText = this->text;
+    SDL_Color color = {this->_color.r, this->_color.g, this->_color.b};
+    std::string finalText = this->_text;
     if (finalText == "")
     {
         finalText = " ";
     }
     if (this->editable)
     {
-        if (this->cursorIndex < 0 || finalText.length() < this->cursorIndex)
+        if (this->_cursorIndex < 0 || finalText.length() < this->_cursorIndex)
         {
-            this->cursorIndex = finalText.length();
+            this->_cursorIndex = finalText.length();
         }
-        finalText.insert(this->cursorIndex, "|");
+        finalText.insert(this->_cursorIndex, "|");
     }
     SDL_Surface *defaultSurface;
     if (this->parentElement != NULL)
     {
-        defaultSurface = TTF_RenderUTF8_Blended_Wrapped(this->font, finalText.c_str(), color, this->parentElement->getW());
+        defaultSurface = TTF_RenderUTF8_Blended_Wrapped(this->_font, finalText.c_str(), color, this->parentElement->getW());
     }
     else
     {
-        defaultSurface = TTF_RenderUTF8_Blended(this->font, finalText.c_str(), color);
+        defaultSurface = TTF_RenderUTF8_Blended(this->_font, finalText.c_str(), color);
     }
-    this->surface = SDL_ConvertSurfaceFormat(defaultSurface, SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32, 0);
+    this->_surface = SDL_ConvertSurfaceFormat(defaultSurface, SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32, 0);
     SDL_FreeSurface(defaultSurface);
-    this->w = this->surface->w;
-    this->h = this->surface->h;
+    this->w = this->_surface->w;
+    this->h = this->_surface->h;
     this->freeTexture();
-    this->texture = surfaceToTexture(this->app, this->surface);
+    this->_texture = surfaceToTexture(this->_app, this->_surface);
 }
 
 int UIText::getFontSize()
 {
-    return this->fontSize;
+    return this->_fontSize;
 }
 
 std::string UIText::getFontPath()
 {
-    return this->fontPath;
+    return this->_fontPath;
 }
 
 void UIText::loadFont(std::string path)
 {
-    this->font = TTF_OpenFont(path.c_str(), this->fontSize);
-    if (!this->font)
+    this->_font = TTF_OpenFont(path.c_str(), this->_fontSize);
+    if (!this->_font)
     {
-        this->app->logger->addErrorLog("Failed to load font: ", TTF_GetError());
+        this->_app->logger->addErrorLog("Failed to load font: ", TTF_GetError());
     }
 }
 
@@ -449,68 +449,68 @@ void UIText::setFont(std::optional<int> fontSize, std::optional<std::string> pat
 {
     if (fontSize.has_value())
     {
-        this->fontSize = fontSize.value();
+        this->_fontSize = fontSize.value();
     }
     if (path.has_value())
     {
-        this->fontPath = path.value();
+        this->_fontPath = path.value();
     }
     if (fontSize.has_value() || path.has_value())
     {
-        this->loadFont(this->fontPath);
+        this->loadFont(this->_fontPath);
         this->updateSurface();
     }
 }
 
 std::string UIText::getText()
 {
-    return this->text;
+    return this->_text;
 }
 
 void UIText::setText(std::string text)
 {
-    this->text = text;
+    this->_text = text;
     this->updateSurface();
 }
 
 RGBA UIText::getColor()
 {
-    return this->color;
+    return this->_color;
 }
 
 void UIText::setColor(RGBA color)
 {
-    this->color = color;
+    this->_color = color;
     this->updateSurface();
 }
 
 int UIText::getCursorIndex()
 {
-    return this->cursorIndex;
+    return this->_cursorIndex;
 }
 
 void UIText::setCursorIndex(int cursorIndex)
 {
-    this->cursorIndex = cursorIndex;
+    this->_cursorIndex = cursorIndex;
     this->updateSurface();
 }
 
 UIText::UIText(std::string name, FileTagManager *app, std::string text, int fontSize, RGBA color) : UIElement(name, app),
-                                                                                                    text(text),
-                                                                                                    fontSize(fontSize),
-                                                                                                    color(color)
+                                                                                                    _text(text),
+                                                                                                    _fontSize(fontSize),
+                                                                                                    _color(color)
 {
     this->pivotPosH = RelPos::Center;
     this->pivotPosV = RelPos::Center;
-    this->fontPath = this->app->config->defaultFont;
-    this->loadFont(this->fontPath);
+    this->_fontPath = this->_app->config->defaultFont;
+    this->loadFont(this->_fontPath);
 
     auto editEnable = [](std::shared_ptr<UIElement> &el, AppEvent &e)
     {
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         if (el->checkCollision(e.mouseEvent.pos.first, e.mouseEvent.pos.second))
         {
-            textEl->cursorIndex = -1;
+            textEl->_cursorIndex = -1;
             textEl->editable = true;
         }
         else
@@ -572,26 +572,26 @@ UIText::UIText(std::string name, FileTagManager *app, std::string text, int font
 
 UIText::~UIText()
 {
-    TTF_CloseFont(this->font);
+    TTF_CloseFont(this->_font);
 }
 
 UIPictureElement::UIPictureElement(std::string name, FileTagManager *app) : UIElement(name, app)
 {
-    this->texture = this->loadPictureTexture(name);
-    SDL_QueryTexture(this->texture, NULL, NULL, &this->w, &this->h);
+    this->_texture = this->loadPictureTexture(name);
+    SDL_QueryTexture(this->_texture, NULL, NULL, &this->w, &this->h);
 }
 
 SDL_Texture *UIPictureElement::loadPictureTexture(std::string path)
 {
-    if (this->texture != nullptr)
+    if (this->_texture != nullptr)
     {
-        return this->texture;
+        return this->_texture;
     }
-    SDL_Texture *texture = surfaceToTexture(this->app, Str::endsWith(path, ".bmp") ? SDL_LoadBMP(path.c_str()) : IMG_Load(path.c_str()), true);
+    SDL_Texture *texture = surfaceToTexture(this->_app, Str::endsWith(path, ".bmp") ? SDL_LoadBMP(path.c_str()) : IMG_Load(path.c_str()), true);
     return texture;
 }
 
-UIPictureElement::UIPictureElement() : UIElement(name, app)
+UIPictureElement::UIPictureElement() : UIElement(name, _app)
 {
 }
 
@@ -624,85 +624,85 @@ void UIDynamicElement::setH(int h)
 
 void UIBox::setRadius(int radius)
 {
-    this->radius = radius;
-    Setter::setInRange(this->radius, 0, this->getMaxRadius() - 1);
+    this->_radius = radius;
+    Setter::setInRange(this->_radius, 0, this->getMaxRadius() - 1);
     this->updateSurface();
 }
 
 int UIBox::getRadius()
 {
-    return this->radius;
+    return this->_radius;
 }
 
 void UIBox::setColor(RGBA color)
 {
-    this->color = color;
+    this->_color = color;
     this->updateSurface();
 }
 
 RGBA UIBox::getColor()
 {
-    return this->color;
+    return this->_color;
 }
 
 void UIBox::setBorderWidth(int borderWidth)
 {
-    this->borderWidth = borderWidth;
+    this->_borderWidth = borderWidth;
     this->updateSurface();
 }
 
 int UIBox::getBorderWidth()
 {
-    return this->borderWidth;
+    return this->_borderWidth;
 }
 
 void UIBox::setBorderColor(RGBA borderColor)
 {
-    this->borderColor = borderColor;
+    this->_borderColor = borderColor;
     this->updateSurface();
 }
 
 RGBA UIBox::getBorderColor()
 {
-    return this->borderColor;
+    return this->_borderColor;
 }
 
 void UIBox::updateSurface()
 {
-    this->surface = this->makeSurface();
-    SurfaceEditor editor(this->surface);
-    editor.setDrawColor(this->color);
-    editor.fillRectangle(this->radius, 0, this->w - this->radius, this->h);
-    editor.fillRectangle(0, this->radius, this->w, this->h - this->radius);
+    this->_surface = this->makeSurface();
+    SurfaceEditor editor(this->_surface);
+    editor.setDrawColor(this->_color);
+    editor.fillRectangle(this->_radius, 0, this->w - this->_radius, this->h);
+    editor.fillRectangle(0, this->_radius, this->w, this->h - this->_radius);
     CoordsVector topLeft = Geometry::mirrorAndAddCoords(
         Geometry::mirrorAndAddCoords(
-            Geometry::circleQuater(this->radius), this->radius, this->radius, Geometry::Horizontal),
-        this->radius, this->radius, Geometry::Vertical);
-    CoordsVector topRight = Geometry::mirrorAndAddCoords(Geometry::circleQuater(this->radius), this->radius, this->radius, Geometry::Vertical);
-    CoordsVector bottomLeft = Geometry::mirrorAndAddCoords(Geometry::circleQuater(this->radius), this->radius, this->radius, Geometry::Horizontal);
-    CoordsVector bottomRight = Geometry::circleQuater(this->radius);
+            Geometry::circleQuater(this->_radius), this->_radius, this->_radius, Geometry::Horizontal),
+        this->_radius, this->_radius, Geometry::Vertical);
+    CoordsVector topRight = Geometry::mirrorAndAddCoords(Geometry::circleQuater(this->_radius), this->_radius, this->_radius, Geometry::Vertical);
+    CoordsVector bottomLeft = Geometry::mirrorAndAddCoords(Geometry::circleQuater(this->_radius), this->_radius, this->_radius, Geometry::Horizontal);
+    CoordsVector bottomRight = Geometry::circleQuater(this->_radius);
 
-    editor.fillWithCoordsVector(topLeft, this->radius, true, 0, 0);
-    editor.fillWithCoordsVector(topRight, this->radius, true, this->w - 1 - this->radius, 0);
-    editor.fillWithCoordsVector(bottomLeft, this->h - 1 - this->radius, true, 0, this->h - 1 - this->radius);
-    editor.fillWithCoordsVector(bottomRight, this->h - 1 - this->radius, true, this->w - 1 - this->radius, this->h - 1 - this->radius);
+    editor.fillWithCoordsVector(topLeft, this->_radius, true, 0, 0);
+    editor.fillWithCoordsVector(topRight, this->_radius, true, this->w - 1 - this->_radius, 0);
+    editor.fillWithCoordsVector(bottomLeft, this->h - 1 - this->_radius, true, 0, this->h - 1 - this->_radius);
+    editor.fillWithCoordsVector(bottomRight, this->h - 1 - this->_radius, true, this->w - 1 - this->_radius, this->h - 1 - this->_radius);
 
-    topRight = Geometry::addToCoords(topRight, this->w - 1 - this->radius, 0);
-    bottomLeft = Geometry::addToCoords(bottomLeft, 0, this->h - 1 - this->radius);
-    bottomRight = Geometry::addToCoords(bottomRight, this->w - 1 - this->radius, this->h - 1 - this->radius);
-    CoordsVector top = Geometry::line({this->radius, 0}, {this->w - 1 - this->radius, 0});
-    CoordsVector left = Geometry::line({0, this->radius}, {0, this->h - 1 - this->radius});
-    CoordsVector right = Geometry::line({this->w - 1, this->radius}, {this->w - 1, this->h - 1 - this->radius});
-    CoordsVector down = Geometry::line({this->radius, this->h - 1}, {this->w - 1 - this->radius, this->h - 1});
+    topRight = Geometry::addToCoords(topRight, this->w - 1 - this->_radius, 0);
+    bottomLeft = Geometry::addToCoords(bottomLeft, 0, this->h - 1 - this->_radius);
+    bottomRight = Geometry::addToCoords(bottomRight, this->w - 1 - this->_radius, this->h - 1 - this->_radius);
+    CoordsVector top = Geometry::line({this->_radius, 0}, {this->w - 1 - this->_radius, 0});
+    CoordsVector left = Geometry::line({0, this->_radius}, {0, this->h - 1 - this->_radius});
+    CoordsVector right = Geometry::line({this->w - 1, this->_radius}, {this->w - 1, this->h - 1 - this->_radius});
+    CoordsVector down = Geometry::line({this->_radius, this->h - 1}, {this->w - 1 - this->_radius, this->h - 1});
 
     CoordsVector countor = Vect::concat<intPair>(topLeft, topRight, bottomLeft, bottomRight, top, left, right, down);
-    Geometry::BorderMaker borderMaker(countor, this->borderWidth);
+    Geometry::BorderMaker borderMaker(countor, this->_borderWidth);
     CoordsVector border = borderMaker.make();
-    editor.setDrawColor(this->borderColor);
+    editor.setDrawColor(this->_borderColor);
     editor.drawWithCoordsVector(border);
 
     this->freeTexture();
-    this->texture = surfaceToTexture(this->app, this->surface);
+    this->_texture = surfaceToTexture(this->_app, this->_surface);
 }
 
 int UIBox::getMaxRadius()
@@ -716,10 +716,10 @@ UIBox::UIBox(std::string name, FileTagManager *app, int w, int h,
 {
     this->w = w;
     this->h = h;
-    this->radius = radius;
-    Setter::setInRange(this->radius, 0, this->getMaxRadius() - 1);
-    this->color = color;
-    this->borderWidth = borderWidth;
-    this->borderColor = borderColor;
+    this->_radius = radius;
+    Setter::setInRange(this->_radius, 0, this->getMaxRadius() - 1);
+    this->_color = color;
+    this->_borderWidth = borderWidth;
+    this->_borderColor = borderColor;
     this->updateSurface();
 }

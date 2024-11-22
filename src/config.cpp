@@ -11,6 +11,6 @@ Config::Config(std::string filename)
     if(fileJsonData.empty()){
         throw std::runtime_error("Config file " + filename + " is empty");
     }
-    this->data = json::parse(fileJsonData);
+    this->_data = json::parse(fileJsonData);
     this->defaultFont = this->get<std::string>("defaultFont");
 }

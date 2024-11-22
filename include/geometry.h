@@ -69,9 +69,10 @@ namespace Geometry
     class BorderMaker
     {
     private:
-        std::set<intPair> pickedCoords;
-        const int turnDirection = 1;
-        int lastTurn;
+        std::set<intPair> _pickedCoords;
+        const int _turnDirection = 1;
+        int _lastTurn;
+        
         intPair getPixelInDirection(int x, int y, int &currentDirection);
         intPair getPixelFromInTurn(int x, int y, int &currentDirection);
         intPair getPixelFromOutTurn(int x, int y, int &currentDirection);

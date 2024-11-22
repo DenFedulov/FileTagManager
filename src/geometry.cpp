@@ -222,7 +222,7 @@ intPair Geometry::BorderMaker::getPixelInDirection(int x, int y, int &direction)
 
 intPair Geometry::BorderMaker::getPixelFromInTurn(int x, int y, int &direction)
 {
-    switch (this->calcRealCurrentDirection(direction, this->turnDirection))
+    switch (this->calcRealCurrentDirection(direction, this->_turnDirection))
     {
     case Direction::Down:
         x--;
@@ -246,7 +246,7 @@ intPair Geometry::BorderMaker::getPixelFromInTurn(int x, int y, int &direction)
 
 intPair Geometry::BorderMaker::getPixelFromOutTurn(int x, int y, int &currentDirection)
 {
-    switch (this->calcRealCurrentDirection(currentDirection, this->turnDirection))
+    switch (this->calcRealCurrentDirection(currentDirection, this->_turnDirection))
     {
     case Direction::Down:
         x++;
@@ -294,7 +294,7 @@ intPair Geometry::BorderMaker::pickNextBorderPixel(intPair currentPixel, int &cu
         {
             int x = subXstart + i;
             int y = subYstart + j;
-            if (!subArray.get(i, j) || pickedCoords.contains({x, y}))
+            if (!subArray.get(i, j) || _pickedCoords.contains({x, y}))
             {
                 continue;
             }
@@ -307,14 +307,14 @@ intPair Geometry::BorderMaker::pickNextBorderPixel(intPair currentPixel, int &cu
             }
             else if (inTurnPixel.first == 2 && inTurnPixel.second == 2)
             {
-                this->lastTurn = -1;
-                currentDirection += this->turnDirection;
+                this->_lastTurn = -1;
+                currentDirection += this->_turnDirection;
                 return {x, y};
             }
             else if (outTurnPixel.first == 2 && outTurnPixel.second == 2)
             {
-                this->lastTurn = 1;
-                currentDirection += this->turnDirection;
+                this->_lastTurn = 1;
+                currentDirection += this->_turnDirection;
                 return {x, y};
             }
         }
@@ -340,8 +340,8 @@ int Geometry::BorderMaker::calcRealCurrentDirection(int currentDirection, int tu
 
 CoordsVector Geometry::BorderMaker::_make(int currentDirection)
 {
-    this->lastTurn = 0;
-    this->pickedCoords.clear();
+    this->_lastTurn = 0;
+    this->_pickedCoords.clear();
     intPair nextPixel = this->getFirstPixel();
     std::set<intPair> newCoords;
     if (this->width > 0)
@@ -362,7 +362,7 @@ CoordsVector Geometry::BorderMaker::_make(int currentDirection)
         {
             break;
         }
-        pickedCoords.emplace(nextPixel);
+        _pickedCoords.emplace(nextPixel);
         for (int directionOffset = 1; directionOffset < width; directionOffset++)
         {
             int resultCoord;
@@ -386,7 +386,7 @@ CoordsVector Geometry::BorderMaker::_make(int currentDirection)
                 break;
             }
 
-            if (prevDirection == currentDirection || this->lastTurn != 1)
+            if (prevDirection == currentDirection || this->_lastTurn != 1)
             {
                 continue;
             }

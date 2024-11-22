@@ -16,9 +16,9 @@ struct TableData
 class SQLiteClass
 {
 private:
-    sqlite3 *db;
-    char *error = nullptr;
-    std::vector<std::string> errorHistory;
+    sqlite3 *_db;
+    char *_errorMassage = nullptr;
+    std::vector<std::string> _errorHistory;
     void processExec(int result, const char *sqlQuery);
 
 public:

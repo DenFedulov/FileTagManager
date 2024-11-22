@@ -21,7 +21,7 @@ struct KeyEvent
 {
     int pressState;
     std::string text;
-    int32_t keycode;
+    int keycode;
     KeyEvent() : pressState(-1),
                  text(""),
                  keycode(-1) {};
@@ -31,7 +31,7 @@ struct MouseEvent
 {
     int pressState;
     intPair pos;
-    int32_t button;
+    int button;
     MouseEvent() : pressState(-1),
                    pos({-1, -1}),
                    button(-1) {};
@@ -61,14 +61,14 @@ class EventManager
     typedef std::unordered_map<int, CallbackList> EventHandlers;
 
 private:
-    EventHandlers eventHandlers;
+    EventHandlers _eventHandlers;
     CallbackList &getCallbackList(const int &eventTypeEnum)
     {
-        if (!this->eventHandlers.contains(eventTypeEnum))
+        if (!this->_eventHandlers.contains(eventTypeEnum))
         {
-            this->eventHandlers.emplace(eventTypeEnum, CallbackList());
+            this->_eventHandlers.emplace(eventTypeEnum, CallbackList());
         }
-        return this->eventHandlers.at(eventTypeEnum);
+        return this->_eventHandlers.at(eventTypeEnum);
     }
 
 public:

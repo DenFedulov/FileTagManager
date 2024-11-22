@@ -1,17 +1,11 @@
 #include <iostream>
-#include <memory>
 #include <windows.h>
 #include "SDL.h"
 #include "SDL_mixer.h"
 #include "SDL_ttf.h"
-#include "BaseElements.h"
-#include "Filesystem.h"
-#include "EventManager.h"
 #include "logger.h"
-#include "date.h"
 #include "config.h"
 #include "app.h"
-#include "Debug.h"
 
 int main(int argc, char *argv[])
 {

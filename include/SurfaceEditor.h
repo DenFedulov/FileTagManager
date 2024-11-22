@@ -8,8 +8,8 @@
 class SurfaceEditor
 {
 private:
-    SDL_Surface *surface;
-    RGBA color;
+    SDL_Surface *_surface;
+    RGBA _color;
     void setSurfacePixel(int x, int y);
     void setSurfacePixelRow(int x1, int x2, int y);
     void setSurfacePixelColumn(int x, int y1, int y2);

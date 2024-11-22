@@ -14,26 +14,26 @@ void SQLiteClass::processExec(int result, const char *sqlQuery)
 {
     if (result != SQLITE_OK)
     {
-        std::string message = "Error while executing query '" + std::string(sqlQuery) + "': " + std::string(this->error);
-        this->errorHistory.push_back(message);
-        sqlite3_free(this->error);
+        std::string message = "Error while executing query '" + std::string(sqlQuery) + "': " + std::string(this->_errorMassage);
+        this->_errorHistory.push_back(message);
+        sqlite3_free(this->_errorMassage);
     }
 }
 
 SQLiteClass::SQLiteClass(const char *filename)
 {
-    sqlite3_open(filename, &this->db);
+    sqlite3_open(filename, &this->_db);
     this->exec("PRAGMA foreign_keys = ON;");
 }
 
 SQLiteClass::~SQLiteClass()
 {
-    sqlite3_close(this->db);
+    sqlite3_close(this->_db);
 }
 
 bool SQLiteClass::exec(const char *sqlQuery)
 {
-    int result = sqlite3_exec(this->db, sqlQuery, nullptr, nullptr, &this->error);
+    int result = sqlite3_exec(this->_db, sqlQuery, nullptr, nullptr, &this->_errorMassage);
     processExec(result, sqlQuery);
     return result == SQLITE_OK;
 }
@@ -64,6 +64,6 @@ TableData SQLiteClass::query(const char *sqlQuery)
         tableData->data.push_back(dataRow);
         return 0;
     };
-    processExec(sqlite3_exec(this->db, sqlQuery, callback, &tableData, &this->error), sqlQuery);
+    processExec(sqlite3_exec(this->_db, sqlQuery, callback, &tableData, &this->_errorMassage), sqlQuery);
     return tableData;
 }

@@ -1,7 +1,6 @@
 #pragma once
 #include <unordered_map>
 #include <bitset>
-#include <optional>
 #include <memory>
 #include <algorithm>
 #include "AppElementsCommon.h"
@@ -10,7 +9,6 @@
 #include "SDL_mixer.h"
 #include "SDL_ttf.h"
 #include "logger.h"
-#include "Str.h"
 #include "geometry.h"
 #include "BaseElements.h"
 #include "ElementGroups.h"
@@ -39,13 +37,14 @@ struct MouseSelection
 class FileTagManager
 {
 private:
-    bool running = true;
-    MouseSelection mSelection;
+    bool _running = true;
+    MouseSelection _mSelection;
+    std::unordered_map<std::string, Mix_Chunk *> _loadedSounds;
+    std::unordered_map<std::string, Mix_Music *> _loadedMusic;
+    std::vector<std::shared_ptr<UIElement>> _loadedElements;
+
     void triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE);
     void triggerKeyEvent(AppEvent::Type eventEnum, SDL_Event sdlE);
-    std::unordered_map<std::string, Mix_Chunk *> loadedSounds;
-    std::unordered_map<std::string, Mix_Music *> loadedMusic;
-    std::vector<std::shared_ptr<UIElement>> loadedElements;
     void sortLoadedElements();
 
 public:

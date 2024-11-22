@@ -143,7 +143,7 @@ void FileTagManager::sortLoadedElements()
     {
         return a->z < b->z;
     };
-    std::sort(this->loadedElements.begin(), this->loadedElements.end(), sortByZ);
+    std::sort(this->_loadedElements.begin(), this->_loadedElements.end(), sortByZ);
 }
 
 void FileTagManager::addElements(const std::vector<std::shared_ptr<UIElement>> &elements, bool sortElements)
@@ -154,13 +154,13 @@ void FileTagManager::addElements(const std::vector<std::shared_ptr<UIElement>> &
         {
             continue;
         }
-        int id = this->loadedElements.size();
+        int id = this->_loadedElements.size();
         element->id = id;
         if (element->parentElement == NULL && element->name != "main")
         {
             element->parentElement = this->mainElement;
         }
-        this->loadedElements.push_back(element);
+        this->_loadedElements.push_back(element);
         this->addElements(element->childElements, false);
     }
     if (sortElements)
@@ -187,7 +187,7 @@ void FileTagManager::drawCoordsVector(const CoordsVector &coords, int xC, int yC
 
 void FileTagManager::triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
 {
-    for (auto &element : this->loadedElements)
+    for (auto &element : this->_loadedElements)
     {
         AppEvent e;
         e.type = eventEnum;
@@ -204,7 +204,7 @@ void FileTagManager::triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
 
 void FileTagManager::triggerKeyEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
 {
-    for (auto &element : this->loadedElements)
+    for (auto &element : this->_loadedElements)
     {
         AppEvent e;
         e.type = eventEnum;
@@ -217,7 +217,7 @@ void FileTagManager::triggerKeyEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
 
 bool FileTagManager::loop()
 {
-    if (!this->running)
+    if (!this->_running)
     {
         return false;
     }
@@ -244,8 +244,8 @@ bool FileTagManager::loop()
             break;
         case SDL_MOUSEBUTTONUP:
             this->triggerMouseEvent(AppEvent::mouse_button_up, evt);
-            this->mSelection.x1.reset();
-            this->mSelection.y1.reset();
+            this->_mSelection.x1.reset();
+            this->_mSelection.y1.reset();
             break;
         case SDL_MOUSEMOTION:
             this->triggerMouseEvent(AppEvent::mouse_move, evt);
@@ -264,7 +264,7 @@ bool FileTagManager::loop()
             break;
         }
     }
-    for (auto &element : this->loadedElements)
+    for (auto &element : this->_loadedElements)
     {
         element->draw();
     }
@@ -275,9 +275,9 @@ bool FileTagManager::loop()
 
 std::shared_ptr<UIElement> FileTagManager::getElement(int id)
 {
-    if (id < this->loadedElements.size())
+    if (id < this->_loadedElements.size())
     {
-        return this->loadedElements.at(id);
+        return this->_loadedElements.at(id);
     }
     return nullptr;
 }
@@ -285,9 +285,9 @@ std::shared_ptr<UIElement> FileTagManager::getElement(int id)
 Mix_Chunk *FileTagManager::getSound(std::string filename)
 {
     std::string path = App::AUDIO_PATH + filename;
-    if (this->loadedSounds.contains(filename))
+    if (this->_loadedSounds.contains(filename))
     {
-        return this->loadedSounds.at(filename);
+        return this->_loadedSounds.at(filename);
     }
     Mix_Chunk *sound = Mix_LoadWAV(path.c_str());
     if (!sound)
@@ -295,15 +295,15 @@ Mix_Chunk *FileTagManager::getSound(std::string filename)
         this->logger->addErrorLog("Error loading sound: ", Mix_GetError());
         return nullptr;
     }
-    this->loadedSounds.emplace(filename, sound);
+    this->_loadedSounds.emplace(filename, sound);
     return sound;
 }
 
 Mix_Music *FileTagManager::getMusic(std::string filename)
 {
-    if (this->loadedMusic.contains(filename))
+    if (this->_loadedMusic.contains(filename))
     {
-        return this->loadedMusic.at(filename);
+        return this->_loadedMusic.at(filename);
     }
     Mix_Music *music = Mix_LoadMUS((App::AUDIO_PATH + filename).c_str());
     if (!music)
@@ -311,18 +311,18 @@ Mix_Music *FileTagManager::getMusic(std::string filename)
         this->logger->addErrorLog("Error loading music: ", Mix_GetError());
         return nullptr;
     }
-    this->loadedMusic.emplace(filename, music);
+    this->_loadedMusic.emplace(filename, music);
     return music;
 }
 
 void FileTagManager::quitSDL()
 {
-    this->running = false;
-    for (auto const &[filename, sound] : this->loadedSounds)
+    this->_running = false;
+    for (auto const &[filename, sound] : this->_loadedSounds)
     {
         Mix_FreeChunk(sound);
     }
-    for (auto const &[filename, music] : this->loadedMusic)
+    for (auto const &[filename, music] : this->_loadedMusic)
     {
         Mix_FreeMusic(music);
     }

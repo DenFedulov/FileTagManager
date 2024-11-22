@@ -7,6 +7,7 @@
 #include "custom_types.h"
 #include "EventManager.h"
 #include "app.h"
+#include "Str.h"
 #include "SurfaceEditor.h"
 #include "geometry.h"
 #include "Setter.h"
@@ -23,11 +24,12 @@ public:
 class UIElement : public Drawable
 {
 protected:
-    SDL_Surface *surface = NULL;
-    SDL_Texture *texture = NULL;
-    FileTagManager *app;
+    SDL_Surface *_surface = NULL;
+    SDL_Texture *_texture = NULL;
+    FileTagManager *_app;
     int w = 0;
     int h = 0;
+
     int getChildWSum(int upTo = -10);
     int getChildHSum(int upTo = -10);
     int getChildMaxW();
@@ -80,7 +82,6 @@ public:
     DistDirection distDirection = DistDirection::column;
     std::shared_ptr<UIElement> parentElement = NULL;
     std::vector<std::shared_ptr<UIElement>> childElements;
-
     EventManager<std::shared_ptr<UIElement> &, AppEvent &> events;
 
     int calcPivotOffsetH(RelPos p);
@@ -122,13 +123,14 @@ public:
 class UIText : public UIElement, Dynamic
 {
 private:
-    TTF_Font *font = nullptr;
-    std::string fontPath;
-    int fontSize = 24;
-    std::string text = "";
-    RGBA color;
+    TTF_Font *_font = nullptr;
+    std::string _fontPath;
+    int _fontSize = 24;
+    std::string _text = "";
+    RGBA _color;
+    int _cursorIndex = -1;
+
     void loadFont(std::string path);
-    int cursorIndex = -1;
 
 protected:
     void updateSurface();
@@ -174,12 +176,13 @@ public:
 class UIBox : public UIDynamicElement
 {
 private:
+    int _radius = 0;
+    RGBA _color;
+    int _borderWidth = 0;
+    RGBA _borderColor;
+
     void updateSurface();
     int getMaxRadius();
-    int radius = 0;
-    RGBA color;
-    int borderWidth = 0;
-    RGBA borderColor;
 
 public:
     void setRadius(int radius);

@@ -2,12 +2,12 @@
 
 Logger::Logger(std::string logFilename)
 {
-    this->logFilename = logFilename;
+    this->_logFilename = logFilename;
 }
 
 int Logger::getErrorCount()
 {
-    return this->errorCount;
+    return this->_errorCount;
 }
 
 std::string Logger::makeLogEntry(std::string message, std::string data)
@@ -22,18 +22,18 @@ std::string Logger::makeLogEntry(std::string message, std::string data)
 
 void Logger::addLog(std::string message, std::string data)
 {
-    this->logHistory += this->makeLogEntry(message, data);
+    this->_logHistory += this->makeLogEntry(message, data);
 }
 
 void Logger::addErrorLog(std::string message, std::string data)
 {
-    this->errorCount++;
+    this->_errorCount++;
     this->addLog(message, data);
 }
 
 void Logger::writeLog()
 {
-    fileWrite(this->logFilename, this->logHistory, true);
+    fileWrite(this->_logFilename, this->_logHistory, true);
 }
 
 void Logger::dieIf(bool reason, std::string message, std::string data)

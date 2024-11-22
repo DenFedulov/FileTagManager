@@ -5,11 +5,11 @@
 class Config
 {
 private:
-    nlohmann::json data;
+    nlohmann::json _data;
     template <typename T>
     T get(std::string propName)
     {
-        return (T)this->data[propName];
+        return (T)this->_data[propName];
     }
 
 public:

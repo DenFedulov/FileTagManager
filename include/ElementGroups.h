@@ -6,8 +6,8 @@
 class ElementGroup
 {
 protected:
-    FileTagManager *app;
-    std::shared_ptr<UIElement> parentElement = NULL;
+    FileTagManager *_app;
+    std::shared_ptr<UIElement> _parentElement = NULL;
 
 public:
     ElementGroup(FileTagManager *app);

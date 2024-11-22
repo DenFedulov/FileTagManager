@@ -38,12 +38,12 @@ bool SQLiteClass::exec(const char *sqlQuery)
     return result == SQLITE_OK;
 }
 
-TableDataPtr SQLiteClass::query(const char *sqlQuery)
+TableData SQLiteClass::query(const char *sqlQuery)
 {
-    TableDataPtr tableData = std::make_unique<TableData>();
+    TableData tableData;
     auto callback = [](void *param, int columnCount, char **data, char **colName) -> int
     {
-        TableDataPtr tableData = *static_cast<TableDataPtr *>(param);
+        TableData *tableData = static_cast<TableData *>(param);
         std::vector<std::string> dataRow;
         if (tableData->columns.empty())
         {

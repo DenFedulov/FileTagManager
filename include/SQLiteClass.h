@@ -13,8 +13,6 @@ struct TableData
     std::string getCellValue(std::string column, int row);
 };
 
-typedef std::shared_ptr<TableData> TableDataPtr;
-
 class SQLiteClass
 {
 private:
@@ -27,6 +25,5 @@ public:
     SQLiteClass(const char *filename);
     ~SQLiteClass();
     bool exec(const char *sqlQuery);
-    TableDataPtr query(const char *sqlQuery);
-    
+    TableData query(const char *sqlQuery);
 };

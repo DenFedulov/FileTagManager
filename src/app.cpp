@@ -1,37 +1,7 @@
-#include "app.h"
+#include "App.h"
 
-FileTagManager::FileTagManager(Logger *logger, Config *config)
+FileTagManager::FileTagManager(CommonObjects *comm) : comm(comm)
 {
-    this->logger = logger;
-    this->config = config;
-}
-
-void FileTagManager::initSDL()
-{
-    int result;
-    this->logger->addLog(App::APP_NAME + " started");
-    this->logger->dieIf(SDL_Init(SDL_INIT_EVERYTHING) < 0, "Error initializing SDL: ", SDL_GetError());
-
-    this->logger->addLog("Initializing mixer");
-    result = Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024);
-    this->logger->dieIf(result != 0, "Error initializing mixer: ", Mix_GetError());
-
-    this->logger->addLog("Initializing IMG");
-    result = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
-    this->logger->dieIf(result == 0, "Error initializing IMG: ", IMG_GetError());
-
-    this->logger->addLog("Initializing TTF");
-    result = TTF_Init();
-    this->logger->dieIf(result < 0, "Error initializing TTF: ", TTF_GetError());
-
-    this->logger->addLog("Creating window");
-    this->window = SDL_CreateWindow(App::APP_NAME.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, App::WIDTH, App::HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
-    this->logger->dieIf(!this->window, "Error Creating window: ", SDL_GetError());
-    SDL_SetWindowResizable(this->window, SDL_TRUE);
-
-    this->logger->addLog("Creating renderer");
-    this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
-    this->logger->dieIf(!this->renderer, "Error Creating renderer: ", SDL_GetError());
 }
 
 void FileTagManager::initResize()
@@ -39,17 +9,16 @@ void FileTagManager::initResize()
     auto HitTestCallback = [](SDL_Window *win, const SDL_Point *area, void *data) -> SDL_HitTestResult
     {
         int w, h;
-        FileTagManager *app = static_cast<FileTagManager *>(data);
         SDL_GetWindowSize(win, &w, &h);
         int x = area->x, y = area->y;
         SDL_HitTestResult result = SDL_HITTEST_NORMAL;
-        if (y < App::RESIZE_PADDING)
+        if (y < G_App::RESIZE_PADDING)
         {
-            if (x < App::RESIZE_PADDING)
+            if (x < G_App::RESIZE_PADDING)
             {
                 result = SDL_HITTEST_RESIZE_TOPLEFT;
             }
-            else if (x > w - App::RESIZE_PADDING)
+            else if (x > w - G_App::RESIZE_PADDING)
             {
                 result = SDL_HITTEST_RESIZE_TOPRIGHT;
             }
@@ -58,13 +27,13 @@ void FileTagManager::initResize()
                 result = SDL_HITTEST_RESIZE_TOP;
             }
         }
-        else if (y > h - App::RESIZE_PADDING)
+        else if (y > h - G_App::RESIZE_PADDING)
         {
-            if (x < App::RESIZE_PADDING)
+            if (x < G_App::RESIZE_PADDING)
             {
                 result = SDL_HITTEST_RESIZE_BOTTOMLEFT;
             }
-            else if (x > w - App::RESIZE_PADDING)
+            else if (x > w - G_App::RESIZE_PADDING)
             {
                 result = SDL_HITTEST_RESIZE_BOTTOMRIGHT;
             }
@@ -73,40 +42,39 @@ void FileTagManager::initResize()
                 result = SDL_HITTEST_RESIZE_BOTTOM;
             }
         }
-        else if (x < App::RESIZE_PADDING)
+        else if (x < G_App::RESIZE_PADDING)
         {
             result = SDL_HITTEST_RESIZE_LEFT;
         }
-        else if (x > w - App::RESIZE_PADDING)
+        else if (x > w - G_App::RESIZE_PADDING)
         {
             result = SDL_HITTEST_RESIZE_RIGHT;
         }
-        else if (x > w - App::HEADER_HEIGHT)
+        else if (x > w - G_App::HEADER_HEIGHT)
         {
             result = SDL_HITTEST_NORMAL;
         }
-        else if (y < App::HEADER_HEIGHT)
+        else if (y < G_App::HEADER_HEIGHT)
         {
             result = SDL_HITTEST_DRAGGABLE;
         }
 
         return result;
     };
-    SDL_SetWindowHitTest(this->window, HitTestCallback, this);
+    SDL_SetWindowHitTest(this->comm->window, HitTestCallback, 0);
 }
 
 void FileTagManager::initElements()
 {
-    this->mainElement = std::make_shared<UIElement>("main", this, true);
     int w, h;
-    SDL_GetWindowSize(this->window, &w, &h);
+    SDL_GetWindowSize(this->comm->window, &w, &h);
 
-    HeaderBar headerBar(this);
-    MainContents contents(this);
+    HeaderBar headerBar(this->comm);
+    MainContents contents(this->comm);
 
     // auto element = std::make_shared<UIBox>("box", this, w, 400, 0, RGBA(), 10, RGBA(100, 100, 100));
     // element->displayMode = DisplayMode::Distribute;
-    // element->y = App::HEADER_HEIGHT;
+    // element->y = G_App::HEADER_HEIGHT;
     // // auto text = std::make_shared<UIText>("text", this, "test text", element);
     // // text->distPosH = RelPos::Center;
     // // text->distPosV = RelPos::Center;
@@ -129,7 +97,6 @@ void FileTagManager::initElements()
     // element->addChildren({child1, child2, child3});
 
     this->addElements({
-        this->mainElement,
         headerBar.getParentElement(),
         contents.getParentElement(),
         // element,
@@ -156,10 +123,6 @@ void FileTagManager::addElements(const std::vector<std::shared_ptr<UIElement>> &
         }
         int id = this->_loadedElements.size();
         element->id = id;
-        if (element->parentElement == NULL && element->name != "main")
-        {
-            element->parentElement = this->mainElement;
-        }
         this->_loadedElements.push_back(element);
         this->addElements(element->childElements, false);
     }
@@ -176,11 +139,11 @@ void FileTagManager::drawCoordsVector(const CoordsVector &coords, int xC, int yC
     {
         if (fill)
         {
-            SDL_RenderDrawLine(this->renderer, pair.first, pair.second, xC, pair.second);
+            SDL_RenderDrawLine(this->comm->renderer, pair.first, pair.second, xC, pair.second);
         }
         else
         {
-            SDL_RenderDrawPoint(this->renderer, pair.first, pair.second);
+            SDL_RenderDrawPoint(this->comm->renderer, pair.first, pair.second);
         }
     }
 }
@@ -221,7 +184,7 @@ bool FileTagManager::loop()
     {
         return false;
     }
-    SDL_RenderClear(this->renderer);
+    SDL_RenderClear(this->comm->renderer);
     SDL_Event evt;
     while (SDL_PollEvent(&evt))
     {
@@ -257,8 +220,7 @@ bool FileTagManager::loop()
             // std::cout << (int)evt.window.event << ' ' << evt.window.data1 << ' ' << evt.window.data2 << '\n';
             if (evt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
             {
-                this->mainElement->setW(evt.window.data1);
-                this->mainElement->setH(evt.window.data2);
+                // TODO: make and trigger custom resize event
             }
         default:
             break;
@@ -268,7 +230,7 @@ bool FileTagManager::loop()
     {
         element->draw();
     }
-    SDL_RenderPresent(this->renderer);
+    SDL_RenderPresent(this->comm->renderer);
 
     return true;
 }
@@ -284,7 +246,7 @@ std::shared_ptr<UIElement> FileTagManager::getElement(int id)
 
 Mix_Chunk *FileTagManager::getSound(std::string filename)
 {
-    std::string path = App::AUDIO_PATH + filename;
+    std::string path = G_App::AUDIO_PATH + filename;
     if (this->_loadedSounds.contains(filename))
     {
         return this->_loadedSounds.at(filename);
@@ -292,7 +254,7 @@ Mix_Chunk *FileTagManager::getSound(std::string filename)
     Mix_Chunk *sound = Mix_LoadWAV(path.c_str());
     if (!sound)
     {
-        this->logger->addErrorLog("Error loading sound: ", Mix_GetError());
+        this->comm->logger->addErrorLog("Error loading sound: ", Mix_GetError());
         return nullptr;
     }
     this->_loadedSounds.emplace(filename, sound);
@@ -305,10 +267,10 @@ Mix_Music *FileTagManager::getMusic(std::string filename)
     {
         return this->_loadedMusic.at(filename);
     }
-    Mix_Music *music = Mix_LoadMUS((App::AUDIO_PATH + filename).c_str());
+    Mix_Music *music = Mix_LoadMUS((G_App::AUDIO_PATH + filename).c_str());
     if (!music)
     {
-        this->logger->addErrorLog("Error loading music: ", Mix_GetError());
+        this->comm->logger->addErrorLog("Error loading music: ", Mix_GetError());
         return nullptr;
     }
     this->_loadedMusic.emplace(filename, music);
@@ -326,8 +288,8 @@ void FileTagManager::quitSDL()
     {
         Mix_FreeMusic(music);
     }
-    SDL_DestroyWindow(this->window);
-    SDL_DestroyRenderer(this->renderer);
+    SDL_DestroyWindow(this->comm->window);
+    SDL_DestroyRenderer(this->comm->renderer);
     IMG_Quit();
     SDL_Quit();
 }

@@ -3,31 +3,18 @@
 #include <bitset>
 #include <memory>
 #include <algorithm>
-#include "AppElementsCommon.h"
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_mixer.h"
 #include "SDL_ttf.h"
-#include "logger.h"
-#include "geometry.h"
-#include "BaseElements.h"
-#include "ElementGroups.h"
-#include "config.h"
+#include "Geometry.h"
+#include "Elements/BaseElements/UIElement.h"
+#include "Elements/ElementGroups.h"
+#include "Config.h"
 #include "EventManager.h"
 #include "Layout.h"
-
-namespace App
-{
-    const int WIDTH = 1280, HEIGHT = 720;
-    const int HEADER_HEIGHT = 32;
-    const int RESIZE_PADDING = 6;
-    const std::string APP_NAME = "FileTagManager";
-    const std::string RESOURCES_PATH = "resources/";
-    const std::string IMAGES_PATH = RESOURCES_PATH + "images/";
-    const std::string AUDIO_PATH = RESOURCES_PATH + "audio/";
-    const std::string FONTS_PATH = RESOURCES_PATH + "fonts/";
-    const std::string CONFIG_FILENAME = "config.json";
-}
+#include "CommonObjects.h"
+#include "AppGlobals.h"
 
 struct MouseSelection
 {
@@ -48,16 +35,10 @@ private:
     void sortLoadedElements();
 
 public:
-    Logger *logger;
-    Config *config;
+    CommonObjects *comm = NULL;
 
-    std::shared_ptr<UIElement> mainElement;
-    SDL_Window *window = NULL;
-    SDL_Renderer *renderer = NULL;
+    FileTagManager(CommonObjects *comm);
 
-    FileTagManager(Logger *logger, Config *config);
-
-    void initSDL();
     void initResize();
     void initElements();
     void addElements(const std::vector<std::shared_ptr<UIElement>> &elements, bool sortElements = true);

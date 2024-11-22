@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include "SDL.h"
-#include "app.h"
+#include "App.h"
+#include "CommonObjects.h"
 
-SDL_Texture *surfaceToTexture(FileTagManager *app, SDL_Surface *surface, bool freeSurface = false);
+void initSDL(Logger *logger, CommonObjects *comm);
+SDL_Texture *surfaceToTexture(CommonObjects *comm, SDL_Surface *surface, bool freeSurface = false);

@@ -5,16 +5,21 @@
 #include "SDL_ttf.h"
 #include "logger.h"
 #include "config.h"
-#include "app.h"
+#include "CommonObjects.h"
+#include "App.h"
+#include "SDL_Helpers.h"
 
 int main(int argc, char *argv[])
 {
-	Logger logger(App::APP_NAME + ".error.log");
+	CommonObjects comm;
+	Logger logger(G_App::APP_NAME + ".error.log");
+	comm.logger = &logger;
 	try
 	{
-		Config config(App::CONFIG_FILENAME);
-		FileTagManager app(&logger, &config);
-		app.initSDL();
+		initSDL(&logger, &comm);
+		Config config(G_App::CONFIG_FILENAME);
+		comm.config = &config;
+		FileTagManager app(&comm);
 		app.initResize();
 		app.initElements();
 		::ShowWindow(::GetConsoleWindow(), SW_MINIMIZE);

@@ -1,16 +1,18 @@
 #pragma once
-#include "AppElementsCommon.h"
-#include "app.h"
-#include "BaseElements.h"
+#include "Elements/BaseElements/UIElement.h"
+#include "Elements/BaseElements/UIPictureElement.h"
+#include "Elements/BaseElements/UIText.h"
+#include "Elements/BaseElements/UIBox.h"
+#include "AppGlobals.h"
 
 class ElementGroup
 {
 protected:
-    FileTagManager *_app;
+    CommonObjects *_comm;
     std::shared_ptr<UIElement> _parentElement = NULL;
 
 public:
-    ElementGroup(FileTagManager *app);
+    ElementGroup(CommonObjects *comm);
     virtual ~ElementGroup() {};
     virtual void createElementGroup() = 0;
     std::shared_ptr<UIElement> getParentElement();
@@ -22,7 +24,7 @@ private:
     void createElementGroup();
 
 public:
-    HeaderBar(FileTagManager *app);
+    HeaderBar(CommonObjects *comm);
 };
 
 class MainContents : public ElementGroup
@@ -31,5 +33,6 @@ private:
     void createElementGroup();
 
 public:
-    MainContents(FileTagManager *app);
+    const int SIDEBAR_WIDTH = 350;
+    MainContents(CommonObjects *comm);
 };

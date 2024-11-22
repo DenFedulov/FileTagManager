@@ -1,4 +1,4 @@
-#include "geometry.h"
+#include "Geometry.h"
 
 CoordsArray::CoordsArray(const CoordsVector &coords) : Array2D()
 {

@@ -1,8 +1,8 @@
 #pragma once
 #include "SDL_Helpers.h"
 #include "SDL_ttf.h"
-#include "Elements/BaseElements/UIElement.h"
-#include "Elements/BaseElements/Dynamic.h"
+#include "BaseElements/UIElement.h"
+#include "BaseElements/Dynamic.h"
 
 class UIText : public UIElement, Dynamic
 {

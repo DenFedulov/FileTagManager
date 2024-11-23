@@ -2,7 +2,7 @@
 #include "SurfaceEditor.h"
 #include "Geometry.h"
 #include "SDL_Helpers.h"
-#include "Elements/BaseElements/UIDynamicElement.h"
+#include "BaseElements/UIDynamicElement.h"
 
 class UIBox : public UIDynamicElement
 {

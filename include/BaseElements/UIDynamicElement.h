@@ -1,6 +1,6 @@
 #pragma once
-#include "Elements/BaseElements/UIElement.h"
-#include "Elements/BaseElements/Dynamic.h"
+#include "BaseElements/UIElement.h"
+#include "BaseElements/Dynamic.h"
 
 class UIDynamicElement : public UIElement, Dynamic
 {

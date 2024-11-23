@@ -1,7 +1,7 @@
 #pragma once
 #include "Str.h"
 #include "SDL_Helpers.h"
-#include "Elements/BaseElements/UIElement.h"
+#include "BaseElements/UIElement.h"
 
 class UIPictureElement : public UIElement
 {

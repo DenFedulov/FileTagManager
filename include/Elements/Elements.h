@@ -1,5 +1,5 @@
 #pragma once
-#include "Elements/BaseElements/UIBox.h"
+#include "BaseElements/UIBox.h"
 
 class UIDivider : public UIBox
 {

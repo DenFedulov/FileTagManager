@@ -30,8 +30,7 @@ private:
     std::unordered_map<std::string, Mix_Music *> _loadedMusic;
     std::vector<std::shared_ptr<UIElement>> _loadedElements;
 
-    void triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE);
-    void triggerKeyEvent(AppEvent::Type eventEnum, SDL_Event sdlE);
+    void triggerEvent(AppEvent::Type eventEnum, const SDL_Event &sdlE);
     void sortLoadedElements();
 
 public:

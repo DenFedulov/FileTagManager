@@ -148,33 +148,42 @@ void FileTagManager::drawCoordsVector(const CoordsVector &coords, int xC, int yC
     }
 }
 
-void FileTagManager::triggerMouseEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
+void FileTagManager::triggerEvent(AppEvent::Type eventEnum, const SDL_Event &sdlE)
 {
     for (auto &element : this->_loadedElements)
     {
         AppEvent e;
         e.type = eventEnum;
-        e.mouseEvent.pos = {sdlE.button.x, sdlE.button.y};
-        e.mouseEvent.pressState = sdlE.button.state;
-        e.mouseEvent.button = sdlE.button.button;
-        element->events.triggerEvent(eventEnum, element, e);
-        if (eventEnum == AppEvent::mouse_button_up && element->checkCollision(sdlE.button.x, sdlE.button.y))
+        switch (eventEnum)
         {
-            element->events.triggerEvent(AppEvent::mouse_click, element, e);
+        case AppEvent::mouse_button_down:
+        case AppEvent::mouse_button_up:
+        case AppEvent::mouse_click:
+        case AppEvent::mouse_move:
+            e.mouseEvent.pos = {sdlE.button.x, sdlE.button.y};
+            e.mouseEvent.pressState = sdlE.button.state;
+            e.mouseEvent.button = sdlE.button.button;
+            element->events.triggerEvent(eventEnum, element, e);
+            if (eventEnum == AppEvent::mouse_button_up && element->checkCollision(sdlE.button.x, sdlE.button.y))
+            {
+                element->events.triggerEvent(AppEvent::mouse_click, element, e);
+            }
+            break;
+        case AppEvent::keyboard_button_down:
+        case AppEvent::keyboard_button_up:
+        case AppEvent::text_input:
+            e.keyEvent.keycode = sdlE.key.keysym.sym;
+            e.keyEvent.pressState = sdlE.key.state;
+            e.keyEvent.text = sdlE.text.text;
+            element->events.triggerEvent(eventEnum, element, e);
+            break;
+        case AppEvent::window_resized:
+            e.windowEvent.window = this->comm->window;
+            e.windowEvent.data1 = sdlE.window.data1;
+            e.windowEvent.data2 = sdlE.window.data2;
+            element->events.triggerEvent(eventEnum, element, e);
+            break;
         }
-    }
-}
-
-void FileTagManager::triggerKeyEvent(AppEvent::Type eventEnum, SDL_Event sdlE)
-{
-    for (auto &element : this->_loadedElements)
-    {
-        AppEvent e;
-        e.type = eventEnum;
-        e.keyEvent.keycode = sdlE.key.keysym.sym;
-        e.keyEvent.pressState = sdlE.key.state;
-        e.keyEvent.text = sdlE.text.text;
-        element->events.triggerEvent(eventEnum, element, e);
     }
 }
 
@@ -194,33 +203,33 @@ bool FileTagManager::loop()
             this->quitSDL();
             return false;
         case SDL_KEYDOWN:
-            this->triggerKeyEvent(AppEvent::keyboard_button_down, evt);
+            this->triggerEvent(AppEvent::keyboard_button_down, evt);
             // std::cout << evt.key.keysym.sym << '\n';
             break;
         case SDL_KEYUP:
-            this->triggerKeyEvent(AppEvent::keyboard_button_up, evt);
+            this->triggerEvent(AppEvent::keyboard_button_up, evt);
             // std::cout << evt.key.keysym.sym << '\n';
             break;
         case SDL_MOUSEBUTTONDOWN:
             // std::cout << evt.button.button << '\n';
-            this->triggerMouseEvent(AppEvent::mouse_button_down, evt);
+            this->triggerEvent(AppEvent::mouse_button_down, evt);
             break;
         case SDL_MOUSEBUTTONUP:
-            this->triggerMouseEvent(AppEvent::mouse_button_up, evt);
+            this->triggerEvent(AppEvent::mouse_button_up, evt);
             this->_mSelection.x1.reset();
             this->_mSelection.y1.reset();
             break;
         case SDL_MOUSEMOTION:
-            this->triggerMouseEvent(AppEvent::mouse_move, evt);
+            this->triggerEvent(AppEvent::mouse_move, evt);
             break;
         case SDL_TEXTINPUT:
-            this->triggerKeyEvent(AppEvent::text_input, evt);
+            this->triggerEvent(AppEvent::text_input, evt);
             break;
         case SDL_WINDOWEVENT:
             // std::cout << (int)evt.window.event << ' ' << evt.window.data1 << ' ' << evt.window.data2 << '\n';
             if (evt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
             {
-                // TODO: make and trigger custom resize event
+                this->triggerEvent(AppEvent::window_resized, evt);
             }
         default:
             break;

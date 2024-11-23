@@ -19,22 +19,23 @@ namespace Events
 
 struct KeyEvent
 {
-    int pressState;
-    std::string text;
-    int keycode;
-    KeyEvent() : pressState(-1),
-                 text(""),
-                 keycode(-1) {};
+    int pressState = -1;
+    std::string text = "";
+    int keycode = -1;
 };
 
 struct MouseEvent
 {
-    int pressState;
-    intPair pos;
-    int button;
-    MouseEvent() : pressState(-1),
-                   pos({-1, -1}),
-                   button(-1) {};
+    int pressState = -1;
+    intPair pos = {-1, -1};
+    int button = -1;
+};
+
+struct WindowEvent
+{
+    SDL_Window *window = NULL;
+    int data1;
+    int data2;
 };
 
 struct AppEvent
@@ -48,10 +49,12 @@ struct AppEvent
         keyboard_button_down,
         keyboard_button_up,
         text_input,
+        window_resized,
     };
     Type type;
     KeyEvent keyEvent;
     MouseEvent mouseEvent;
+    WindowEvent windowEvent;
 };
 
 template <typename... Args>

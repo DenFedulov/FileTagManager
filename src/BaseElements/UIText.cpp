@@ -9,7 +9,7 @@ void UIText::updateSurface()
     {
         finalText = " ";
     }
-    if (this->editable)
+    if (this->_editing)
     {
         if (this->_cursorIndex < 0 || finalText.length() < this->_cursorIndex)
         {
@@ -116,14 +116,17 @@ UIText::UIText(std::string name, CommonObjects *comm, std::string text, int font
     auto editEnable = [](std::shared_ptr<UIElement> &el, AppEvent &e)
     {
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
+        if(!textEl->editable){
+            return;
+        }
         if (el->checkCollision(e.mouseEvent.pos.first, e.mouseEvent.pos.second))
         {
             textEl->_cursorIndex = -1;
-            textEl->editable = true;
+            textEl->_editing = true;
         }
         else
         {
-            textEl->editable = false;
+            textEl->_editing = false;
         }
         textEl->updateSurface();
     };
@@ -131,7 +134,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::string text, int font
     auto textInput = [](std::shared_ptr<UIElement> &el, AppEvent &e)
     {
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
-        if (!textEl->editable)
+        if (!textEl->_editing)
         {
             return;
         }
@@ -147,7 +150,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::string text, int font
     auto specialKeysInput = [](std::shared_ptr<UIElement> &el, AppEvent &e)
     {
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
-        if (!textEl->editable)
+        if (!textEl->_editing)
         {
             return;
         }

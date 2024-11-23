@@ -1,6 +1,7 @@
 #pragma once
 #include "SDL_Helpers.h"
 #include "SDL_ttf.h"
+#include "SurfaceEditor.h"
 #include "BaseElements/UIElement.h"
 #include "BaseElements/Dynamic.h"
 
@@ -13,6 +14,7 @@ private:
     std::string _text = "";
     RGBA _color;
     int _cursorIndex = -1;
+    bool _editing = false;
 
     void loadFont(std::string path);
 

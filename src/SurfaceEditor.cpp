@@ -126,3 +126,13 @@ void SurfaceEditor::fillWithCoordsVector(const CoordsVector &coords, int baseLin
     }
     SDL_UnlockSurface(this->_surface);
 }
+
+void SurfaceEditor::drawHitbox()
+{
+    SDL_LockSurface(this->_surface);
+    this->setSurfacePixelColumn(0, 0, this->_surface->h);
+    this->setSurfacePixelColumn(this->_surface->w, 0, this->_surface->h);
+    this->setSurfacePixelRow(0, this->_surface->w, 0);
+    this->setSurfacePixelRow(0, this->_surface->w, this->_surface->h);
+    SDL_UnlockSurface(this->_surface);
+}

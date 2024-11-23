@@ -22,4 +22,5 @@ public:
     void fillRectangle(int x1, int y1, int x2, int y2);
     void drawWithCoordsVector(const CoordsVector &coords, int x1 = 0, int y1 = 0, int x2 = -1, int y2 = -1);
     void fillWithCoordsVector(const CoordsVector &coords, int baseLine, bool vertical, int x1, int y1, int x2 = -1, int y2 = -1);
+    void drawHitbox();
 };

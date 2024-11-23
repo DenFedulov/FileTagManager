@@ -150,6 +150,9 @@ void FileTagManager::drawCoordsVector(const CoordsVector &coords, int xC, int yC
 
 void FileTagManager::triggerEvent(AppEvent::Type eventEnum, const SDL_Event &sdlE)
 {
+    std::vector<int> results;
+    std::vector<int> fR;
+    std::vector<int> sR;
     for (auto &element : this->_loadedElements)
     {
         AppEvent e;
@@ -163,11 +166,12 @@ void FileTagManager::triggerEvent(AppEvent::Type eventEnum, const SDL_Event &sdl
             e.mouseEvent.pos = {sdlE.button.x, sdlE.button.y};
             e.mouseEvent.pressState = sdlE.button.state;
             e.mouseEvent.button = sdlE.button.button;
-            element->events.triggerEvent(eventEnum, element, e);
+            fR = element->events.triggerEvent(eventEnum, element, e);
             if (eventEnum == AppEvent::mouse_button_up && element->checkCollision(sdlE.button.x, sdlE.button.y))
             {
-                element->events.triggerEvent(AppEvent::mouse_click, element, e);
+                sR = element->events.triggerEvent(AppEvent::mouse_click, element, e);
             }
+            results = Vect::concat<int>(fR, sR);
             break;
         case AppEvent::keyboard_button_down:
         case AppEvent::keyboard_button_up:
@@ -175,13 +179,27 @@ void FileTagManager::triggerEvent(AppEvent::Type eventEnum, const SDL_Event &sdl
             e.keyEvent.keycode = sdlE.key.keysym.sym;
             e.keyEvent.pressState = sdlE.key.state;
             e.keyEvent.text = sdlE.text.text;
-            element->events.triggerEvent(eventEnum, element, e);
+            results = element->events.triggerEvent(eventEnum, element, e);
             break;
         case AppEvent::window_resized:
             e.windowEvent.window = this->comm->window;
             e.windowEvent.data1 = sdlE.window.data1;
             e.windowEvent.data2 = sdlE.window.data2;
-            element->events.triggerEvent(eventEnum, element, e);
+            results = element->events.triggerEvent(eventEnum, element, e);
+            break;
+        }
+    }
+    this->processEventResults(results);
+}
+
+void FileTagManager::processEventResults(const std::vector<int> &results)
+{
+    for (int result : results)
+    {
+        switch (result)
+        {
+        case Events::Result::Quit:
+            this->quitSDL();
             break;
         }
     }

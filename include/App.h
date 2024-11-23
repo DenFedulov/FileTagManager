@@ -32,6 +32,7 @@ private:
     std::vector<std::shared_ptr<UIElement>> _loadedElements;
 
     void triggerEvent(AppEvent::Type eventEnum, const SDL_Event &sdlE);
+    void processEventResults(const std::vector<int> &results);
     void sortLoadedElements();
 
 public:

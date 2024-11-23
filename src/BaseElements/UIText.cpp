@@ -116,8 +116,9 @@ UIText::UIText(std::string name, CommonObjects *comm, std::string text, int font
     auto editEnable = [](std::shared_ptr<UIElement> &el, AppEvent &e)
     {
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
-        if(!textEl->editable){
-            return;
+        if (!textEl->editable)
+        {
+            return 0;
         }
         if (el->checkCollision(e.mouseEvent.pos.first, e.mouseEvent.pos.second))
         {
@@ -129,6 +130,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::string text, int font
             textEl->_editing = false;
         }
         textEl->updateSurface();
+        return 0;
     };
     this->events.addHandler(AppEvent::mouse_button_down, editEnable);
     auto textInput = [](std::shared_ptr<UIElement> &el, AppEvent &e)
@@ -136,7 +138,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::string text, int font
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         if (!textEl->_editing)
         {
-            return;
+            return 0;
         }
         if (e.keyEvent.text.length() > 0)
         {
@@ -145,6 +147,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::string text, int font
             textEl->setText(curText);
             textEl->setCursorIndex(textEl->getCursorIndex() + e.keyEvent.text.length());
         }
+        return 0;
     };
     this->events.addHandler(AppEvent::text_input, textInput);
     auto specialKeysInput = [](std::shared_ptr<UIElement> &el, AppEvent &e)
@@ -152,7 +155,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::string text, int font
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         if (!textEl->_editing)
         {
-            return;
+            return 0;
         }
         if (e.keyEvent.keycode == SDLK_BACKSPACE && textEl->getText().length() > 0 && textEl->getCursorIndex() > 0)
         {
@@ -175,6 +178,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::string text, int font
         {
             textEl->setCursorIndex(textEl->getCursorIndex() + 1);
         }
+        return 0;
     };
     this->events.addHandler(AppEvent::keyboard_button_down, specialKeysInput);
 

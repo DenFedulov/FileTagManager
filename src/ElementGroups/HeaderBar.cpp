@@ -23,8 +23,9 @@ void HeaderBar::createElementGroup()
     {
         if (e.mouseEvent.button == Events::MouseButtons::Left)
         {
-            // TODO: make event result type
+            return (int)Events::Quit;
         }
+        return 0;
     };
     close->events.addHandler(AppEvent::mouse_click, closeApp);
 

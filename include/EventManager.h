@@ -15,6 +15,12 @@ namespace Events
         Back,
         Forward
     };
+
+    enum Result
+    {
+        Nothing,
+        Quit,
+    };
 }
 
 struct KeyEvent
@@ -60,7 +66,7 @@ struct AppEvent
 template <typename... Args>
 class EventManager
 {
-    typedef std::unordered_map<int, std::function<void(Args...)>> CallbackList;
+    typedef std::unordered_map<int, std::function<int(Args...)>> CallbackList;
     typedef std::unordered_map<int, CallbackList> EventHandlers;
 
 private:
@@ -75,7 +81,7 @@ private:
     }
 
 public:
-    int addHandler(const int &eventTypeEnum, std::function<void(Args...)> func)
+    int addHandler(const int &eventTypeEnum, std::function<int(Args...)> func)
     {
         CallbackList &callbacks = this->getCallbackList(eventTypeEnum);
         int index = callbacks.size();
@@ -92,12 +98,14 @@ public:
         }
         return false;
     }
-    void triggerEvent(const int &eventTypeEnum, Args... args)
+    std::vector<int> triggerEvent(const int &eventTypeEnum, Args... args)
     {
+        std::vector<int> results;
         CallbackList &callbacks = this->getCallbackList(eventTypeEnum);
         for (auto &[i, func] : callbacks)
         {
-            func(std::forward<Args>(args)...);
+            results.push_back(func(std::forward<Args>(args)...));
         }
+        return results;
     }
 };

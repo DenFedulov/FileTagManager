@@ -19,8 +19,5 @@ void MainContents::createElementGroup()
     auto sidebar = std::make_shared<UIBox>("sidebar", this->_comm, this->SIDEBAR_WIDTH, h - G_App::HEADER_HEIGHT, 0, RGBA(100, 100, 100));
     sidebar->anchors[Direction::Down] = true;
 
-    // auto circle = std::make_shared<UICircle>("circle", this->_comm, 50);
-    // sidebar->addChildren({circle});
-
     this->_parentElement->addChildren({sidebar});
 }

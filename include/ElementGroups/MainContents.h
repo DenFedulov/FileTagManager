@@ -1,4 +1,6 @@
 #pragma once
+#include "WindowsUtils.h"
+#include "BaseElements/UIText.h"
 #include "Elements/UICircle.h"
 #include "ElementGroups/ElementGroup.h"
 

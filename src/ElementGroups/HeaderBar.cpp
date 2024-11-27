@@ -13,7 +13,7 @@ void HeaderBar::createElementGroup()
     this->_parentElement->anchors[Direction::Right] = true;
     this->_parentElement->displayMode = DisplayMode::Distribute;
 
-    auto title = std::make_shared<UIText>("header title", this->_comm, G_App::APP_NAME, 18, RGBA(255, 255, 255));
+    auto title = std::make_shared<UIText>("header title", this->_comm, strToWStr(G_App::APP_NAME), 18, RGBA(255, 255, 255));
     title->distPosH = RelPos::Center;
     title->alignPosH = RelPos::Center;
 

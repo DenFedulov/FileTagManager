@@ -1,5 +1,6 @@
 #pragma once
 #include "SDL_Helpers.h"
+#include "type_helpers.h"
 #include "SDL_ttf.h"
 #include "SurfaceEditor.h"
 #include "BaseElements/UIElement.h"
@@ -11,7 +12,7 @@ private:
     TTF_Font *_font = nullptr;
     std::string _fontPath;
     int _fontSize = 24;
-    std::string _text = "";
+    std::wstring _text = L"";
     RGBA _color;
     int _cursorIndex = -1;
     bool _editing = false;
@@ -26,13 +27,13 @@ public:
     int getFontSize();
     std::string getFontPath();
     void setFont(std::optional<int> fontSize = std::nullopt, std::optional<std::string> path = std::nullopt);
-    std::string getText();
-    void setText(std::string text);
+    std::wstring getText();
+    void setText(std::wstring text);
     RGBA getColor();
     void setColor(RGBA color);
     int getCursorIndex();
     void setCursorIndex(int cursorIndex);
 
-    UIText(std::string name, CommonObjects *comm, std::string text, int fontSize = 24, RGBA color = {0, 0, 0});
+    UIText(std::string name, CommonObjects *comm, std::wstring text, int fontSize = 24, RGBA color = {0, 0, 0});
     ~UIText() override;
 };

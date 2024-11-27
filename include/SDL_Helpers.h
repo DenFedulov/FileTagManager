@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "custom_types.h"
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_mixer.h"

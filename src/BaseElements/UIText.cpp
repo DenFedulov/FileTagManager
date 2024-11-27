@@ -4,10 +4,10 @@ void UIText::updateSurface()
 {
     this->freeSurface();
     SDL_Color color = {this->_color.r, this->_color.g, this->_color.b};
-    std::string finalText = this->_text;
-    if (finalText == "")
+    std::wstring finalText = this->_text;
+    if (finalText == L"")
     {
-        finalText = " ";
+        finalText = L" ";
     }
     if (this->_editing)
     {
@@ -15,16 +15,17 @@ void UIText::updateSurface()
         {
             this->_cursorIndex = finalText.length();
         }
-        finalText.insert(this->_cursorIndex, "|");
+        finalText.insert(this->_cursorIndex, L"|");
     }
+    uint16string finalTextInt = wStrToUInt16(finalText);
     SDL_Surface *defaultSurface;
     if (this->parentElement != NULL)
     {
-        defaultSurface = TTF_RenderUTF8_Blended_Wrapped(this->_font, finalText.c_str(), color, this->parentElement->getW());
+        defaultSurface = TTF_RenderUNICODE_Blended_Wrapped(this->_font, finalTextInt.c_str(), color, this->parentElement->getW());
     }
     else
     {
-        defaultSurface = TTF_RenderUTF8_Blended(this->_font, finalText.c_str(), color);
+        defaultSurface = TTF_RenderUNICODE_Blended(this->_font, finalTextInt.c_str(), color);
     }
     this->_surface = SDL_ConvertSurfaceFormat(defaultSurface, SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32, 0);
     SDL_FreeSurface(defaultSurface);
@@ -70,12 +71,12 @@ void UIText::setFont(std::optional<int> fontSize, std::optional<std::string> pat
     }
 }
 
-std::string UIText::getText()
+std::wstring UIText::getText()
 {
     return this->_text;
 }
 
-void UIText::setText(std::string text)
+void UIText::setText(std::wstring text)
 {
     this->_text = text;
     this->updateSurface();
@@ -103,10 +104,10 @@ void UIText::setCursorIndex(int cursorIndex)
     this->updateSurface();
 }
 
-UIText::UIText(std::string name, CommonObjects *comm, std::string text, int fontSize, RGBA color) : UIElement(name, comm),
-                                                                                                    _text(text),
-                                                                                                    _fontSize(fontSize),
-                                                                                                    _color(color)
+UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fontSize, RGBA color) : UIElement(name, comm),
+                                                                                                     _text(text),
+                                                                                                     _fontSize(fontSize),
+                                                                                                     _color(color)
 {
     this->pivotPosH = RelPos::Center;
     this->pivotPosV = RelPos::Center;
@@ -142,10 +143,11 @@ UIText::UIText(std::string name, CommonObjects *comm, std::string text, int font
         }
         if (e.keyEvent.text.length() > 0)
         {
-            std::string curText = textEl->getText();
-            curText.insert(textEl->getCursorIndex(), e.keyEvent.text);
+            std::wstring curText = textEl->getText();
+            std::wstring eText = strToWStr(e.keyEvent.text);
+            curText.insert(textEl->getCursorIndex(), eText);
             textEl->setText(curText);
-            textEl->setCursorIndex(textEl->getCursorIndex() + e.keyEvent.text.length());
+            textEl->setCursorIndex(textEl->getCursorIndex() + eText.length());
         }
         return 0;
     };
@@ -159,14 +161,14 @@ UIText::UIText(std::string name, CommonObjects *comm, std::string text, int font
         }
         if (e.keyEvent.keycode == SDLK_BACKSPACE && textEl->getText().length() > 0 && textEl->getCursorIndex() > 0)
         {
-            std::string curText = textEl->getText();
+            std::wstring curText = textEl->getText();
             curText.erase(textEl->getCursorIndex() - 1, 1);
             textEl->setCursorIndex(textEl->getCursorIndex() - 1);
             textEl->setText(curText);
         }
         if (e.keyEvent.keycode == SDLK_DELETE && textEl->getText().length() > 0 && textEl->getCursorIndex() < textEl->getText().length())
         {
-            std::string curText = textEl->getText();
+            std::wstring curText = textEl->getText();
             curText.erase(textEl->getCursorIndex(), 1);
             textEl->setText(curText);
         }

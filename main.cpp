@@ -8,6 +8,7 @@
 #include "CommonObjects.h"
 #include "App.h"
 #include "SDL_Helpers.h"
+#pragma comment(lib,"user32.lib") 
 
 int main(int argc, char *argv[])
 {
@@ -40,6 +41,6 @@ int main(int argc, char *argv[])
 	{
 		logger.addLog(typeid(e).name() + std::string(" ") + (std::string)e.what());
 		logger.writeLog();
-		throw e;
 	}
+	return 0;
 }

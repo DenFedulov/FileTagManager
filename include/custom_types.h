@@ -1,9 +1,12 @@
 #pragma once
 #include <vector>
 #include <cstdint>
+#include <string>
 
 typedef std::pair<int, int> intPair;
 typedef std::vector<intPair> CoordsVector;
+typedef unsigned short uint16;
+typedef std::basic_string<uint16> uint16string;
 
 struct RGBA
 {

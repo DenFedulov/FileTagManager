@@ -7,7 +7,7 @@ closestTo0(T first, T second)
 {
     T absFirst = std::abs(first);
     T absSecond = std::abs(second);
-    T result = std::min(absFirst, absSecond) == absFirst ? first : second;
+    T result = ((std::min)(absFirst, absSecond) == absFirst) ? first : second;
     return result;
 }
 

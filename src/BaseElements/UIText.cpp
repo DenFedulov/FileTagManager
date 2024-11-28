@@ -79,6 +79,12 @@ std::wstring UIText::getText()
 void UIText::setText(std::wstring text)
 {
     this->_text = text;
+    if ((this->_historyCursor + 1) < this->_textHistory.size())
+    {
+        this->_textHistory.erase(this->_textHistory.begin() + this->_historyCursor + 1, this->_textHistory.end());
+    }
+    this->_historyCursor = this->_textHistory.size();
+    this->_textHistory.push_back(text);
     this->updateSurface();
 }
 
@@ -113,6 +119,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
     this->pivotPosV = RelPos::Center;
     this->_fontPath = this->_comm->config->defaultFont;
     this->loadFont(this->_fontPath);
+    this->_textHistory.push_back(text);
 
     auto editEnable = [](std::shared_ptr<UIElement> &el, AppEvent &e)
     {
@@ -200,10 +207,40 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
             textEl->setText(curText);
             textEl->setCursorIndex(textEl->getCursorIndex() + clipboardText.length());
         }
+        if (isKeyPressed(VK_CONTROL) && e.keyEvent.keycode == SDLK_z)
+        {
+            textEl->undo();
+        }
+        if (isKeyPressed(VK_CONTROL) && e.keyEvent.keycode == SDLK_y)
+        {
+            textEl->redo();
+        }
         return 0;
     };
     this->events.addHandler(AppEvent::keyboard_button_down, specialKeysInput);
 
+    this->updateSurface();
+}
+
+void UIText::undo()
+{
+    if (this->_textHistory.size() <= 1 || this->_historyCursor <= 0)
+    {
+        return;
+    }
+    this->_historyCursor--;
+    this->_text = this->_textHistory.at(this->_historyCursor);
+    this->updateSurface();
+}
+
+void UIText::redo()
+{
+    if ((this->_historyCursor + 1) >= this->_textHistory.size())
+    {
+        return;
+    }
+    this->_historyCursor++;
+    this->_text = this->_textHistory.at(this->_historyCursor);
     this->updateSurface();
 }
 

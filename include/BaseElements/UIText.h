@@ -18,6 +18,8 @@ private:
     RGBA _color;
     int _cursorIndex = -1;
     bool _editing = false;
+    std::vector<std::wstring> _textHistory;
+    int _historyCursor = 1;
 
     void loadFont(std::string path);
 
@@ -35,6 +37,9 @@ public:
     void setColor(RGBA color);
     int getCursorIndex();
     void setCursorIndex(int cursorIndex);
+
+    void undo();
+    void redo();
 
     UIText(std::string name, CommonObjects *comm, std::wstring text, int fontSize = 24, RGBA color = {0, 0, 0});
     ~UIText() override;

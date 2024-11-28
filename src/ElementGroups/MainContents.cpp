@@ -21,12 +21,8 @@ void MainContents::createElementGroup()
     sidebar->displayMode = DisplayMode::Distribute;
     sidebar->childrenDistPos = RelPos::Start;
 
-    auto text = std::make_shared<UIText>("text", this->_comm, getClipboardText());
-    text->editable = true;
-    text->pivotPosV = RelPos::Start;
-    sidebar->addChildren({
-        text,
-    });
+    TagElement tag(this->_comm, "test tag", RGBA(18, 198, 255, 50));
+    sidebar->addChildren({tag.getParentElement()});
 
     this->_parentElement->addChildren({sidebar});
 }

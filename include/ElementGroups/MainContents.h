@@ -3,6 +3,7 @@
 #include "BaseElements/UIText.h"
 #include "Elements/UICircle.h"
 #include "ElementGroups/ElementGroup.h"
+#include "ElementGroups/TagElement.h"
 
 class MainContents : public ElementGroup
 {

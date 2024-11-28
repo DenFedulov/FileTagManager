@@ -18,6 +18,7 @@ void HeaderBar::createElementGroup()
     title->alignPosH = RelPos::Center;
 
     auto close = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "close.png", this->_comm);
+    close->setColor(RGBA(255, 200, 200));
     close->distPosH = RelPos::End;
     auto closeApp = [this](std::shared_ptr<UIElement> &el, AppEvent &e)
     {

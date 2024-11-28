@@ -1,14 +1,21 @@
 #pragma once
 #include "Str.h"
 #include "SDL_Helpers.h"
+#include "SurfaceEditor.h"
+#include "BaseElements/Dynamic.h"
 #include "BaseElements/UIElement.h"
 
-class UIPictureElement : public UIElement
+class UIPictureElement : public UIElement, Dynamic
 {
 private:
-    SDL_Texture *loadPictureTexture(std::string filename);
+    RGBA _color;
+
+    SDL_Surface *loadPicture(std::string path);
+    void updateSurface();
 
 public:
-    UIPictureElement();
+    void setColor(RGBA color);
+    RGBA getColor();
+
     UIPictureElement(std::string name, CommonObjects *comm);
 };

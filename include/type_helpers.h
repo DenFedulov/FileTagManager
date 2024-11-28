@@ -5,3 +5,4 @@
 
 uint16string wStrToUInt16(const std::wstring &wStr);
 std::wstring strToWStr(const char *str);
+RGBA hexStrToRBGA(const char *str);

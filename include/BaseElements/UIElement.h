@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 #include "CommonObjects.h"
 #include "BaseElements/Drawable.h"
 #include "Layout.h"
@@ -14,8 +15,6 @@ protected:
     int w = 0;
     int h = 0;
 
-    int getChildWSum(int upTo = -10);
-    int getChildHSum(int upTo = -10);
     int getChildMaxW();
     int getChildMaxH();
     int calcCoordRelToParent(
@@ -82,6 +81,8 @@ public:
     int getH();
     virtual void setW(int w);
     virtual void setH(int h);
+    int getChildWSum(std::optional<int> upTo = std::nullopt);
+    int getChildHSum(std::optional<int> upTo = std::nullopt);
     void addChildren(const std::vector<std::shared_ptr<UIElement>> &childElements);
     void removeChild(int id);
     std::shared_ptr<UIElement> getChild(int id);

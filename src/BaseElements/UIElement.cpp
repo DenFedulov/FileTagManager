@@ -168,28 +168,22 @@ int UIElement::calcPivotOffsetV(RelPos p)
     return calcPivotOffset(p, this->calcH(), this->pivot.second);
 }
 
-int UIElement::getChildWSum(int upTo)
+int UIElement::getChildWSum(std::optional<int> upTo)
 {
-    if (upTo < -9)
-    {
-        upTo = this->childElements.size() - 1;
-    }
+    int limit = upTo.value_or(this->childElements.size() - 1);
     int sum = 0;
-    for (int i = 0; i <= upTo; i++)
+    for (int i = 0; i <= limit; i++)
     {
         sum += this->childElements[i]->w;
     }
     return sum;
 }
 
-int UIElement::getChildHSum(int upTo)
+int UIElement::getChildHSum(std::optional<int> upTo)
 {
-    if (upTo < -9)
-    {
-        upTo = this->childElements.size() - 1;
-    }
+    int limit = upTo.value_or(this->childElements.size() - 1);
     int sum = 0;
-    for (int i = 0; i <= upTo; i++)
+    for (int i = 0; i <= limit; i++)
     {
         sum += this->childElements[i]->h;
     }

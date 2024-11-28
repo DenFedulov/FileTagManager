@@ -3,6 +3,7 @@
 #include <bitset>
 #include <memory>
 #include <algorithm>
+#include <filesystem>
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_mixer.h"
@@ -15,6 +16,8 @@
 #include "Layout.h"
 #include "CommonObjects.h"
 #include "AppGlobals.h"
+#include "SQLiteClass.h"
+#include "db_structure.h"
 
 struct MouseSelection
 {
@@ -29,6 +32,7 @@ private:
     std::unordered_map<std::string, Mix_Chunk *> _loadedSounds;
     std::unordered_map<std::string, Mix_Music *> _loadedMusic;
     std::vector<std::shared_ptr<UIElement>> _loadedElements;
+    std::unique_ptr<SQLiteClass> _db;
 
     void triggerEvent(AppEvent::Type eventEnum, const SDL_Event &sdlE);
     void processEventResults(const std::vector<int> &results);
@@ -41,6 +45,7 @@ public:
 
     void initResize();
     void initElements();
+    void initDb();
     void addElements(const std::vector<std::shared_ptr<UIElement>> &elements, bool sortElements = true);
     std::shared_ptr<UIElement> getElement(int id);
     Mix_Chunk *getSound(std::string filename);

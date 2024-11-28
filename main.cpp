@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
 		comm.config = &config;
 		FileTagManager app(&comm);
 		app.initResize();
+		app.initDb();
 		app.initElements();
 		::ShowWindow(::GetConsoleWindow(), SW_MINIMIZE);
 		SDL_StartTextInput();

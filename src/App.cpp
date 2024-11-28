@@ -102,6 +102,16 @@ void FileTagManager::initElements()
     });
 }
 
+void FileTagManager::initDb()
+{
+    bool createDbStruct = !std::filesystem::exists(G_App::DB_FILENAME);
+    this->_db = std::make_unique<SQLiteClass>(G_App::DB_FILENAME.c_str());
+    if (createDbStruct)
+    {
+        this->_db->exec(DB_STRUCTURE_SQL_SCRIPT);
+    }
+}
+
 void FileTagManager::sortLoadedElements()
 {
     auto sortByZ = [](std::shared_ptr<UIElement> a, std::shared_ptr<UIElement> b) -> bool

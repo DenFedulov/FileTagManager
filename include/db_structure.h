@@ -1,6 +1,6 @@
 #pragma once
 
-const char *DB_STRUCTURE_SQL_SCRIPT = R"script(
+static const char *DB_STRUCTURE_SQL_SCRIPT = R"script(
 CREATE TABLE IF NOT EXISTS tags (
 	tag_name TEXT NOT NULL,
 	CONSTRAINT file_tags_pk PRIMARY KEY (tag_name)

@@ -24,5 +24,6 @@ int Str::distanceToWSpace(const std::wstring &str, int step, int offset)
         }
         distance++;
     }
+    Setter::setInRange(distance, 1, (int)(str.length()));
     return distance;
 }

@@ -3,6 +3,7 @@
 static const char *DB_STRUCTURE_SQL_SCRIPT = R"script(
 CREATE TABLE IF NOT EXISTS tags (
 	tag_name TEXT NOT NULL,
+	color TEXT NOT NULL,
 	CONSTRAINT file_tags_pk PRIMARY KEY (tag_name)
 );
 CREATE TABLE IF NOT EXISTS tag_categories (

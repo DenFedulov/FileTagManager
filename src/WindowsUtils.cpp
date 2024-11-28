@@ -1,6 +1,6 @@
 #include "WindowsUtils.h"
 
-std::wstring GetClipboardText()
+std::wstring getClipboardText()
 {
     if (!OpenClipboard(nullptr))
     {
@@ -23,4 +23,14 @@ std::wstring GetClipboardText()
     CloseClipboard();
 
     return text;
+}
+
+bool isKeyPressed(int keyCode)
+{
+    SHORT keyState = GetAsyncKeyState(keyCode);
+    if (keyState & (1 << 15))
+    {
+        return true;
+    }
+    return false;
 }

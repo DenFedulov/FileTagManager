@@ -40,13 +40,26 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(SDL2_ttf REQUIRED)
+message(STATUS "ICU_FOUND - ${ICU_FOUND}")
+message(STATUS "SDL2_FOUND - ${SDL2_FOUND}")
 message(STATUS "SDL2_image_FOUND - ${SDL2_image_FOUND}")
 message(STATUS "SDL2_mixer_FOUND - ${SDL2_mixer_FOUND}")
 message(STATUS "SDL2_ttf_FOUND - ${SDL2_ttf_FOUND}")
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-        COMMAND_EXPAND_LISTS
-)
+if(ICU_FOUND)
+        file(GLOB_RECURSE uc_DLL ${LIB_ROOT_PATH}/ICU/*icuuc*.dll)
+        file(GLOB_RECURSE data_DLL ${LIB_ROOT_PATH}/ICU/*icudt*.dll)
+        list(APPEND uc_DLL ${data_DLL})
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${uc_DLL} $<TARGET_FILE_DIR:${PROJECT_NAME}>
+                COMMAND_EXPAND_LISTS
+        )
+endif()
+if(SDL2_FOUND OR SDL2_image_FOUND OR SDL2_mixer_FOUND OR SDL2_ttf_FOUND)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+                COMMAND_EXPAND_LISTS
+        )
+endif()
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${SDL2_LIBRARIES} ${ICU_LIBRARIES} SDL2_image::SDL2_image SDL2_mixer::SDL2_mixer SDL2_ttf::SDL2_ttf)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${SDL2_LIBRARIES} ICU::uc ICU::data SDL2_image::SDL2_image SDL2_mixer::SDL2_mixer SDL2_ttf::SDL2_ttf)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

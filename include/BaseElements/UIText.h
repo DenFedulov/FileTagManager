@@ -5,6 +5,7 @@
 #include "SurfaceEditor.h"
 #include "BaseElements/UIElement.h"
 #include "BaseElements/Dynamic.h"
+#include "WindowsUtils.h"
 
 class UIText : public UIElement, Dynamic
 {

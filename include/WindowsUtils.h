@@ -2,4 +2,5 @@
 #include <string>
 #include <windows.h>
 
-std::wstring GetClipboardText();
+std::wstring getClipboardText();
+bool isKeyPressed(int keyCode);

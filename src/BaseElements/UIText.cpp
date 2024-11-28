@@ -134,6 +134,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
         return 0;
     };
     this->events.addHandler(AppEvent::mouse_button_down, editEnable);
+
     auto textInput = [](std::shared_ptr<UIElement> &el, AppEvent &e)
     {
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
@@ -144,7 +145,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
         if (e.keyEvent.text.length() > 0)
         {
             std::wstring curText = textEl->getText();
-            std::wstring eText = strToWStr(e.keyEvent.text);
+            std::wstring eText = strToWStr(e.keyEvent.text.c_str());
             curText.insert(textEl->getCursorIndex(), eText);
             textEl->setText(curText);
             textEl->setCursorIndex(textEl->getCursorIndex() + eText.length());
@@ -152,6 +153,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
         return 0;
     };
     this->events.addHandler(AppEvent::text_input, textInput);
+
     auto specialKeysInput = [](std::shared_ptr<UIElement> &el, AppEvent &e)
     {
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
@@ -172,13 +174,21 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
             curText.erase(textEl->getCursorIndex(), 1);
             textEl->setText(curText);
         }
-        if (e.keyEvent.keycode == 1073741904 && textEl->getCursorIndex() > 0)
+        if (e.keyEvent.keycode == SDLK_LEFT && textEl->getCursorIndex() > 0)
         {
             textEl->setCursorIndex(textEl->getCursorIndex() - 1);
         }
-        if (e.keyEvent.keycode == 1073741903)
+        if (e.keyEvent.keycode == SDLK_RIGHT)
         {
             textEl->setCursorIndex(textEl->getCursorIndex() + 1);
+        }
+        if (isKeyPressed(VK_CONTROL) && e.keyEvent.keycode == SDLK_v)
+        {
+            std::wstring curText = textEl->getText();
+            std::wstring clipboardText = getClipboardText();
+            curText.insert(textEl->getCursorIndex(), clipboardText);
+            textEl->setText(curText);
+            textEl->setCursorIndex(textEl->getCursorIndex() + clipboardText.length());
         }
         return 0;
     };

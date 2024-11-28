@@ -88,17 +88,6 @@ void UIText::setText(std::wstring text)
     this->updateSurface();
 }
 
-RGBA UIText::getColor()
-{
-    return this->_color;
-}
-
-void UIText::setColor(RGBA color)
-{
-    this->_color = color;
-    this->updateSurface();
-}
-
 int UIText::getCursorIndex()
 {
     return this->_cursorIndex;
@@ -110,16 +99,16 @@ void UIText::setCursorIndex(int cursorIndex)
     this->updateSurface();
 }
 
-UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fontSize, RGBA color) : UIElement(name, comm),
+UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fontSize, RGBA color) : UIDynamicElement(name, comm),
                                                                                                      _text(text),
-                                                                                                     _fontSize(fontSize),
-                                                                                                     _color(color)
+                                                                                                     _fontSize(fontSize)
 {
     this->pivotPosH = RelPos::Center;
     this->pivotPosV = RelPos::Center;
     this->_fontPath = this->_comm->config->defaultFont;
     this->loadFont(this->_fontPath);
     this->_textHistory.push_back(text);
+    this->_color = color;
 
     auto editEnable = [](std::shared_ptr<UIElement> &el, AppEvent &e)
     {

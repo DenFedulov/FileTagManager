@@ -1,5 +1,23 @@
 #include "BaseElements/UIBox.h"
 
+SDL_Surface *UIBox::makeSurface()
+{
+    this->freeSurface();
+    return SDL_CreateRGBSurfaceWithFormat(0, this->w, this->h, 32, SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32);
+}
+
+void UIBox::setW(int w)
+{
+    this->w = w;
+    this->updateSurface();
+}
+
+void UIBox::setH(int h)
+{
+    this->h = h;
+    this->updateSurface();
+}
+
 void UIBox::setRadius(int radius)
 {
     this->_radius = radius;
@@ -10,17 +28,6 @@ void UIBox::setRadius(int radius)
 int UIBox::getRadius()
 {
     return this->_radius;
-}
-
-void UIBox::setColor(RGBA color)
-{
-    this->_color = color;
-    this->updateSurface();
-}
-
-RGBA UIBox::getColor()
-{
-    return this->_color;
 }
 
 void UIBox::setBorderWidth(int borderWidth)

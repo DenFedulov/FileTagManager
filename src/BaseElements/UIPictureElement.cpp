@@ -1,6 +1,6 @@
 #include "BaseElements/UIPictureElement.h"
 
-UIPictureElement::UIPictureElement(std::string name, CommonObjects *comm) : UIElement(name, comm)
+UIPictureElement::UIPictureElement(std::string name, CommonObjects *comm) : UIDynamicElement(name, comm)
 {
     this->updateSurface();
 }
@@ -16,6 +16,7 @@ SDL_Surface *UIPictureElement::loadPicture(std::string path)
 
 void UIPictureElement::updateSurface()
 {
+    this->freeSurface();
     SDL_Surface *defaultSurface = this->loadPicture(this->name);
     this->_surface = SDL_ConvertSurfaceFormat(defaultSurface, SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32, 0);
     this->w = this->_surface->w;
@@ -23,17 +24,6 @@ void UIPictureElement::updateSurface()
     SDL_FreeSurface(defaultSurface);
     SurfaceEditor editor(this->_surface);
     editor.multiply(this->_color);
+    this->freeTexture();
     this->_texture = surfaceToTexture(this->_comm, this->_surface);
-    this->freeSurface();
-}
-
-void UIPictureElement::setColor(RGBA color)
-{
-    this->_color = color;
-    this->updateSurface();
-}
-
-RGBA UIPictureElement::getColor()
-{
-    return this->_color;
 }

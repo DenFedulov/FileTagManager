@@ -5,11 +5,12 @@
 class UIDynamicElement : public UIElement, Dynamic
 {
 protected:
-    SDL_Surface *makeSurface();
-    UIDynamicElement(std::string name, CommonObjects *comm);
-    ~UIDynamicElement() override;
+    RGBA _color;
 
 public:
-    void setW(int w) override;
-    void setH(int h) override;
+    void setColor(RGBA color);
+    RGBA getColor();
+
+    UIDynamicElement(std::string name, CommonObjects *comm);
+    ~UIDynamicElement() override;
 };

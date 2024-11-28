@@ -8,19 +8,19 @@ class UIBox : public UIDynamicElement
 {
 protected:
     int _radius = 0;
-    RGBA _color;
     int _borderWidth = 0;
     RGBA _borderColor;
 
+    SDL_Surface *makeSurface();
     void updateSurface();
     int getMaxRadius();
 
 public:
+    void setW(int w) override;
+    void setH(int h) override;
+
     void setRadius(int radius);
     int getRadius();
-
-    void setColor(RGBA color);
-    RGBA getColor();
 
     void setBorderWidth(int borderWidth);
     int getBorderWidth();

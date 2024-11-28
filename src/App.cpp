@@ -69,8 +69,7 @@ void FileTagManager::initElements()
     int w, h;
     SDL_GetWindowSize(this->comm->window, &w, &h);
 
-    HeaderBar headerBar(this->comm);
-    MainContents contents(this->comm);
+    MainParent mainParent(this->comm);
 
     // auto element = std::make_shared<UIBox>("box", this, w, 400, 0, RGBA(), 10, RGBA(100, 100, 100));
     // element->displayMode = DisplayMode::Distribute;
@@ -97,8 +96,7 @@ void FileTagManager::initElements()
     // element->addChildren({child1, child2, child3});
 
     this->addElements({
-        headerBar.getParentElement(),
-        contents.getParentElement(),
+        mainParent.getParentElement(),
         // element,
         // text,
     });

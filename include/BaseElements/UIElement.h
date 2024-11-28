@@ -90,7 +90,7 @@ public:
     void freeSurface();
     void freeTexture();
     virtual void draw(SDL_Point *rotationPoint = nullptr, double angle = 0, SDL_RendererFlip flip = SDL_FLIP_NONE);
-    UIElement(std::string name, CommonObjects *comm, bool isMainElement = false);
+    UIElement(std::string name, CommonObjects *comm);
     ~UIElement() override;
     SDL_Texture *getTexture();
 };

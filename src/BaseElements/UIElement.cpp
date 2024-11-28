@@ -1,14 +1,7 @@
 #include "BaseElements/UIElement.h"
 
-UIElement::UIElement(std::string name, CommonObjects *comm, bool isMainElement) : name(name), _comm(comm)
+UIElement::UIElement(std::string name, CommonObjects *comm) : name(name), _comm(comm)
 {
-    if (isMainElement)
-    {
-        int width, hight;
-        SDL_GetWindowSize(this->_comm->window, &width, &hight);
-        this->w = width;
-        this->h = hight;
-    }
 }
 
 int UIElement::calcCoordRelToParent(

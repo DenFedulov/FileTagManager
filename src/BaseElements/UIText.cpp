@@ -164,14 +164,24 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
         if (e.keyEvent.keycode == SDLK_BACKSPACE && textEl->getText().length() > 0 && textEl->getCursorIndex() > 0)
         {
             std::wstring curText = textEl->getText();
-            curText.erase(textEl->getCursorIndex() - 1, 1);
-            textEl->setCursorIndex(textEl->getCursorIndex() - 1);
+            int charCount = 1;
+            if (isKeyPressed(VK_CONTROL))
+            {
+                charCount = Str::distanceToWSpace(curText, -1, textEl->getCursorIndex());
+            }
+            curText.erase(textEl->getCursorIndex() - charCount, charCount);
+            textEl->setCursorIndex(textEl->getCursorIndex() - charCount);
             textEl->setText(curText);
         }
         if (e.keyEvent.keycode == SDLK_DELETE && textEl->getText().length() > 0 && textEl->getCursorIndex() < textEl->getText().length())
         {
             std::wstring curText = textEl->getText();
-            curText.erase(textEl->getCursorIndex(), 1);
+            int charCount = 1;
+            if (isKeyPressed(VK_CONTROL))
+            {
+                charCount = Str::distanceToWSpace(curText, 1, textEl->getCursorIndex());
+            }
+            curText.erase(textEl->getCursorIndex(), charCount);
             textEl->setText(curText);
         }
         if (e.keyEvent.keycode == SDLK_LEFT && textEl->getCursorIndex() > 0)

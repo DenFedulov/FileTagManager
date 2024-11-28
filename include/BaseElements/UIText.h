@@ -6,6 +6,7 @@
 #include "BaseElements/UIElement.h"
 #include "BaseElements/Dynamic.h"
 #include "WindowsUtils.h"
+#include "Str.h"
 
 class UIText : public UIElement, Dynamic
 {

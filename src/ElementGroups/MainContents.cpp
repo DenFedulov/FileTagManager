@@ -21,8 +21,9 @@ void MainContents::createElementGroup()
     sidebar->displayMode = DisplayMode::Distribute;
     sidebar->childrenDistPos = RelPos::Start;
 
-    TagElement tag(this->_comm, "test tag", RGBA(18, 198, 255, 50));
-    sidebar->addChildren({tag.getParentElement()});
+    TagElement tag1(this->_comm, "test tag1", RGBA(18, 198, 255, 50));
+    TagElement tag2(this->_comm, "tag2", RGBA(18, 198, 255, 50));
+    sidebar->addChildren({tag1.getParentElement(), tag2.getParentElement()});
 
     this->_parentElement->addChildren({sidebar});
 }

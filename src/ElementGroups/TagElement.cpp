@@ -30,6 +30,7 @@ void TagElement::createElementGroup()
     this->_parentElement = std::make_shared<UIElement>("tag", this->_comm);
     this->_parentElement->displayMode = DisplayMode::Distribute;
     this->_parentElement->childrenDistPos = RelPos::Start;
+    this->_parentElement->setMargin(5);
 
     auto tagLeft = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "tag_left.png", this->_comm);
     tagLeft->setColor(this->_color);

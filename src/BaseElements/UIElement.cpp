@@ -120,6 +120,14 @@ int UIElement::calcY()
         Direction::Left);
 }
 
+void UIElement::setMargin(int m)
+{
+    for (int i = 0; i < (sizeof(this->margin) / sizeof(this->margin[0])); i++)
+    {
+        this->margin[i] = m;
+    }
+}
+
 int UIElement::calcW()
 {
     if (this->anchors[Direction::Right] && this->parentElement != NULL)
@@ -140,12 +148,12 @@ int UIElement::calcH()
 
 int UIElement::getW()
 {
-    return this->w;
+    return this->w + this->margin[Direction::Left] + this->margin[Direction::Right];
 }
 
 int UIElement::getH()
 {
-    return this->h;
+    return this->h + this->margin[Direction::Up] + this->margin[Direction::Down];
 }
 
 void UIElement::setW(int w)
@@ -174,7 +182,7 @@ int UIElement::getChildWSum(std::optional<int> upTo)
     int sum = 0;
     for (int i = 0; i <= limit; i++)
     {
-        sum += this->childElements[i]->w;
+        sum += this->childElements[i]->getW();
     }
     return sum;
 }
@@ -185,7 +193,7 @@ int UIElement::getChildHSum(std::optional<int> upTo)
     int sum = 0;
     for (int i = 0; i <= limit; i++)
     {
-        sum += this->childElements[i]->h;
+        sum += this->childElements[i]->getH();
     }
     return sum;
 }

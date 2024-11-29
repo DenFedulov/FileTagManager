@@ -20,10 +20,22 @@ void MainContents::createElementGroup()
     sidebar->anchors[Direction::Down] = true;
     sidebar->displayMode = DisplayMode::Distribute;
     sidebar->childrenDistPos = RelPos::Start;
+    sidebar->childrenAlignPos = RelPos::Start;
 
     TagElement tag1(this->_comm, "test tag1", RGBA(18, 198, 255, 50));
-    TagElement tag2(this->_comm, "tag2", RGBA(18, 198, 255, 50));
-    sidebar->addChildren({tag1.getParentElement(), tag2.getParentElement()});
+    TagElement tag2(this->_comm, "test tag2", RGBA(18, 198, 255, 50));
+    TagElement tag3(this->_comm, "tag3asrgsadfgsdcgsdfrgsadrhgdfg", RGBA(18, 198, 255, 50));
+    TagElement tag4(this->_comm, "tag4", RGBA(18, 198, 255, 50));
+    TagElement tag5(this->_comm, "tag5", RGBA(18, 198, 255, 50));
+    // TagElement tag6(this->_comm, "tag6", RGBA(18, 198, 255, 50));
+    sidebar->addChildren({
+        tag1.getParentElement(),
+        tag2.getParentElement(),
+        tag3.getParentElement(),
+        tag4.getParentElement(),
+        tag5.getParentElement(),
+        // tag6.getParentElement(),
+    });
 
     this->_parentElement->addChildren({sidebar});
 }

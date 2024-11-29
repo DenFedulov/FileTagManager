@@ -27,7 +27,7 @@ RGBA TagElement::getColor()
 
 void TagElement::createElementGroup()
 {
-    this->_parentElement = std::make_shared<UIElement>("tag", this->_comm);
+    this->_parentElement = std::make_shared<UIElement>(this->_name, this->_comm);
     this->_parentElement->displayMode = DisplayMode::Distribute;
     this->_parentElement->childrenDistPos = RelPos::Start;
     this->_parentElement->setMargin(5);
@@ -51,5 +51,6 @@ void TagElement::createElementGroup()
     tagRight->setW(this->SIDE_WIDTH);
 
     this->_parentElement->addChildren({tagLeft, body, tagRight});
+    this->_parentElement->setH(this->TAG_HIGHT);
     this->_parentElement->setW(this->_parentElement->getChildWSum());
 }

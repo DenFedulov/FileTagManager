@@ -17,6 +17,7 @@ protected:
 
     int getChildMaxW();
     int getChildMaxH();
+    intPair calcChildWrapping(int childInd);
     int calcCoordRelToParent(
         int baseCoord,
         std::function<int()> pCalc,

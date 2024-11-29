@@ -130,30 +130,32 @@ void UIElement::setMargin(int m)
 
 int UIElement::calcW()
 {
+    int result = this->w;
     if (this->anchors[Direction::Right] && this->parentElement != NULL)
     {
-        return this->parentElement->calcW();
+        result = this->parentElement->calcW();
     }
-    return this->w;
+    return result + this->margin[Direction::Left] + this->margin[Direction::Right];
 }
 
 int UIElement::calcH()
 {
+    int result = this->h;
     if (this->anchors[Direction::Down] && this->parentElement != NULL)
     {
-        return this->parentElement->calcH();
+        result = this->parentElement->calcH();
     }
-    return this->h;
+    return result + this->margin[Direction::Up] + this->margin[Direction::Down];
 }
 
 int UIElement::getW()
 {
-    return this->w + this->margin[Direction::Left] + this->margin[Direction::Right];
+    return this->w;
 }
 
 int UIElement::getH()
 {
-    return this->h + this->margin[Direction::Up] + this->margin[Direction::Down];
+    return this->h;
 }
 
 void UIElement::setW(int w)
@@ -182,7 +184,7 @@ int UIElement::getChildWSum(std::optional<int> upTo)
     int sum = 0;
     for (int i = 0; i <= limit; i++)
     {
-        sum += this->childElements[i]->getW();
+        sum += this->childElements[i]->calcW();
     }
     return sum;
 }
@@ -193,7 +195,7 @@ int UIElement::getChildHSum(std::optional<int> upTo)
     int sum = 0;
     for (int i = 0; i <= limit; i++)
     {
-        sum += this->childElements[i]->getH();
+        sum += this->childElements[i]->calcH();
     }
     return sum;
 }
@@ -226,11 +228,41 @@ int UIElement::getChildMaxH()
     return max;
 }
 
+intPair UIElement::calcChildWrapping(int childInd)
+{
+    const int directionSize = this->distDirection == DistDirection::column ? this->calcW() : this->calcH();
+    int directionOrder = 0;
+    int offset = 0;
+    for (size_t i = 0; i < this->childElements.size(); i++)
+    {
+        auto child = this->childElements.at(i);
+        int childSize = this->distDirection == DistDirection::column ? child->calcW() : child->calcH();
+        int prevChildSize = 0;
+        if (i > 0) 
+        {
+            auto prevChild = this->childElements.at(i - 1);
+            prevChildSize = this->distDirection == DistDirection::column ? prevChild->calcW() : prevChild->calcH();
+        }
+        offset += prevChildSize;
+        if (directionSize - (offset + childSize) < 0)
+        {
+            directionOrder++;
+            offset = 0;
+        }
+        if (child->childIndex == childInd)
+        {
+            break;
+        }
+    }
+
+    return {directionOrder, offset};
+}
+
 int UIElement::calcDistPosH(RelPos p)
 {
     int childCount = this->parentElement->childElements.size();
     int wSum = this->parentElement->getChildWSum();
-    int wOffset = this->parentElement->getChildWSum(this->childIndex - 1);
+    int wOffset = this->parentElement->calcChildWrapping(this->childIndex).second;
     return calcRelPos(
         p,
         this->parentElement->calcX(),
@@ -246,7 +278,7 @@ int UIElement::calcDistPosV(RelPos p)
 {
     int childCount = this->parentElement->childElements.size();
     int hSum = this->parentElement->getChildHSum();
-    int hOffset = this->parentElement->getChildHSum(this->childIndex - 1);
+    int hOffset = this->parentElement->calcChildWrapping(this->childIndex).second;
     return calcRelPos(
         p,
         this->parentElement->calcY(),
@@ -263,6 +295,7 @@ int UIElement::calcAlignPosH(RelPos p)
     RelPos pivotPos = this->pivotPosV != RelPos::None ? this->pivotPosV : this->parentElement->childrenPivotPos;
     int maxH = this->parentElement->getChildMaxH();
     int parentOffset = calcPivotOffset(pivotPos, this->parentElement->calcH(), this->pivot.second, maxH) + this->parentElement->calcY();
+    int childOffset = this->parentElement->calcChildWrapping(this->childIndex).first * maxH;
 
     int result = calcRelPos(
         p,
@@ -271,7 +304,7 @@ int UIElement::calcAlignPosH(RelPos p)
         0,
         1,
         this->calcH(),
-        0,
+        childOffset,
         this->pivot.second);
     return result;
 }
@@ -281,6 +314,7 @@ int UIElement::calcAlignPosV(RelPos p)
     RelPos pivotPos = this->pivotPosH != RelPos::None ? this->pivotPosH : this->parentElement->childrenPivotPos;
     int maxW = this->parentElement->getChildMaxW();
     int parentOffset = calcPivotOffset(pivotPos, this->parentElement->calcW(), this->pivot.first, maxW) + this->parentElement->calcX();
+    int childOffset = this->parentElement->calcChildWrapping(this->childIndex).first * maxW;
 
     int result = calcRelPos(
         p,
@@ -289,7 +323,7 @@ int UIElement::calcAlignPosV(RelPos p)
         0,
         1,
         this->calcW(),
-        0,
+        childOffset,
         this->pivot.first);
     return result;
 }

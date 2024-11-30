@@ -261,9 +261,11 @@ bool FileTagManager::loop()
             break;
         }
     }
+
     for (auto &element : this->_loadedElements)
     {
         element->draw();
+        break;
     }
     SDL_RenderPresent(this->comm->renderer);
 

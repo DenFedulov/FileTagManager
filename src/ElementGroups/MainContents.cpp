@@ -23,28 +23,14 @@ void MainContents::createElementGroup()
     sidebar->childrenAlignPos = RelPos::Start;
     sidebar->overflow = OverflowMode::Scroll;
 
-    TagElement tag1(this->_comm, "test tag1", RGBA(18, 198, 255, 120));
-    TagElement tag2(this->_comm, "test tag2", RGBA(18, 198, 255, 120));
-    TagElement tag3(this->_comm, "tag3asrgsadfgsdcgsdfrgsadrhgdfg", RGBA(18, 198, 255, 120));
-    tag3.getParentElement()->overflow = OverflowMode::Scroll;
-    tag3.getParentElement()->scrollDirection = Direction::Left;
-    TagElement tag4(this->_comm, "tag4", RGBA(18, 198, 255, 120));
-    TagElement tag5(this->_comm, "tag5", RGBA(18, 198, 255, 120));
-    TagElement tag6(this->_comm, "tag5", RGBA(18, 198, 255, 120));
-    TagElement tag7(this->_comm, "tag5", RGBA(18, 198, 255, 120));
-    TagElement tag8(this->_comm, "tag5", RGBA(18, 198, 255, 120));
-    // TagElement tag6(this->_comm, "tag6", RGBA(18, 198, 255, 120));
-    sidebar->addChildren({
-        tag1.getParentElement(),
-        tag2.getParentElement(),
-        tag3.getParentElement(),
-        tag4.getParentElement(),
-        tag5.getParentElement(),
-        tag6.getParentElement(),
-        tag7.getParentElement(),
-        tag8.getParentElement(),
-        // tag6.getParentElement(),
-    });
+    std::vector<std::shared_ptr<UIElement>> tags;
+    for (int i = 0; i < 15; i++)
+    {
+        TagElement tag(this->_comm, "test tag" + std::to_string(i) + " saedrgsdeargasdf", RGBA(18, 198, 255, 120));
+        tags.push_back(tag.getParentElement());
+    }
+
+    sidebar->addChildren(tags);
 
     this->_parentElement->addChildren({sidebar});
 }

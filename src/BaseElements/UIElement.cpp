@@ -367,7 +367,7 @@ intPair UIElement::calcChildWrapping(int childInd)
             prevChildSize = this->distDirection == DistDirection::column ? prevChild->calcW() : prevChild->calcH();
         }
         offset += prevChildSize;
-        if (directionSize - (offset + childSize) < 0)
+        if (i > 0 && directionSize - (offset + childSize) < 0)
         {
             directionOrder++;
             offset = 0;

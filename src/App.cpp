@@ -174,7 +174,7 @@ void FileTagManager::triggerEvent(const SDL_Event &event)
         {
             results = Vect::concat<int>(results, element->events.triggerEvent((int)CustomEvent::MOUSE_CLICK, element, event));
         }
-
+        
         results = Vect::concat<int>(results, element->events.triggerEvent(event.type, element, event));
         if (this->processEventResults(results))
         {
@@ -223,20 +223,8 @@ bool FileTagManager::loop()
         case SDL_MOUSEWHEEL:
         case SDL_MOUSEMOTION:
         case SDL_TEXTINPUT:
-            // if (evt.type == SDL_MOUSEWHEEL)
-            // {
-            //     std::cout << evt.wheel.mouseX << '\n';
-            //     std::cout << evt.wheel.mouseY << '\n';
-            //     std::cout << evt.wheel.y << '\n';
-            // }
-            this->triggerEvent(evt);
-            break;
         case SDL_WINDOWEVENT:
-            // std::cout << (int)evt.window.event << ' ' << evt.window.data1 << ' ' << evt.window.data2 << '\n';
-            if (evt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-            {
-                this->triggerEvent(evt);
-            }
+            this->triggerEvent(evt);
             break;
         }
     }

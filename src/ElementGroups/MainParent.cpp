@@ -14,8 +14,11 @@ void MainParent::createElementGroup()
     this->_parentElement->setH(h);
     auto onResize = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
-        el->setW(e.window.data1);
-        el->setH(e.window.data2);
+        if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+        {
+            el->setW(e.window.data1);
+            el->setH(e.window.data2);
+        }
         return 0;
     };
     this->_parentElement->events.addHandler(SDL_WINDOWEVENT, onResize);

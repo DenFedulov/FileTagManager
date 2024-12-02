@@ -42,8 +42,10 @@ void TagElement::createElementGroup()
     body->childrenDistPos = RelPos::Center;
     body->childrenAlignPos = RelPos::Center;
     auto tagName = std::make_shared<UIText>("tag_name", this->_comm, strToWStr(this->_name.c_str()));
+    tagName->editable = true;
     body->setW(tagName->getW() + this->SIDE_WIDTH);
     body->addChildren({tagName});
+
 
     auto tagRight = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "tag_right.png", this->_comm);
     tagRight->setColor(this->_color);

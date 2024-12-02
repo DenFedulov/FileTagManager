@@ -77,9 +77,9 @@ void FileTagManager::initElements()
     // // auto text = std::make_shared<UIText>("text", this, "test text", element);
     // // text->distPosH = RelPos::Center;
     // // text->distPosV = RelPos::Center;
-    // // // element->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, AppEvent &e)
+    // // // element->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     // // // 						   { Mix_PlayChannel(-1, el->getApp()->getSound("failsound.mp3"), 0); });
-    // // auto setTextToCoords = [text](std::shared_ptr<UIElement> &el, AppEvent &e)
+    // // auto setTextToCoords = [text](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     // // {
     // //     text->setText(std::to_string(e.mouseEvent.pos.first) + "," + std::to_string(e.mouseEvent.pos.second));
     // // };
@@ -116,12 +116,20 @@ void FileTagManager::sortLoadedElements()
 {
     auto sortByZ = [](std::shared_ptr<UIElement> a, std::shared_ptr<UIElement> b) -> bool
     {
-        return a->z < b->z;
+        if (a->getZ() < b->getZ())
+        {
+            return true;
+        }
+        else if (a->getZ() == b->getZ())
+        {
+            return a->defaultRenderOrder < b->defaultRenderOrder;
+        }
+        return false;
     };
     std::sort(this->_loadedElements.begin(), this->_loadedElements.end(), sortByZ);
 }
 
-void FileTagManager::addElements(const std::vector<std::shared_ptr<UIElement>> &elements, bool sortElements)
+void FileTagManager::addElements(const std::vector<std::shared_ptr<UIElement>> &elements, int order, bool sortElements)
 {
     for (const auto &element : elements)
     {
@@ -130,9 +138,10 @@ void FileTagManager::addElements(const std::vector<std::shared_ptr<UIElement>> &
             continue;
         }
         int id = this->_loadedElements.size();
+        element->defaultRenderOrder = order;
         element->id = id;
         this->_loadedElements.push_back(element);
-        this->addElements(element->childElements, false);
+        this->addElements(element->childElements, order + 1, false);
     }
     if (sortElements)
     {
@@ -156,61 +165,40 @@ void FileTagManager::drawCoordsVector(const CoordsVector &coords, int xC, int yC
     }
 }
 
-void FileTagManager::triggerEvent(AppEvent::Type eventEnum, const SDL_Event &sdlE)
+void FileTagManager::triggerEvent(const SDL_Event &event)
 {
-    std::vector<int> results;
-    std::vector<int> fR;
-    std::vector<int> sR;
-    for (auto &element : this->_loadedElements)
+    for (auto &element : std::ranges::reverse_view(this->_loadedElements))
     {
-        AppEvent e;
-        e.type = eventEnum;
-        switch (eventEnum)
+        std::vector<int> results;
+        if (event.type == SDL_MOUSEBUTTONUP && element->checkCollision(event.button.x, event.button.y))
         {
-        case AppEvent::mouse_button_down:
-        case AppEvent::mouse_button_up:
-        case AppEvent::mouse_click:
-        case AppEvent::mouse_move:
-            e.mouseEvent.pos = {sdlE.button.x, sdlE.button.y};
-            e.mouseEvent.pressState = sdlE.button.state;
-            e.mouseEvent.button = sdlE.button.button;
-            fR = element->events.triggerEvent(eventEnum, element, e);
-            if (eventEnum == AppEvent::mouse_button_up && element->checkCollision(sdlE.button.x, sdlE.button.y))
-            {
-                sR = element->events.triggerEvent(AppEvent::mouse_click, element, e);
-            }
-            results = Vect::concat<int>(fR, sR);
-            break;
-        case AppEvent::keyboard_button_down:
-        case AppEvent::keyboard_button_up:
-        case AppEvent::text_input:
-            e.keyEvent.keycode = sdlE.key.keysym.sym;
-            e.keyEvent.pressState = sdlE.key.state;
-            e.keyEvent.text = sdlE.text.text;
-            results = element->events.triggerEvent(eventEnum, element, e);
-            break;
-        case AppEvent::window_resized:
-            e.windowEvent.window = this->comm->window;
-            e.windowEvent.data1 = sdlE.window.data1;
-            e.windowEvent.data2 = sdlE.window.data2;
-            results = element->events.triggerEvent(eventEnum, element, e);
+            results = Vect::concat<int>(results, element->events.triggerEvent((int)CustomEvent::MOUSE_CLICK, element, event));
+        }
+
+        results = Vect::concat<int>(results, element->events.triggerEvent(event.type, element, event));
+        if (this->processEventResults(results))
+        {
             break;
         }
     }
-    this->processEventResults(results);
 }
 
-void FileTagManager::processEventResults(const std::vector<int> &results)
+bool FileTagManager::processEventResults(const std::vector<int> &results)
 {
+    int stopPropagation = false;
     for (int result : results)
     {
         switch (result)
         {
-        case Events::Result::Quit:
+        case (int)EventResult::Quit:
             this->quitSDL();
+            break;
+        case (int)EventResult::StopPropagation:
+            stopPropagation = true;
             break;
         }
     }
+    return stopPropagation;
 }
 
 bool FileTagManager::loop()
@@ -229,43 +217,37 @@ bool FileTagManager::loop()
             this->quitSDL();
             return false;
         case SDL_KEYDOWN:
-            this->triggerEvent(AppEvent::keyboard_button_down, evt);
-            // std::cout << evt.key.keysym.sym << '\n';
-            break;
         case SDL_KEYUP:
-            this->triggerEvent(AppEvent::keyboard_button_up, evt);
-            // std::cout << evt.key.keysym.sym << '\n';
-            break;
         case SDL_MOUSEBUTTONDOWN:
-            // std::cout << evt.button.button << '\n';
-            this->triggerEvent(AppEvent::mouse_button_down, evt);
-            break;
         case SDL_MOUSEBUTTONUP:
-            this->triggerEvent(AppEvent::mouse_button_up, evt);
-            this->_mSelection.x1.reset();
-            this->_mSelection.y1.reset();
-            break;
+        case SDL_MOUSEWHEEL:
         case SDL_MOUSEMOTION:
-            this->triggerEvent(AppEvent::mouse_move, evt);
-            break;
         case SDL_TEXTINPUT:
-            this->triggerEvent(AppEvent::text_input, evt);
+            // if (evt.type == SDL_MOUSEWHEEL)
+            // {
+            //     std::cout << evt.wheel.mouseX << '\n';
+            //     std::cout << evt.wheel.mouseY << '\n';
+            //     std::cout << evt.wheel.y << '\n';
+            // }
+            this->triggerEvent(evt);
             break;
         case SDL_WINDOWEVENT:
             // std::cout << (int)evt.window.event << ' ' << evt.window.data1 << ' ' << evt.window.data2 << '\n';
             if (evt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
             {
-                this->triggerEvent(AppEvent::window_resized, evt);
+                this->triggerEvent(evt);
             }
-        default:
             break;
         }
     }
 
+    if (this->_loadedElements.size() > 0)
+    {
+        this->_loadedElements.at(0)->draw();
+    }
     for (auto &element : this->_loadedElements)
     {
-        element->draw();
-        break;
+        element->render();
     }
     SDL_RenderPresent(this->comm->renderer);
 

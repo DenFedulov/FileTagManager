@@ -1,22 +1,31 @@
 #pragma once
 #include <optional>
 #include "CommonObjects.h"
-#include "BaseElements/Drawable.h"
+#include "BaseElements/Renderable.h"
 #include "Layout.h"
 #include "custom_types.h"
 #include "EventManager.h"
+#include "Setter.h"
 
-class UIElement : public Drawable
+class UIElement : public Renderable
 {
 protected:
     SDL_Surface *_surface = NULL;
     SDL_Texture *_texture = NULL;
     CommonObjects *_comm;
-    int w = 0;
-    int h = 0;
+    std::shared_ptr<LimitRect> _cropRect;
+    SDL_Rect _lastDest;
+    SDL_Rect _lastCrop;
+    int _w = 0;
+    int _h = 0;
+    int _z = -1;
+    int _scrollH = 0;
+    int _scrollV = 0;
 
-    int getChildMaxW();
-    int getChildMaxH();
+    int getMaxChildRelX();
+    int getMaxChildRelY();
+    int getMaxChildW();
+    int getMaxChildH();
     intPair calcChildWrapping(int childInd);
     int calcCoordRelToParent(
         int baseCoord,
@@ -40,14 +49,14 @@ protected:
                   RelPos pivotPos,
                   int pivotDim,
                   int pivotDefault,
-                  Direction marginDirection);
+                  Direction scrollDirection);
 
 public:
+    int defaultRenderOrder = 0;
     int id = -1;
     int childIndex = -1;
     int x = 0;
     int y = 0;
-    int z = -1;
     int margin[4] = {0, 0, 0, 0};
     const std::string name;
     intPair pivot = intPair(0, 0);
@@ -62,29 +71,50 @@ public:
     RelPos childrenAlignPos = RelPos::None;
     bool anchors[4] = {0, 0, 0, 0};
     bool visible = true;
+    OverflowMode overflow = OverflowMode::Visible;
+    Direction scrollDirection = Direction::Down;
     DisplayMode displayMode = DisplayMode::Normal;
     DistDirection distDirection = DistDirection::column;
     std::shared_ptr<UIElement> parentElement = NULL;
     std::vector<std::shared_ptr<UIElement>> childElements;
-    EventManager<std::shared_ptr<UIElement> &, AppEvent &> events;
+    EventManager<std::shared_ptr<UIElement> &, const SDL_Event &> events;
 
     int calcX();
     int calcY();
-    void setMargin(int m);
+
     int calcW();
-    int calcH();
     int getW();
     virtual void setW(int w);
+
+    int calcH();
     int getH();
     virtual void setH(int h);
+
+    int getZ();
+    void setZ(int z);
+
+    void setMargin(int m);
+
+    int getScrollH();
+    void setScrollH(int scrollH);
+    void moveScrollH(int step);
+
+    int getScrollV();
+    void setScrollV(int scrollV);
+    void moveScrollV(int step);
+
     int calcPivotOffsetH(RelPos p);
     int calcPivotOffsetV(RelPos p);
+
     int calcDistPosH(RelPos p);
     int calcDistPosV(RelPos p);
+
     int calcAlignPosH(RelPos p);
     int calcAlignPosV(RelPos p);
+
     int getChildWSum(std::optional<int> upTo = std::nullopt);
     int getChildHSum(std::optional<int> upTo = std::nullopt);
+
     void addChildren(const std::vector<std::shared_ptr<UIElement>> &childElements);
     void removeChild(int id);
     std::shared_ptr<UIElement> getChild(int id);
@@ -92,7 +122,8 @@ public:
     virtual bool checkCollision(int x, int y);
     void freeSurface();
     void freeTexture();
-    virtual void draw(SDL_Point *rotationPoint = nullptr, double angle = 0, SDL_RendererFlip flip = SDL_FLIP_NONE);
+    virtual void draw();
+    virtual void render(SDL_Point *rotationPoint = nullptr, double angle = 0, SDL_RendererFlip flip = SDL_FLIP_NONE);
     UIElement(std::string name, CommonObjects *comm);
     ~UIElement() override;
     SDL_Texture *getTexture();

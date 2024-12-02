@@ -4,63 +4,26 @@
 #include <string>
 #include <functional>
 
-namespace Events
+enum class MouseButtons
 {
-    enum MouseButtons
-    {
-        None,
-        Left,
-        Middle,
-        Right,
-        Back,
-        Forward
-    };
-
-    enum Result
-    {
-        Nothing,
-        Quit,
-    };
-}
-
-struct KeyEvent
-{
-    int pressState = -1;
-    std::string text = "";
-    int keycode = -1;
+    None,
+    Left,
+    Middle,
+    Right,
+    Back,
+    Forward
 };
 
-struct MouseEvent
+enum class EventResult
 {
-    int pressState = -1;
-    intPair pos = {-1, -1};
-    int button = -1;
+    Nothing,
+    Quit,
+    StopPropagation,
 };
 
-struct WindowEvent
+enum class CustomEvent
 {
-    SDL_Window *window = NULL;
-    int data1;
-    int data2;
-};
-
-struct AppEvent
-{
-    enum Type
-    {
-        mouse_button_down,
-        mouse_click,
-        mouse_button_up,
-        mouse_move,
-        keyboard_button_down,
-        keyboard_button_up,
-        text_input,
-        window_resized,
-    };
-    Type type;
-    KeyEvent keyEvent;
-    MouseEvent mouseEvent;
-    WindowEvent windowEvent;
+    MOUSE_CLICK = -1
 };
 
 template <typename... Args>

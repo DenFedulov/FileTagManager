@@ -12,13 +12,13 @@ void MainParent::createElementGroup()
     this->_parentElement = std::make_shared<UIElement>("mainParent", this->_comm);
     this->_parentElement->setW(w);
     this->_parentElement->setH(h);
-    auto onResize = [](std::shared_ptr<UIElement> &el, AppEvent &e)
+    auto onResize = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
-        el->setW(e.windowEvent.data1);
-        el->setH(e.windowEvent.data2);
+        el->setW(e.window.data1);
+        el->setH(e.window.data2);
         return 0;
     };
-    this->_parentElement->events.addHandler(AppEvent::window_resized, onResize);
+    this->_parentElement->events.addHandler(SDL_WINDOWEVENT, onResize);
     HeaderBar headerBar(this->_comm);
     MainContents contents(this->_comm);
 

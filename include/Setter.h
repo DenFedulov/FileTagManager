@@ -61,6 +61,20 @@ namespace Setter
 
     template <typename T>
     typename std::enable_if<std::is_same<T, int>::value || std::is_same<T, double>::value, void>::type
+    setInMin(T &val, T min)
+    {
+        val = getInMin(val, min);
+    }
+
+    template <typename T>
+    typename std::enable_if<std::is_same<T, int>::value || std::is_same<T, double>::value, void>::type
+    setInMax(T &val, T max)
+    {
+        val = getInMax(val, max);
+    }
+
+    template <typename T>
+    typename std::enable_if<std::is_same<T, int>::value || std::is_same<T, double>::value, void>::type
     setInRange(T &val, T min, T max)
     {
         val = getInRange(val, min, max);

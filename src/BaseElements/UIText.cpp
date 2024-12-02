@@ -29,8 +29,8 @@ void UIText::updateSurface()
     }
     this->_surface = SDL_ConvertSurfaceFormat(defaultSurface, SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32, 0);
     SDL_FreeSurface(defaultSurface);
-    this->w = this->_surface->w;
-    this->h = this->_surface->h;
+    this->_w = this->_surface->w;
+    this->_h = this->_surface->h;
     this->freeTexture();
     this->_texture = surfaceToTexture(this->_comm, this->_surface);
 }
@@ -110,14 +110,14 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
     this->_textHistory.push_back(text);
     this->_color = color;
 
-    auto editEnable = [](std::shared_ptr<UIElement> &el, AppEvent &e)
+    auto editEnable = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         if (!textEl->editable)
         {
             return 0;
         }
-        if (el->checkCollision(e.mouseEvent.pos.first, e.mouseEvent.pos.second))
+        if (el->checkCollision(e.button.x, e.button.y))
         {
             textEl->_cursorIndex = -1;
             textEl->_editing = true;
@@ -129,35 +129,35 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
         textEl->updateSurface();
         return 0;
     };
-    this->events.addHandler(AppEvent::mouse_button_down, editEnable);
+    this->events.addHandler(SDL_MOUSEBUTTONUP, editEnable);
 
-    auto textInput = [](std::shared_ptr<UIElement> &el, AppEvent &e)
+    auto textInput = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         if (!textEl->_editing)
         {
             return 0;
         }
-        if (e.keyEvent.text.length() > 0)
+        if (std::string(e.text.text).length() > 0)
         {
             std::wstring curText = textEl->getText();
-            std::wstring eText = strToWStr(e.keyEvent.text.c_str());
+            std::wstring eText = strToWStr(e.text.text);
             curText.insert(textEl->getCursorIndex(), eText);
             textEl->setText(curText);
             textEl->setCursorIndex(textEl->getCursorIndex() + eText.length());
         }
         return 0;
     };
-    this->events.addHandler(AppEvent::text_input, textInput);
+    this->events.addHandler(SDL_TEXTINPUT, textInput);
 
-    auto specialKeysInput = [](std::shared_ptr<UIElement> &el, AppEvent &e)
+    auto specialKeysInput = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         if (!textEl->_editing)
         {
             return 0;
         }
-        if (e.keyEvent.keycode == SDLK_BACKSPACE && textEl->getText().length() > 0 && textEl->getCursorIndex() > 0)
+        if (e.key.keysym.sym == SDLK_BACKSPACE && textEl->getText().length() > 0 && textEl->getCursorIndex() > 0)
         {
             std::wstring curText = textEl->getText();
             int charCount = 1;
@@ -169,7 +169,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
             textEl->setCursorIndex(textEl->getCursorIndex() - charCount);
             textEl->setText(curText);
         }
-        if (e.keyEvent.keycode == SDLK_DELETE && textEl->getText().length() > 0 && textEl->getCursorIndex() < textEl->getText().length())
+        if (e.key.keysym.sym == SDLK_DELETE && textEl->getText().length() > 0 && textEl->getCursorIndex() < textEl->getText().length())
         {
             std::wstring curText = textEl->getText();
             int charCount = 1;
@@ -180,15 +180,15 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
             curText.erase(textEl->getCursorIndex(), charCount);
             textEl->setText(curText);
         }
-        if (e.keyEvent.keycode == SDLK_LEFT && textEl->getCursorIndex() > 0)
+        if (e.key.keysym.sym == SDLK_LEFT && textEl->getCursorIndex() > 0)
         {
             textEl->setCursorIndex(textEl->getCursorIndex() - 1);
         }
-        if (e.keyEvent.keycode == SDLK_RIGHT)
+        if (e.key.keysym.sym == SDLK_RIGHT)
         {
             textEl->setCursorIndex(textEl->getCursorIndex() + 1);
         }
-        if (isKeyPressed(VK_CONTROL) && e.keyEvent.keycode == SDLK_v)
+        if (isKeyPressed(VK_CONTROL) && e.key.keysym.sym == SDLK_v)
         {
             std::wstring curText = textEl->getText();
             std::wstring clipboardText = getClipboardText();
@@ -196,17 +196,17 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
             textEl->setText(curText);
             textEl->setCursorIndex(textEl->getCursorIndex() + clipboardText.length());
         }
-        if (isKeyPressed(VK_CONTROL) && e.keyEvent.keycode == SDLK_z)
+        if (isKeyPressed(VK_CONTROL) && e.key.keysym.sym == SDLK_z)
         {
             textEl->undo();
         }
-        if (isKeyPressed(VK_CONTROL) && e.keyEvent.keycode == SDLK_y)
+        if (isKeyPressed(VK_CONTROL) && e.key.keysym.sym == SDLK_y)
         {
             textEl->redo();
         }
         return 0;
     };
-    this->events.addHandler(AppEvent::keyboard_button_down, specialKeysInput);
+    this->events.addHandler(SDL_KEYDOWN, specialKeysInput);
 
     this->updateSurface();
 }

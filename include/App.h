@@ -4,6 +4,7 @@
 #include <memory>
 #include <algorithm>
 #include <filesystem>
+#include <ranges>
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_mixer.h"
@@ -34,8 +35,8 @@ private:
     std::vector<std::shared_ptr<UIElement>> _loadedElements;
     std::unique_ptr<SQLiteClass> _db;
 
-    void triggerEvent(AppEvent::Type eventEnum, const SDL_Event &sdlE);
-    void processEventResults(const std::vector<int> &results);
+    void triggerEvent(const SDL_Event &sdlE);
+    bool processEventResults(const std::vector<int> &results);
     void sortLoadedElements();
 
 public:
@@ -46,7 +47,7 @@ public:
     void initResize();
     void initElements();
     void initDb();
-    void addElements(const std::vector<std::shared_ptr<UIElement>> &elements, bool sortElements = true);
+    void addElements(const std::vector<std::shared_ptr<UIElement>> &elements, int order = 0, bool sortElements = true);
     std::shared_ptr<UIElement> getElement(int id);
     Mix_Chunk *getSound(std::string filename);
     Mix_Music *getMusic(std::string filename);

@@ -20,15 +20,16 @@ void HeaderBar::createElementGroup()
     auto close = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "close.png", this->_comm);
     close->setColor(RGBA(255, 200, 200));
     close->distPosH = RelPos::End;
-    auto closeApp = [this](std::shared_ptr<UIElement> &el, AppEvent &e)
+    auto closeApp = [this](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
-        if (e.mouseEvent.button == Events::MouseButtons::Left)
+        if (e.button.button == (int)MouseButtons::Left)
         {
-            return (int)Events::Quit;
+            return (int)EventResult::Quit;
         }
         return 0;
     };
-    close->events.addHandler(AppEvent::mouse_click, closeApp);
+    close->events.addHandler((int)CustomEvent::MOUSE_CLICK, closeApp);
 
     this->_parentElement->addChildren({title, close});
+    this->_parentElement->setZ(0);
 }

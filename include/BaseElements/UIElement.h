@@ -22,8 +22,8 @@ protected:
     int _scrollH = 0;
     int _scrollV = 0;
 
-    int getMaxChildRelX();
-    int getMaxChildRelY();
+    int calcChildRealW();
+    int calcChildRealH();
     int getMaxChildW();
     int getMaxChildH();
     intPair calcChildWrapping(int childInd);

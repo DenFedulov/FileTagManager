@@ -163,7 +163,12 @@ int UIElement::getScrollH()
 
 void UIElement::setScrollH(int scrollH)
 {
-    Setter::setInRange(scrollH, 0, this->getMaxChildRelX());
+    Setter::setInRange(scrollH,
+                       0,
+                       this->calcChildRealW() -
+                           this->_cropRect->maxX +
+                           this->margin[Direction::Left] +
+                           this->margin[Direction::Right]);
     this->_scrollH = scrollH;
 }
 
@@ -179,7 +184,11 @@ int UIElement::getScrollV()
 
 void UIElement::setScrollV(int scrollV)
 {
-    Setter::setInRange(scrollV, 0, this->getMaxChildRelY());
+    Setter::setInRange(scrollV,
+                       0,
+                       this->calcChildRealH() - this->_cropRect->maxY +
+                           this->margin[Direction::Up] +
+                           this->margin[Direction::Down]);
     this->_scrollV = scrollV;
 }
 
@@ -274,7 +283,7 @@ int UIElement::getChildHSum(std::optional<int> upTo)
     return sum;
 }
 
-int UIElement::getMaxChildRelX()
+int UIElement::calcChildRealW()
 {
     int min = INT_MAX;
     int max = INT_MIN;
@@ -294,7 +303,7 @@ int UIElement::getMaxChildRelX()
     return max - min;
 }
 
-int UIElement::getMaxChildRelY()
+int UIElement::calcChildRealH()
 {
     int min = INT_MAX;
     int max = INT_MIN;
@@ -577,6 +586,7 @@ void UIElement::draw()
                     Setter::setInRange(childCrop->maxY, this->_cropRect->minY, this->_cropRect->maxY);
                 }
                 childElement->_cropRect = childCrop;
+                this->_cropRect = childCrop;
             }
             else
             {

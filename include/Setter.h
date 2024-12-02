@@ -24,21 +24,6 @@ namespace Setter
 
     template <typename T>
     typename std::enable_if<std::is_same<T, int>::value || std::is_same<T, double>::value, T>::type
-    getInRange(T val, T min, T max)
-    {
-        if (val < min)
-        {
-            val = min;
-        }
-        if (val >= max)
-        {
-            val = max;
-        }
-        return val;
-    }
-
-    template <typename T>
-    typename std::enable_if<std::is_same<T, int>::value || std::is_same<T, double>::value, T>::type
     getInMin(T val, T min)
     {
         if (val < min)
@@ -52,6 +37,23 @@ namespace Setter
     typename std::enable_if<std::is_same<T, int>::value || std::is_same<T, double>::value, T>::type
     getInMax(T val, T max)
     {
+        if (val >= max)
+        {
+            val = max;
+        }
+        return val;
+    }
+    
+    template <typename T>
+    typename std::enable_if<std::is_same<T, int>::value || std::is_same<T, double>::value, T>::type
+    getInRange(T val, T min, T max)
+    {
+        max = getInMin(max, min);
+        if (val <= min)
+        {
+            val = min;
+            return val;
+        }
         if (val >= max)
         {
             val = max;

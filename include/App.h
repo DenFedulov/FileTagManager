@@ -17,8 +17,6 @@
 #include "Layout.h"
 #include "CommonObjects.h"
 #include "AppGlobals.h"
-#include "SQLiteClass.h"
-#include "db_structure.h"
 
 struct MouseSelection
 {
@@ -33,7 +31,6 @@ private:
     std::unordered_map<std::string, Mix_Chunk *> _loadedSounds;
     std::unordered_map<std::string, Mix_Music *> _loadedMusic;
     std::vector<std::shared_ptr<UIElement>> _loadedElements;
-    std::unique_ptr<SQLiteClass> _db;
 
     void triggerEvent(const SDL_Event &sdlE);
     bool processEventResults(const std::vector<int> &results);
@@ -46,7 +43,6 @@ public:
 
     void initResize();
     void initElements();
-    void initDb();
     void addElements(const std::vector<std::shared_ptr<UIElement>> &elements, int order = 0, bool sortElements = true);
     std::shared_ptr<UIElement> getElement(int id);
     Mix_Chunk *getSound(std::string filename);

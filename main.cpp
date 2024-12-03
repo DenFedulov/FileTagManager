@@ -8,6 +8,7 @@
 #include "CommonObjects.h"
 #include "App.h"
 #include "SDL_Helpers.h"
+#include "AppDB.h"
 #pragma comment(lib,"user32.lib") 
 
 int main(int argc, char *argv[])
@@ -20,9 +21,10 @@ int main(int argc, char *argv[])
 		initSDL(&logger, &comm);
 		Config config(G_App::CONFIG_FILENAME);
 		comm.config = &config;
+		AppDB db(G_App::DB_FILENAME);
+		comm.db = &db;
 		FileTagManager app(&comm);
 		app.initResize();
-		app.initDb();
 		app.initElements();
 		::ShowWindow(::GetConsoleWindow(), SW_MINIMIZE);
 		SDL_StartTextInput();

@@ -66,50 +66,11 @@ void FileTagManager::initResize()
 
 void FileTagManager::initElements()
 {
-    int w, h;
-    SDL_GetWindowSize(this->comm->window, &w, &h);
-
     MainParent mainParent(this->comm);
-
-    // auto element = std::make_shared<UIBox>("box", this, w, 400, 0, RGBA(), 10, RGBA(100, 100, 100));
-    // element->displayMode = DisplayMode::Distribute;
-    // element->y = G_App::HEADER_HEIGHT;
-    // // auto text = std::make_shared<UIText>("text", this, "test text", element);
-    // // text->distPosH = RelPos::Center;
-    // // text->distPosV = RelPos::Center;
-    // // // element->events.addHandler(AppEvent::mouse_button_down, [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
-    // // // 						   { Mix_PlayChannel(-1, el->getApp()->getSound("failsound.mp3"), 0); });
-    // // auto setTextToCoords = [text](std::shared_ptr<UIElement> &el, const SDL_Event &e)
-    // // {
-    // //     text->setText(std::to_string(e.mouseEvent.pos.first) + "," + std::to_string(e.mouseEvent.pos.second));
-    // // };
-    // // element->events.addHandler(AppEvent::mouse_button_down, setTextToCoords);
-    // // element->childrenDistPos = RelPos::Start;
-    // // element->childrenAlignPos = RelPos::End;
-    // element->distDirection = DistDirection::row;
-    // element->childrenDistPos = RelPos::Start;
-    // element->childrenAlignPos = RelPos::Center;
-    // element->childrenPivotPos = RelPos::End;
-    // auto child1 = std::make_shared<UIBox>("child1", this, 200, 80, 0, RGBA(255, 0, 0), 5);
-    // auto child2 = std::make_shared<UIBox>("child2", this, 100, 30, 0, RGBA(0, 255, 0), 5);
-    // auto child3 = std::make_shared<UIBox>("child3", this, 50, 70, 0, RGBA(0, 0, 255), 5);
-    // element->addChildren({child1, child2, child3});
 
     this->addElements({
         mainParent.getParentElement(),
-        // element,
-        // text,
     });
-}
-
-void FileTagManager::initDb()
-{
-    bool createDbStruct = !std::filesystem::exists(G_App::DB_FILENAME);
-    this->_db = std::make_unique<SQLiteClass>(G_App::DB_FILENAME.c_str());
-    if (createDbStruct)
-    {
-        this->_db->exec(DB_STRUCTURE_SQL_SCRIPT);
-    }
 }
 
 void FileTagManager::sortLoadedElements()
@@ -174,7 +135,7 @@ void FileTagManager::triggerEvent(const SDL_Event &event)
         {
             results = Vect::concat<int>(results, element->events.triggerEvent((int)CustomEvent::MOUSE_CLICK, element, event));
         }
-        
+
         results = Vect::concat<int>(results, element->events.triggerEvent(event.type, element, event));
         if (this->processEventResults(results))
         {

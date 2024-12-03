@@ -41,7 +41,7 @@ UIElement::UIElement(std::string name, CommonObjects *comm) : name(name), _comm(
 
 int UIElement::calcCoordRelToParent(
     int baseCoord,
-    std::function<int()> pCalc,
+    int pCalc,
     DistDirection mainDistDirection,
     std::function<int(RelPos)> calcDistPos,
     RelPos distPos,
@@ -72,13 +72,13 @@ int UIElement::calcCoordRelToParent(
             }
         }
     }
-    return baseCoord + pCalc() - calcPivotOffset(pivotPos, pivotDim, pivotDefault);
+    return baseCoord + pCalc - calcPivotOffset(pivotPos, pivotDim, pivotDefault);
 }
 
 int UIElement::calcCoord(
     int baseCoord,
     Direction anchorDirection,
-    std::function<int()> pCalc,
+    int pCalc,
     DistDirection mainDistDirection,
     std::function<int(RelPos)> calcDistPos,
     RelPos distPos,
@@ -92,7 +92,7 @@ int UIElement::calcCoord(
     int result;
     if (this->anchors[anchorDirection] && this->parentElement != NULL)
     {
-        result = pCalc();
+        result = pCalc;
     }
     else if (this->parentElement != NULL)
     {
@@ -121,8 +121,7 @@ int UIElement::calcX()
     return this->calcCoord(
                this->x,
                Direction::Left,
-               [this]()
-               { return this->parentElement != NULL ? this->parentElement->calcX() : 0; },
+               this->parentElement != NULL ? this->parentElement->hitbox->minX : 0,
                DistDirection::column,
                [this](RelPos p)
                { return this->calcDistPosH(p); },
@@ -131,7 +130,7 @@ int UIElement::calcX()
                { return this->calcAlignPosV(p); },
                this->alignPosV,
                this->pivotPosH,
-               this->calcW(),
+               this->_w,
                this->pivot.first,
                Direction::Right) +
            this->margin[Direction::Left];
@@ -142,8 +141,7 @@ int UIElement::calcY()
     return this->calcCoord(
                this->y,
                Direction::Up,
-               [this]()
-               { return this->parentElement != NULL ? this->parentElement->calcY() : 0; },
+               this->parentElement != NULL ? this->parentElement->hitbox->minY : 0,
                DistDirection::row,
                [this](RelPos p)
                { return this->calcDistPosV(p); },
@@ -152,7 +150,7 @@ int UIElement::calcY()
                { return this->calcAlignPosH(p); },
                this->alignPosH,
                this->pivotPosV,
-               this->calcH(),
+               this->_h,
                this->pivot.second,
                Direction::Down) +
            this->margin[Direction::Up];
@@ -215,7 +213,7 @@ int UIElement::calcW()
     int result = this->_w;
     if (this->anchors[Direction::Right] && this->parentElement != NULL)
     {
-        result = this->parentElement->calcW();
+        return this->parentElement->hitbox->maxX - this->calcX() - this->margin[Direction::Right];
     }
     return result + this->margin[Direction::Left] + this->margin[Direction::Right];
 }
@@ -225,7 +223,7 @@ int UIElement::calcH()
     int result = this->_h;
     if (this->anchors[Direction::Down] && this->parentElement != NULL)
     {
-        result = this->parentElement->calcH();
+        return this->parentElement->hitbox->maxY - this->calcY() - this->margin[Direction::Down];
     }
     return result + this->margin[Direction::Up] + this->margin[Direction::Down];
 }
@@ -397,12 +395,22 @@ intPair UIElement::calcChildWrapping(int childInd)
 int UIElement::calcDistPosH(RelPos p)
 {
     int childCount = this->parentElement->childElements.size();
-    int wSum = this->parentElement->getChildWSum();
-    int wOffset = this->parentElement->calcChildWrapping(this->childIndex).second;
+    int wSum = 0;
+    int wOffset = 0;
+    if (!this->anchors[Direction::Down])
+    {
+        wSum = this->parentElement->getChildWSum();
+        wOffset = this->parentElement->calcChildWrapping(this->childIndex).second;
+    }
+    else
+    {
+        wSum = this->parentElement->hitbox->w;
+        wOffset = this->parentElement->getChildWSum(this->childIndex - 1);
+    }
     return calcRelPos(
         p,
-        this->parentElement->calcX(),
-        this->parentElement->calcW(),
+        this->parentElement->hitbox->minX,
+        this->parentElement->hitbox->w,
         this->childIndex,
         childCount,
         wSum,
@@ -413,12 +421,22 @@ int UIElement::calcDistPosH(RelPos p)
 int UIElement::calcDistPosV(RelPos p)
 {
     int childCount = this->parentElement->childElements.size();
-    int hSum = this->parentElement->getChildHSum();
-    int hOffset = this->parentElement->calcChildWrapping(this->childIndex).second;
+    int hSum = 0;
+    int hOffset = 0;
+    if (!this->anchors[Direction::Down])
+    {
+        hSum = this->parentElement->getChildHSum();
+        hOffset = this->parentElement->calcChildWrapping(this->childIndex).second;
+    }
+    else
+    {
+        hSum = this->parentElement->hitbox->h;
+        hOffset = this->parentElement->getChildHSum(this->childIndex - 1);
+    }
     return calcRelPos(
         p,
-        this->parentElement->calcY(),
-        this->parentElement->calcH(),
+        this->parentElement->hitbox->minY,
+        this->parentElement->hitbox->h,
         this->childIndex,
         childCount,
         hSum,
@@ -430,7 +448,7 @@ int UIElement::calcAlignPosH(RelPos p)
 {
     RelPos pivotPos = this->pivotPosV != RelPos::None ? this->pivotPosV : this->parentElement->childrenPivotPos;
     int maxH = this->parentElement->getMaxChildH();
-    int parentOffset = calcPivotOffset(pivotPos, this->parentElement->calcH(), this->pivot.second, maxH) + this->parentElement->calcY();
+    int parentOffset = calcPivotOffset(pivotPos, this->parentElement->hitbox->h, this->pivot.second, maxH) + this->parentElement->hitbox->minY;
     int childOffset = this->parentElement->calcChildWrapping(this->childIndex).first * maxH;
 
     int result = calcRelPos(
@@ -449,7 +467,7 @@ int UIElement::calcAlignPosV(RelPos p)
 {
     RelPos pivotPos = this->pivotPosH != RelPos::None ? this->pivotPosH : this->parentElement->childrenPivotPos;
     int maxW = this->parentElement->getMaxChildW();
-    int parentOffset = calcPivotOffset(pivotPos, this->parentElement->calcW(), this->pivot.first, maxW) + this->parentElement->calcX();
+    int parentOffset = calcPivotOffset(pivotPos, this->parentElement->hitbox->w, this->pivot.first, maxW) + this->parentElement->hitbox->minX;
     int childOffset = this->parentElement->calcChildWrapping(this->childIndex).first * maxW;
 
     int result = calcRelPos(
@@ -466,12 +484,10 @@ int UIElement::calcAlignPosV(RelPos p)
 
 bool UIElement::checkCollision(int x, int y)
 {
-    int elemX = this->calcX();
-    int elemY = this->calcY();
-    int X1 = elemX;
-    int X2 = elemX + this->calcW();
-    int Y1 = elemY;
-    int Y2 = elemY + this->calcH();
+    int X1 = this->hitbox->minX;
+    int X2 = this->hitbox->maxX;
+    int Y1 = this->hitbox->minY;
+    int Y2 = this->hitbox->maxY;
     if (this->_cropRect != NULL)
     {
         Setter::setInMin(X1, this->_cropRect->minX);
@@ -554,12 +570,14 @@ void UIElement::draw()
     {
         return;
     }
+    SDL_Rect dimentions;
+    dimentions.x = this->calcX();
+    dimentions.y = this->calcY();
+    dimentions.w = this->calcW();
+    dimentions.h = this->calcH();
     if (this->_texture != NULL)
     {
-        this->_lastDest.x = this->calcX();
-        this->_lastDest.y = this->calcY();
-        this->_lastDest.w = this->calcW();
-        this->_lastDest.h = this->calcH();
+        this->_lastDest = dimentions;
         int tW, tH;
         SDL_QueryTexture(this->_texture, NULL, NULL, &tW, &tH);
         this->_lastCrop.x = 0;
@@ -580,19 +598,22 @@ void UIElement::draw()
             this->_lastCrop.h = this->_lastDest.h * tHCoef;
         }
     }
+    int winW, winH;
+    SDL_GetWindowSize(this->_comm->window, &winW, &winH);
+    this->hitbox->minX = Setter::getInMin(dimentions.x, 0);
+    this->hitbox->minY = Setter::getInMin(dimentions.y, 0);
+    this->hitbox->maxX = Setter::getInMax(this->hitbox->minX + dimentions.w, winW);
+    this->hitbox->maxY = Setter::getInMax(this->hitbox->minY + dimentions.h, winH);
+    this->hitbox->w = dimentions.w;
+    this->hitbox->h = dimentions.h;
+    this->hitbox = hitbox;
     for (auto &childElement : this->childElements)
     {
         if (this->_cropRect != NULL || this->overflow != OverflowMode::Visible)
         {
             if (this->overflow != OverflowMode::Visible)
             {
-                int winW, winH;
-                SDL_GetWindowSize(this->_comm->window, &winW, &winH);
-                std::shared_ptr<LimitRect> childCrop = std::make_shared<LimitRect>();
-                childCrop->minX = Setter::getInMin(this->calcX(), 0);
-                childCrop->minY = Setter::getInMin(this->calcY(), 0);
-                childCrop->maxX = Setter::getInMax(childCrop->minX + this->calcW(), winW);
-                childCrop->maxY = Setter::getInMax(childCrop->minY + this->calcH(), winH);
+                std::shared_ptr<Hitbox> childCrop = std::make_shared<Hitbox>(*hitbox);
                 if (this->_cropRect != NULL)
                 {
                     Setter::setInRange(childCrop->minX, this->_cropRect->minX, this->_cropRect->maxX);

@@ -13,7 +13,7 @@ protected:
     SDL_Surface *_surface = NULL;
     SDL_Texture *_texture = NULL;
     CommonObjects *_comm;
-    std::shared_ptr<LimitRect> _cropRect;
+    std::shared_ptr<Hitbox> _cropRect;
     SDL_Rect _lastDest;
     SDL_Rect _lastCrop;
     int _w = 0;
@@ -29,7 +29,7 @@ protected:
     intPair calcChildWrapping(int childInd);
     int calcCoordRelToParent(
         int baseCoord,
-        std::function<int()> pCalc,
+        int pCalc,
         DistDirection mainDistDirection,
         std::function<int(RelPos)> calcDistPos,
         RelPos distPos,
@@ -40,7 +40,7 @@ protected:
         int pivotDefault);
     int calcCoord(int baseCoord,
                   Direction anchorDirection,
-                  std::function<int()> pCalc,
+                  int pCalc,
                   DistDirection mainDistDirection,
                   std::function<int(RelPos)> calcDistPos,
                   RelPos distPos,
@@ -58,6 +58,7 @@ public:
     int x = 0;
     int y = 0;
     int margin[4] = {0, 0, 0, 0};
+    std::shared_ptr<Hitbox> hitbox = std::make_shared<Hitbox>();
     const std::string name;
     intPair pivot = intPair(0, 0);
     RelPos pivotPosH = RelPos::None;

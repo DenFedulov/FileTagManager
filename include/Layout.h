@@ -31,12 +31,14 @@ enum class OverflowMode
     Scroll,
 };
 
-struct LimitRect
+struct Hitbox
 {
     int minX = 0;
     int minY = 0;
     int maxX = 0;
     int maxY = 0;
+    int w = 0;
+    int h = 0;
 };
 
 int calcPivotOffset(RelPos p, int size, int defaultVal, int childSize = 0);

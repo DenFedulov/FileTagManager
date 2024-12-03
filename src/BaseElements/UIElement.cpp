@@ -6,11 +6,11 @@ UIElement::UIElement(std::string name, CommonObjects *comm) : name(name), _comm(
     {
         if (el->overflow == OverflowMode::Scroll && el->checkCollision(e.wheel.mouseX, e.wheel.mouseY))
         {
-            std::cout << el->name << '\n';
-            std::cout << e.wheel.mouseX << '\n';
-            std::cout << e.wheel.mouseY << '\n';
-            std::cout << e.wheel.y << '\n';
-            int scrollAmount = -e.wheel.y * 10; // TODO: maybe make it configurable/take from windows settings
+            // std::cout << el->name << '\n';
+            // std::cout << e.wheel.mouseX << '\n';
+            // std::cout << e.wheel.mouseY << '\n';
+            // std::cout << e.wheel.y << '\n';
+            int scrollAmount = -e.wheel.y * 15; // TODO: maybe make it configurable/take from windows settings
             switch (el->scrollDirection)
             {
             case Direction::Down:
@@ -27,6 +27,16 @@ UIElement::UIElement(std::string name, CommonObjects *comm) : name(name), _comm(
         return 0;
     };
     this->events.addHandler(SDL_MOUSEWHEEL, editEnable);
+
+    auto onResize = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
+    {
+        if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+        {
+            el->_cropRect = NULL;
+        }
+        return 0;
+    };
+    this->events.addHandler(SDL_WINDOWEVENT, onResize);
 }
 
 int UIElement::calcCoordRelToParent(
@@ -167,6 +177,7 @@ void UIElement::setScrollH(int scrollH)
                        0,
                        this->calcChildRealW() -
                            this->_cropRect->maxX +
+                           this->_cropRect->minX +
                            this->margin[Direction::Left] +
                            this->margin[Direction::Right]);
     this->_scrollH = scrollH;
@@ -186,7 +197,9 @@ void UIElement::setScrollV(int scrollV)
 {
     Setter::setInRange(scrollV,
                        0,
-                       this->calcChildRealH() - this->_cropRect->maxY +
+                       this->calcChildRealH() -
+                           this->_cropRect->maxY +
+                           this->_cropRect->minY +
                            this->margin[Direction::Up] +
                            this->margin[Direction::Down]);
     this->_scrollV = scrollV;
@@ -573,11 +586,13 @@ void UIElement::draw()
         {
             if (this->overflow != OverflowMode::Visible)
             {
+                int winW, winH;
+                SDL_GetWindowSize(this->_comm->window, &winW, &winH);
                 std::shared_ptr<LimitRect> childCrop = std::make_shared<LimitRect>();
-                childCrop->minX = this->calcX();
-                childCrop->minY = this->calcY();
-                childCrop->maxX = childCrop->minX + this->calcW();
-                childCrop->maxY = childCrop->minY + this->calcH();
+                childCrop->minX = Setter::getInMin(this->calcX(), 0);
+                childCrop->minY = Setter::getInMin(this->calcY(), 0);
+                childCrop->maxX = Setter::getInMax(childCrop->minX + this->calcW(), winW);
+                childCrop->maxY = Setter::getInMax(childCrop->minY + this->calcH(), winH);
                 if (this->_cropRect != NULL)
                 {
                     Setter::setInRange(childCrop->minX, this->_cropRect->minX, this->_cropRect->maxX);

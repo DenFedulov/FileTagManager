@@ -25,5 +25,5 @@ void UIPictureElement::updateSurface()
     SurfaceEditor editor(this->_surface);
     editor.multiply(this->_color);
     this->freeTexture();
-    this->_texture = surfaceToTexture(this->_comm, this->_surface);
+    this->_texture = surfaceToTexture(this->comm, this->_surface);
 }

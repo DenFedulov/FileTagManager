@@ -144,6 +144,19 @@ void FileTagManager::triggerEvent(const SDL_Event &event)
     }
 }
 
+void FileTagManager::triggerEvent(const std::shared_ptr<AppEvent> &event)
+{
+    for (auto &element : std::ranges::reverse_view(this->_loadedElements))
+    {
+        std::vector<int> results;
+        results = Vect::concat<int>(results, element->appEvents.triggerEvent((int)event->type, element, event));
+        if (this->processEventResults(results))
+        {
+            break;
+        }
+    }
+}
+
 bool FileTagManager::processEventResults(const std::vector<int> &results)
 {
     int stopPropagation = false;
@@ -188,6 +201,12 @@ bool FileTagManager::loop()
             this->triggerEvent(evt);
             break;
         }
+    }
+
+    while (!this->comm->appEventsQueue.empty())
+    {
+        this->triggerEvent(this->comm->appEventsQueue.front());
+        this->comm->appEventsQueue.pop_front();
     }
 
     if (this->_loadedElements.size() > 0)

@@ -5,7 +5,7 @@
 class ElementGroup
 {
 protected:
-    CommonObjects *_comm;
+    CommonObjects *comm;
     std::shared_ptr<UIElement> _parentElement = NULL;
 
 public:

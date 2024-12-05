@@ -32,7 +32,7 @@ void UIText::updateSurface()
     this->_w = this->_surface->w;
     this->_h = this->_surface->h;
     this->freeTexture();
-    this->_texture = surfaceToTexture(this->_comm, this->_surface);
+    this->_texture = surfaceToTexture(this->comm, this->_surface);
 }
 
 int UIText::getFontSize()
@@ -50,7 +50,7 @@ void UIText::loadFont(std::string path)
     this->_font = TTF_OpenFont(path.c_str(), this->_fontSize);
     if (!this->_font)
     {
-        this->_comm->logger->addErrorLog("Failed to load font: ", TTF_GetError());
+        this->comm->logger->addErrorLog("Failed to load font: ", TTF_GetError());
     }
 }
 
@@ -105,7 +105,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
 {
     this->pivotPosH = RelPos::Center;
     this->pivotPosV = RelPos::Center;
-    this->_fontPath = this->_comm->config->defaultFont;
+    this->_fontPath = this->comm->config->defaultFont;
     this->loadFont(this->_fontPath);
     this->_textHistory.push_back(text);
     this->_color = color;

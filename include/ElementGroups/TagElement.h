@@ -13,8 +13,9 @@ private:
     std::string _name;
 
 public:
-    const int TAG_HIGHT = 40;
-    const int SIDE_WIDTH = 15;
+    const int TAG_HIGHT = 22;
+    const int TAG_FONT_SIZE = 14;
+    const int SIDE_WIDTH = 8;
     TagElement(CommonObjects *comm, std::string name);
     TagElement(CommonObjects *comm, std::string name, RGBA color);
 

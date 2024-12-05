@@ -34,3 +34,18 @@ bool isKeyPressed(int keyCode)
     }
     return false;
 }
+
+std::vector<std::string> getDrivesList()
+{
+    DWORD drives = GetLogicalDrives();
+    const int count = std::popcount(drives);
+    char *arr = new char[count * 4 + 1];
+    GetLogicalDriveStrings(count * 4 + 1, arr);
+    std::vector<std::string> result;
+    for (int i = 0; strlen(&arr[i]) > 0; i += strlen(&arr[i]) + 1)
+    {
+        result.push_back(std::string(&arr[i]));
+    }
+    delete[] arr;
+    return result;
+}

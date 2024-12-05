@@ -8,8 +8,8 @@ MainParent::MainParent(CommonObjects *comm) : ElementGroup(comm)
 void MainParent::createElementGroup()
 {
     int w, h;
-    SDL_GetWindowSize(this->_comm->window, &w, &h);
-    this->_parentElement = std::make_shared<UIElement>("mainParent", this->_comm);
+    SDL_GetWindowSize(this->comm->window, &w, &h);
+    this->_parentElement = std::make_shared<UIElement>("mainParent", this->comm);
     this->_parentElement->setW(w);
     this->_parentElement->setH(h);
     auto onResize = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
@@ -22,8 +22,8 @@ void MainParent::createElementGroup()
         return 0;
     };
     this->_parentElement->events.addHandler(SDL_WINDOWEVENT, onResize);
-    HeaderBar headerBar(this->_comm);
-    MainContents contents(this->_comm);
+    HeaderBar headerBar(this->comm);
+    MainContents contents(this->comm);
 
     this->_parentElement->addChildren({headerBar.getParentElement(), contents.getParentElement()});
 }

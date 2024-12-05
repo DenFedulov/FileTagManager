@@ -87,7 +87,7 @@ void UIBox::updateSurface()
     editor.drawWithCoordsVector(border);
 
     this->freeTexture();
-    this->_texture = surfaceToTexture(this->_comm, this->_surface);
+    this->_texture = surfaceToTexture(this->comm, this->_surface);
 }
 
 int UIBox::getMaxRadius()

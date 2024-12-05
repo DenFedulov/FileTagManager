@@ -1,6 +1,6 @@
 #include "BaseElements/UIElement.h"
 
-UIElement::UIElement(std::string name, CommonObjects *comm) : name(name), _comm(comm)
+UIElement::UIElement(std::string name, CommonObjects *comm) : name(name), comm(comm)
 {
     auto editEnable = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
@@ -536,7 +536,7 @@ void UIElement::freeTexture()
 
 CommonObjects *UIElement::getCommonObjects()
 {
-    return this->_comm;
+    return this->comm;
 }
 
 UIElement::~UIElement()
@@ -618,7 +618,7 @@ void UIElement::draw()
         }
     }
     int winW, winH;
-    SDL_GetWindowSize(this->_comm->window, &winW, &winH);
+    SDL_GetWindowSize(this->comm->window, &winW, &winH);
     this->hitbox->minX = Setter::getInMin(dimentions.x, 0);
     this->hitbox->minY = Setter::getInMin(dimentions.y, 0);
     this->hitbox->maxX = Setter::getInMax(this->hitbox->minX + dimentions.w, winW);
@@ -658,17 +658,17 @@ void UIElement::render(SDL_Point *rotationPoint, double angle, SDL_RendererFlip 
     {
         return;
     }
-    SDL_RenderCopyEx(this->_comm->renderer, this->_texture, &this->_lastCrop, &this->_lastDest, angle, rotationPoint, flip);
+    SDL_RenderCopyEx(this->comm->renderer, this->_texture, &this->_lastCrop, &this->_lastDest, angle, rotationPoint, flip);
     if (this->showHitbox)
     {
-        SDL_SetRenderDrawColor(this->_comm->renderer, 226, 255, 18, 255);
-        SDL_RenderDrawLine(this->_comm->renderer,
+        SDL_SetRenderDrawColor(this->comm->renderer, 226, 255, 18, 255);
+        SDL_RenderDrawLine(this->comm->renderer,
                            this->hitbox->minX, this->hitbox->minY, this->hitbox->maxX, this->hitbox->minY);
-        SDL_RenderDrawLine(this->_comm->renderer,
+        SDL_RenderDrawLine(this->comm->renderer,
                            this->hitbox->minX, this->hitbox->minY, this->hitbox->minX, this->hitbox->maxY);
-        SDL_RenderDrawLine(this->_comm->renderer,
+        SDL_RenderDrawLine(this->comm->renderer,
                            this->hitbox->maxX, this->hitbox->minY, this->hitbox->maxX, this->hitbox->maxY);
-        SDL_RenderDrawLine(this->_comm->renderer,
+        SDL_RenderDrawLine(this->comm->renderer,
                            this->hitbox->minX, this->hitbox->maxY, this->hitbox->maxX, this->hitbox->maxY);
     }
 }

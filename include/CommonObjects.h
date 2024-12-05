@@ -1,4 +1,6 @@
 #pragma once
+#include <deque>
+#include "AppEvents.h"
 #include "Logger.h"
 #include "Config.h"
 #include "SDL.h"
@@ -11,4 +13,5 @@ struct CommonObjects
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
     AppDB *db = NULL;
+    std::deque<std::shared_ptr<AppEvent>> appEventsQueue;
 };

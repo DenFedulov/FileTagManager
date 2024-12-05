@@ -27,27 +27,26 @@ RGBA TagElement::getColor()
 
 void TagElement::createElementGroup()
 {
-    this->_parentElement = std::make_shared<UIElement>(this->_name, this->_comm);
+    this->_parentElement = std::make_shared<UIElement>(this->_name, this->comm);
     this->_parentElement->displayMode = DisplayMode::Distribute;
     this->_parentElement->childrenDistPos = RelPos::Start;
-    this->_parentElement->setMargin(5);
+    this->_parentElement->margin[Direction::Up] = 4;
 
-    auto tagLeft = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "tag_left.png", this->_comm);
+    auto tagLeft = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "tag_left.png", this->comm);
     tagLeft->setColor(this->_color);
     tagLeft->setH(this->TAG_HIGHT);
     tagLeft->setW(this->SIDE_WIDTH);
 
-    auto body = std::make_shared<UIBox>("tag_body", this->_comm, this->TAG_HIGHT, this->TAG_HIGHT, 0, this->_color);
+    auto body = std::make_shared<UIBox>("tag_body", this->comm, this->TAG_HIGHT, this->TAG_HIGHT, 0, this->_color);
     body->displayMode = DisplayMode::Distribute;
     body->childrenDistPos = RelPos::Center;
     body->childrenAlignPos = RelPos::Center;
-    auto tagName = std::make_shared<UIText>("tag_name", this->_comm, strToWStr(this->_name.c_str()));
+    auto tagName = std::make_shared<UIText>("tag_name", this->comm, strToWStr(this->_name.c_str()), this->TAG_FONT_SIZE);
     tagName->editable = true;
     body->setW(tagName->getW() + this->SIDE_WIDTH);
     body->addChildren({tagName});
 
-
-    auto tagRight = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "tag_right.png", this->_comm);
+    auto tagRight = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "tag_right.png", this->comm);
     tagRight->setColor(this->_color);
     tagRight->setH(this->TAG_HIGHT);
     tagRight->setW(this->SIDE_WIDTH);

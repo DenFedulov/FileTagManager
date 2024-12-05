@@ -6,13 +6,13 @@
 #include "custom_types.h"
 #include "EventManager.h"
 #include "Setter.h"
+#include "AppEvents.h"
 
 class UIElement : public Renderable
 {
 protected:
     SDL_Surface *_surface = NULL;
     SDL_Texture *_texture = NULL;
-    CommonObjects *_comm;
     std::shared_ptr<Hitbox> _cropRect;
     SDL_Rect _lastDest;
     SDL_Rect _lastCrop;
@@ -81,6 +81,8 @@ public:
     std::shared_ptr<UIElement> parentElement = NULL;
     std::vector<std::shared_ptr<UIElement>> childElements;
     EventManager<std::shared_ptr<UIElement> &, const SDL_Event &> events;
+    EventManager<std::shared_ptr<UIElement> &, const std::shared_ptr<AppEvent> &> appEvents;
+    CommonObjects *comm;
 
     int calcX();
     int calcY();

@@ -4,6 +4,7 @@
 #include "Elements/UICircle.h"
 #include "ElementGroups/ElementGroup.h"
 #include "ElementGroups/TagElement.h"
+#include "ElementGroups/FileExplorer.h"
 
 class MainContents : public ElementGroup
 {

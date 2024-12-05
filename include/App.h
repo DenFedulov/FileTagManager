@@ -17,6 +17,7 @@
 #include "Layout.h"
 #include "CommonObjects.h"
 #include "AppGlobals.h"
+#include "AppEvents.h"
 
 struct MouseSelection
 {
@@ -32,7 +33,8 @@ private:
     std::unordered_map<std::string, Mix_Music *> _loadedMusic;
     std::vector<std::shared_ptr<UIElement>> _loadedElements;
 
-    void triggerEvent(const SDL_Event &sdlE);
+    void triggerEvent(const SDL_Event &event);
+    void triggerEvent(const std::shared_ptr<AppEvent> &event);
     bool processEventResults(const std::vector<int> &results);
     void sortLoadedElements();
 

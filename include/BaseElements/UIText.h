@@ -26,6 +26,7 @@ protected:
 
 public:
     bool editable = false;
+    bool wrap = true;
     int getFontSize();
     std::string getFontPath();
     void setFont(std::optional<int> fontSize = std::nullopt, std::optional<std::string> path = std::nullopt);
@@ -37,6 +38,6 @@ public:
     void undo();
     void redo();
 
-    UIText(std::string name, CommonObjects *comm, std::wstring text, int fontSize = 24, RGBA color = {0, 0, 0});
+    UIText(std::string name, CommonObjects *comm, std::wstring text, int fontSize = 24, RGBA color = {255, 255, 255});
     ~UIText() override;
 };

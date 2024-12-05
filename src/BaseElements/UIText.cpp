@@ -19,9 +19,9 @@ void UIText::updateSurface()
     }
     uint16string finalTextInt = wStrToUInt16(finalText);
     SDL_Surface *defaultSurface;
-    if (this->parentElement != NULL)
+    if (this->parentElement != NULL && this->wrap)
     {
-        defaultSurface = TTF_RenderUNICODE_Blended_Wrapped(this->_font, finalTextInt.c_str(), color, this->parentElement->getW());
+        defaultSurface = TTF_RenderUNICODE_Blended_Wrapped(this->_font, finalTextInt.c_str(), color, this->parentElement->hitbox->w);
     }
     else
     {

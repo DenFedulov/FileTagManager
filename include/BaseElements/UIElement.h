@@ -50,6 +50,7 @@ protected:
                   int pivotDim,
                   int pivotDefault,
                   Direction scrollDirection);
+    bool hasCropRect();
 
 public:
     int defaultRenderOrder = 0;
@@ -72,6 +73,7 @@ public:
     RelPos childrenAlignPos = RelPos::None;
     bool anchors[4] = {0, 0, 0, 0};
     bool visible = true;
+    bool showHitbox = false;
     OverflowMode overflow = OverflowMode::Visible;
     Direction scrollDirection = Direction::Down;
     DisplayMode displayMode = DisplayMode::Normal;

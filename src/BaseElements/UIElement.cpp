@@ -97,23 +97,27 @@ int UIElement::calcCoord(
     else if (this->parentElement != NULL)
     {
         result = this->calcCoordRelToParent(
-                     baseCoord,
-                     pCalc,
-                     mainDistDirection,
-                     calcDistPos,
-                     distPos,
-                     calcAlignPos,
-                     alignPos,
-                     pivotPos,
-                     pivotDim,
-                     pivotDefault) -
-                 (scrollDirection == Direction::Right ? this->parentElement->_scrollH : this->parentElement->_scrollV);
+            baseCoord,
+            pCalc,
+            mainDistDirection,
+            calcDistPos,
+            distPos,
+            calcAlignPos,
+            alignPos,
+            pivotPos,
+            pivotDim,
+            pivotDefault);
     }
     else
     {
         result = baseCoord - calcPivotOffset(pivotPos, pivotDim, pivotDefault);
     }
     return result;
+}
+
+bool UIElement::hasCropRect()
+{
+    return this->parentElement != NULL && this->parentElement->_cropRect != NULL;
 }
 
 int UIElement::calcX()
@@ -171,14 +175,17 @@ int UIElement::getScrollH()
 
 void UIElement::setScrollH(int scrollH)
 {
-    Setter::setInRange(scrollH,
-                       0,
-                       this->calcChildRealW() -
-                           this->_cropRect->maxX +
-                           this->_cropRect->minX +
-                           this->margin[Direction::Left] +
-                           this->margin[Direction::Right]);
-    this->_scrollH = scrollH;
+    if (this->_cropRect != NULL)
+    {
+        Setter::setInRange(scrollH,
+                           0,
+                           this->calcChildRealW() -
+                               this->_cropRect->maxX +
+                               this->_cropRect->minX +
+                               this->margin[Direction::Left] +
+                               this->margin[Direction::Right]);
+        this->_scrollH = scrollH;
+    }
 }
 
 void UIElement::moveScrollH(int step)
@@ -193,14 +200,17 @@ int UIElement::getScrollV()
 
 void UIElement::setScrollV(int scrollV)
 {
-    Setter::setInRange(scrollV,
-                       0,
-                       this->calcChildRealH() -
-                           this->_cropRect->maxY +
-                           this->_cropRect->minY +
-                           this->margin[Direction::Up] +
-                           this->margin[Direction::Down]);
-    this->_scrollV = scrollV;
+    if (this->_cropRect != NULL)
+    {
+        Setter::setInRange(scrollV,
+                           0,
+                           this->calcChildRealH() -
+                               this->_cropRect->maxY +
+                               this->_cropRect->minY +
+                               this->margin[Direction::Up] +
+                               this->margin[Direction::Down]);
+        this->_scrollV = scrollV;
+    }
 }
 
 void UIElement::moveScrollV(int step)
@@ -488,12 +498,12 @@ bool UIElement::checkCollision(int x, int y)
     int X2 = this->hitbox->maxX;
     int Y1 = this->hitbox->minY;
     int Y2 = this->hitbox->maxY;
-    if (this->_cropRect != NULL)
+    if (this->hasCropRect())
     {
-        Setter::setInMin(X1, this->_cropRect->minX);
-        Setter::setInMax(X2, this->_cropRect->maxX);
-        Setter::setInMin(Y1, this->_cropRect->minY);
-        Setter::setInMax(Y2, this->_cropRect->maxY);
+        Setter::setInMin(X1, this->parentElement->_cropRect->minX);
+        Setter::setInMax(X2, this->parentElement->_cropRect->maxX);
+        Setter::setInMin(Y1, this->parentElement->_cropRect->minY);
+        Setter::setInMax(Y2, this->parentElement->_cropRect->maxY);
     }
     return x >= X1 &&
            x < X2 &&
@@ -584,15 +594,24 @@ void UIElement::draw()
         this->_lastCrop.y = 0;
         this->_lastCrop.w = tW;
         this->_lastCrop.h = tH;
-        if (this->_cropRect != NULL)
+        if (this->hasCropRect())
         {
             double tWCoef = (double)tW / this->_lastDest.w;
             double tHCoef = (double)tH / this->_lastDest.h;
+
+            int offsetH = this->_lastDest.x - this->parentElement->_cropRect->minX;
+            this->_lastDest.x -= Setter::getInMax(this->parentElement->_cropRect->scrollH, offsetH);
+            this->_lastCrop.x = Setter::getInMin(this->parentElement->_cropRect->scrollH - offsetH, 0) * tWCoef;
+
+            int offsetV = this->_lastDest.y - this->parentElement->_cropRect->minY;
+            this->_lastDest.y -= Setter::getInMax(this->parentElement->_cropRect->scrollV, offsetV);
+            this->_lastCrop.y = Setter::getInMin(this->parentElement->_cropRect->scrollV - offsetV, 0) * tHCoef;
+
             this->_lastDest.w = Setter::getInMax(this->_lastDest.x + this->_lastDest.w,
-                                                 this->_cropRect->maxX) -
+                                                 this->parentElement->_cropRect->maxX) -
                                 this->_lastDest.x;
             this->_lastDest.h = Setter::getInMax(this->_lastDest.y + this->_lastDest.h,
-                                                 this->_cropRect->maxY) -
+                                                 this->parentElement->_cropRect->maxY) -
                                 this->_lastDest.y;
             this->_lastCrop.w = this->_lastDest.w * tWCoef;
             this->_lastCrop.h = this->_lastDest.h * tHCoef;
@@ -606,27 +625,28 @@ void UIElement::draw()
     this->hitbox->maxY = Setter::getInMax(this->hitbox->minY + dimentions.h, winH);
     this->hitbox->w = dimentions.w;
     this->hitbox->h = dimentions.h;
+    this->hitbox->scrollH = this->_scrollH;
+    this->hitbox->scrollV = this->_scrollV;
     this->hitbox = hitbox;
     for (auto &childElement : this->childElements)
     {
-        if (this->_cropRect != NULL || this->overflow != OverflowMode::Visible)
+        if ((this->hasCropRect()) || this->overflow != OverflowMode::Visible)
         {
             if (this->overflow != OverflowMode::Visible)
             {
                 std::shared_ptr<Hitbox> childCrop = std::make_shared<Hitbox>(*hitbox);
-                if (this->_cropRect != NULL)
+                if (this->hasCropRect())
                 {
-                    Setter::setInRange(childCrop->minX, this->_cropRect->minX, this->_cropRect->maxX);
-                    Setter::setInRange(childCrop->maxX, this->_cropRect->minX, this->_cropRect->maxX);
-                    Setter::setInRange(childCrop->minY, this->_cropRect->minY, this->_cropRect->maxY);
-                    Setter::setInRange(childCrop->maxY, this->_cropRect->minY, this->_cropRect->maxY);
+                    Setter::setInRange(childCrop->minX, this->parentElement->_cropRect->minX, this->parentElement->_cropRect->maxX);
+                    Setter::setInRange(childCrop->maxX, this->parentElement->_cropRect->minX, this->parentElement->_cropRect->maxX);
+                    Setter::setInRange(childCrop->minY, this->parentElement->_cropRect->minY, this->parentElement->_cropRect->maxY);
+                    Setter::setInRange(childCrop->maxY, this->parentElement->_cropRect->minY, this->parentElement->_cropRect->maxY);
                 }
-                childElement->_cropRect = childCrop;
                 this->_cropRect = childCrop;
             }
             else
             {
-                childElement->_cropRect = this->_cropRect;
+                this->_cropRect = this->parentElement->_cropRect;
             }
         }
         childElement->draw();
@@ -639,4 +659,16 @@ void UIElement::render(SDL_Point *rotationPoint, double angle, SDL_RendererFlip 
         return;
     }
     SDL_RenderCopyEx(this->_comm->renderer, this->_texture, &this->_lastCrop, &this->_lastDest, angle, rotationPoint, flip);
+    if (this->showHitbox)
+    {
+        SDL_SetRenderDrawColor(this->_comm->renderer, 226, 255, 18, 255);
+        SDL_RenderDrawLine(this->_comm->renderer,
+                           this->hitbox->minX, this->hitbox->minY, this->hitbox->maxX, this->hitbox->minY);
+        SDL_RenderDrawLine(this->_comm->renderer,
+                           this->hitbox->minX, this->hitbox->minY, this->hitbox->minX, this->hitbox->maxY);
+        SDL_RenderDrawLine(this->_comm->renderer,
+                           this->hitbox->maxX, this->hitbox->minY, this->hitbox->maxX, this->hitbox->maxY);
+        SDL_RenderDrawLine(this->_comm->renderer,
+                           this->hitbox->minX, this->hitbox->maxY, this->hitbox->maxX, this->hitbox->maxY);
+    }
 }

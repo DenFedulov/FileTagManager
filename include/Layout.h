@@ -39,6 +39,8 @@ struct Hitbox
     int maxY = 0;
     int w = 0;
     int h = 0;
+    int scrollH = 0;
+    int scrollV = 0;
 };
 
 int calcPivotOffset(RelPos p, int size, int defaultVal, int childSize = 0);

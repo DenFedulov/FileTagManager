@@ -4,32 +4,10 @@
 #include <string>
 #include <functional>
 
-enum class MouseButtons
-{
-    None,
-    Left,
-    Middle,
-    Right,
-    Back,
-    Forward
-};
-
-enum class EventResult
-{
-    Nothing,
-    Quit,
-    StopPropagation,
-};
-
-enum class CustomEvent
-{
-    MOUSE_CLICK = -1
-};
-
-template <typename... Args>
+template <typename EventResultType, typename... Args>
 class EventManager
 {
-    typedef std::unordered_map<int, std::function<int(Args...)>> CallbackList;
+    typedef std::unordered_map<int, std::function<EventResultType(Args...)>> CallbackList;
     typedef std::unordered_map<int, CallbackList> EventHandlers;
 
 private:
@@ -44,7 +22,7 @@ private:
     }
 
 public:
-    int addHandler(const int &eventTypeEnum, std::function<int(Args...)> func)
+    int addHandler(const int &eventTypeEnum, std::function<EventResultType(Args...)> func)
     {
         CallbackList &callbacks = this->getCallbackList(eventTypeEnum);
         int index = callbacks.size();
@@ -61,11 +39,11 @@ public:
         }
         return false;
     }
-    std::vector<int> triggerEvent(const int &eventTypeEnum, Args... args)
+    std::vector<EventResultType> triggerEvent(const int &eventTypeEnum, Args... args)
     {
-        std::vector<int> results;
+        std::vector<EventResultType> results;
         CallbackList &callbacks = this->getCallbackList(eventTypeEnum);
-        for (auto &[i, func] : callbacks)
+        for (const auto &[i, func] : callbacks)
         {
             results.push_back(func(std::forward<Args>(args)...));
         }

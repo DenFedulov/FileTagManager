@@ -31,7 +31,7 @@ void FileExplorer::createElementGroup()
     auto addBackward = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
         el->comm->appEventsQueue.push_back(std::make_shared<AppEvent>(AppEventType::Backward));
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     backwardsIcon->events.addHandler((int)CustomEvent::MOUSE_CLICK, addBackward);
     backwardsButton->addChildren({backwardsIcon});
@@ -45,7 +45,7 @@ void FileExplorer::createElementGroup()
     auto addForward = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
         el->comm->appEventsQueue.push_back(std::make_shared<AppEvent>(AppEventType::Forward));
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     forwardsIcon->events.addHandler((int)CustomEvent::MOUSE_CLICK, addForward);
 
@@ -60,7 +60,7 @@ void FileExplorer::createElementGroup()
     auto addFolderUp = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
         el->comm->appEventsQueue.push_back(std::make_shared<AppEvent>(AppEventType::FolderUp));
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     folderUpIcon->events.addHandler((int)CustomEvent::MOUSE_CLICK, addFolderUp);
 
@@ -80,19 +80,19 @@ void FileExplorer::createElementGroup()
     auto onBackward = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         std::cout << "text onBackward called" << '\n';
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     currentPathText->appEvents.addHandler((int)AppEventType::Backward, onBackward);
     auto onForward = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         std::cout << "text onForward called" << '\n';
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     currentPathText->appEvents.addHandler((int)AppEventType::Forward, onForward);
     auto onFolderUp = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         std::cout << "text onFolderUp called" << '\n';
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     currentPathText->appEvents.addHandler((int)AppEventType::FolderUp, onFolderUp);
     currentPath->addChildren({currentPathText});

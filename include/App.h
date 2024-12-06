@@ -35,7 +35,7 @@ private:
 
     void triggerEvent(const SDL_Event &event);
     void triggerEvent(const std::shared_ptr<AppEvent> &event);
-    bool processEventResults(const std::vector<int> &results);
+    bool processEventResults(const std::vector<EventResult<std::shared_ptr<UIElement>>> &results);
     void sortLoadedElements();
 
 public:

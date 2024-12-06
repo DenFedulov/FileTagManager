@@ -115,7 +115,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         if (!textEl->editable)
         {
-            return 0;
+            return EventResult<std::shared_ptr<UIElement>>();
         }
         if (el->checkCollision(e.button.x, e.button.y))
         {
@@ -127,7 +127,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
             textEl->_editing = false;
         }
         textEl->updateSurface();
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     this->events.addHandler(SDL_MOUSEBUTTONUP, editEnable);
 
@@ -136,7 +136,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         if (!textEl->_editing)
         {
-            return 0;
+            return EventResult<std::shared_ptr<UIElement>>();
         }
         if (std::string(e.text.text).length() > 0)
         {
@@ -146,7 +146,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
             textEl->setText(curText);
             textEl->setCursorIndex(textEl->getCursorIndex() + eText.length());
         }
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     this->events.addHandler(SDL_TEXTINPUT, textInput);
 
@@ -155,7 +155,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         if (!textEl->_editing)
         {
-            return 0;
+            return EventResult<std::shared_ptr<UIElement>>();
         }
         if (e.key.keysym.sym == SDLK_BACKSPACE && textEl->getText().length() > 0 && textEl->getCursorIndex() > 0)
         {
@@ -204,7 +204,7 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
         {
             textEl->redo();
         }
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     this->events.addHandler(SDL_KEYDOWN, specialKeysInput);
 

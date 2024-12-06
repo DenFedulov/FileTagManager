@@ -12,3 +12,17 @@ struct AppEvent
 {
     AppEventType type = AppEventType::None;
 };
+
+enum class EventResultType
+{
+    Nothing,
+    Quit,
+    StopPropagation,
+};
+
+template <typename ResultDataType>
+struct EventResult
+{
+    int type = 0;
+    ResultDataType data;
+};

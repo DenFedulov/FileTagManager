@@ -24,9 +24,9 @@ void HeaderBar::createElementGroup()
     {
         if (e.button.button == (int)MouseButtons::Left)
         {
-            return (int)EventResult::Quit;
+            return EventResult<std::shared_ptr<UIElement>>((int)EventResultType::Quit);
         }
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     close->events.addHandler((int)CustomEvent::MOUSE_CLICK, closeApp);
 

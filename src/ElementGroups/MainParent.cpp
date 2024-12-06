@@ -19,7 +19,7 @@ void MainParent::createElementGroup()
             el->setW(e.window.data1);
             el->setH(e.window.data2);
         }
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     this->_parentElement->events.addHandler(SDL_WINDOWEVENT, onResize);
     HeaderBar headerBar(this->comm);

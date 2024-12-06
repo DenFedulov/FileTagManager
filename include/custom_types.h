@@ -30,3 +30,18 @@ enum Direction
     Down,
     Left
 };
+
+enum class CustomEvent
+{
+    MOUSE_CLICK = -1
+};
+
+enum class MouseButtons
+{
+    None,
+    Left,
+    Middle,
+    Right,
+    Back,
+    Forward
+};

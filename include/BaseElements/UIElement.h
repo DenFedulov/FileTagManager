@@ -80,8 +80,8 @@ public:
     DistDirection distDirection = DistDirection::column;
     std::shared_ptr<UIElement> parentElement = NULL;
     std::vector<std::shared_ptr<UIElement>> childElements;
-    EventManager<std::shared_ptr<UIElement> &, const SDL_Event &> events;
-    EventManager<std::shared_ptr<UIElement> &, const std::shared_ptr<AppEvent> &> appEvents;
+    EventManager<EventResult<std::shared_ptr<UIElement>>, std::shared_ptr<UIElement> &, const SDL_Event &> events;
+    EventManager<EventResult<std::shared_ptr<UIElement>>, std::shared_ptr<UIElement> &, const std::shared_ptr<AppEvent> &> appEvents;
     CommonObjects *comm;
 
     int calcX();

@@ -22,9 +22,9 @@ UIElement::UIElement(std::string name, CommonObjects *comm) : name(name), comm(c
                 el->moveScrollH(scrollAmount);
                 break;
             }
-            return (int)EventResult::StopPropagation;
+            return EventResult<std::shared_ptr<UIElement>>((int)EventResultType::StopPropagation);
         }
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     this->events.addHandler(SDL_MOUSEWHEEL, editEnable);
 
@@ -34,7 +34,7 @@ UIElement::UIElement(std::string name, CommonObjects *comm) : name(name), comm(c
         {
             el->_cropRect = NULL;
         }
-        return 0;
+        return EventResult<std::shared_ptr<UIElement>>();
     };
     this->events.addHandler(SDL_WINDOWEVENT, onResize);
 }

@@ -130,13 +130,13 @@ void FileTagManager::triggerEvent(const SDL_Event &event)
 {
     for (auto &element : std::ranges::reverse_view(this->_loadedElements))
     {
-        std::vector<int> results;
+        std::vector<EventResult<std::shared_ptr<UIElement>>> results;
         if (event.type == SDL_MOUSEBUTTONUP && element->checkCollision(event.button.x, event.button.y))
         {
-            results = Vect::concat<int>(results, element->events.triggerEvent((int)CustomEvent::MOUSE_CLICK, element, event));
+            results = Vect::concat<EventResult<std::shared_ptr<UIElement>>>(results, element->events.triggerEvent((int)CustomEvent::MOUSE_CLICK, element, event));
         }
 
-        results = Vect::concat<int>(results, element->events.triggerEvent(event.type, element, event));
+        results = Vect::concat<EventResult<std::shared_ptr<UIElement>>>(results, element->events.triggerEvent(event.type, element, event));
         if (this->processEventResults(results))
         {
             break;
@@ -148,8 +148,8 @@ void FileTagManager::triggerEvent(const std::shared_ptr<AppEvent> &event)
 {
     for (auto &element : std::ranges::reverse_view(this->_loadedElements))
     {
-        std::vector<int> results;
-        results = Vect::concat<int>(results, element->appEvents.triggerEvent((int)event->type, element, event));
+        std::vector<EventResult<std::shared_ptr<UIElement>>> results;
+        results = Vect::concat<EventResult<std::shared_ptr<UIElement>>>(results, element->appEvents.triggerEvent((int)event->type, element, event));
         if (this->processEventResults(results))
         {
             break;
@@ -157,17 +157,17 @@ void FileTagManager::triggerEvent(const std::shared_ptr<AppEvent> &event)
     }
 }
 
-bool FileTagManager::processEventResults(const std::vector<int> &results)
+bool FileTagManager::processEventResults(const std::vector<EventResult<std::shared_ptr<UIElement>>> &results)
 {
     int stopPropagation = false;
-    for (int result : results)
+    for (auto result : results)
     {
-        switch (result)
+        switch (result.type)
         {
-        case (int)EventResult::Quit:
+        case (int)EventResultType::Quit:
             this->quitSDL();
             break;
-        case (int)EventResult::StopPropagation:
+        case (int)EventResultType::StopPropagation:
             stopPropagation = true;
             break;
         }

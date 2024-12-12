@@ -43,5 +43,11 @@ struct Hitbox
     int scrollV = 0;
 };
 
+struct ChildWrappingData
+{
+    int mainDirectionOffset = 0;
+    int otherDirectionOffset = 0;
+};
+
 int calcPivotOffset(RelPos p, int size, int defaultVal, int childSize = 0);
 int calcRelPos(RelPos p, int parentOffset, int parentSize, int childIndex, int childCount, int childrenSize, int childOffset, int defaultVal);

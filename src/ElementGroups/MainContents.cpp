@@ -22,14 +22,6 @@ void MainContents::createElementGroup()
     std::vector<std::shared_ptr<UIElement>> tags;
     for (int i = 0; i < 15; i++)
     {
-        // if (i == 3)
-        // {
-        //     TagElement tag(this->comm, "test tag asdasdawdawadsfasdfasdsfhsdfhsdfvnsdrfgnsdfghgggggggggggggggsdfghsfdhgdfghdfghdfghsftg;ohnijusfgpsipiuhmsdgroimpusbdhfomiubhsvsogimuvdyfsogimfhudygsodfihmuydsoghiruvdgsivhoumlfgfdvihksumdfghrfhndfghdfghdrfthbdftghdfghdfghdfghdfghdfghjdfghdfvgsdfvgdxvgbdfghbdfbxcvbxcfgbcfgbcfgbfdfaewrhbgafdhgzsdgaserfhgsdfgdaszdawdawdawd" + std::to_string(i), RGBA(18, 198, 255, 120));
-        //     tag.getParentElement()->overflow = OverflowMode::Scroll;
-        //     tag.getParentElement()->scrollDirection = Direction::Right;
-        //     tags.push_back(tag.getParentElement());
-        //     continue;
-        // }
         TagElement tag(this->comm, "test tag " + std::to_string(i), RGBA(18, 198, 255, 120));
         tags.push_back(tag.getParentElement());
     }
@@ -42,12 +34,12 @@ void MainContents::createElementGroup()
     sidebarContents->childrenAlignPos = RelPos::Start;
     sidebarContents->margin[Direction::Left] = 5;
     sidebarContents->margin[Direction::Right] = 5;
-    sidebarContents->addChildren(tags);
+    UIElement::addChildren(sidebarContents, tags);
 
-    sidebar->addChildren({sidebarContents});
+    UIElement::addChildren(sidebar, {sidebarContents});
 
     FileExplorer explorer(this->comm);
 
-    this->_parentElement->addChildren({sidebar,
-                                       explorer.getParentElement()});
+    UIElement::addChildren(this->_parentElement, {sidebar,
+                                                             explorer.getParentElement()});
 }

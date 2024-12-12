@@ -25,5 +25,5 @@ void MainParent::createElementGroup()
     HeaderBar headerBar(this->comm);
     MainContents contents(this->comm);
 
-    this->_parentElement->addChildren({headerBar.getParentElement(), contents.getParentElement()});
+    UIElement::addChildren(this->_parentElement, {headerBar.getParentElement(), contents.getParentElement()});
 }

@@ -2,6 +2,7 @@
 #include "BaseElements/UIText.h"
 #include "BaseElements/UIPictureElement.h"
 #include "ElementGroups/ElementGroup.h"
+#include "WindowsUtils.h"
 
 class FileElement : public ElementGroup
 {
@@ -9,16 +10,16 @@ private:
     void createElementGroup();
 
 public:
-    std::string filename;
+    std::wstring filename;
     enum IconType
     {
-        Default,
+        Error,
+        File,
+        Folder,
         Drive,
-        Image,
-        Vidoe
     };
-    IconType iconType = IconType::Default;
+    IconType iconType = IconType::Error;
     int iconSize = 64;
-    int fontSize = 18;
-    FileElement(CommonObjects *comm, std::string filename);
+    int fontSize = 12;
+    FileElement(CommonObjects *comm, std::wstring filename);
 };

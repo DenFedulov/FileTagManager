@@ -92,7 +92,7 @@ void UIBox::updateSurface()
 
 int UIBox::getMaxRadius()
 {
-    return std::min(this->_w / 2, this->_h / 2);
+    return (std::min)(this->_w / 2, this->_h / 2);
 }
 
 UIBox::UIBox(std::string name, CommonObjects *comm, int w, int h,

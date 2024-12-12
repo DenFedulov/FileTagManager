@@ -13,4 +13,5 @@ namespace G_App
     const std::string FONTS_PATH = RESOURCES_PATH + "fonts/";
     const std::string CONFIG_FILENAME = "config.json";
     const std::string DB_FILENAME = APP_NAME + ".db";
+    const std::wstring DEFAULT_PATH = L"<select disk>";
 }

@@ -9,7 +9,9 @@
 #include "App.h"
 #include "SDL_Helpers.h"
 #include "AppDB.h"
-#pragma comment(lib,"user32.lib") 
+#include "type_helpers.h"
+#pragma comment(lib, "user32.lib")
+#pragma comment(lib, "Shell32.lib")
 
 int main(int argc, char *argv[])
 {
@@ -42,7 +44,7 @@ int main(int argc, char *argv[])
 	}
 	catch (const std::exception &e)
 	{
-		logger.addLog(typeid(e).name() + std::string(" ") + (std::string)e.what());
+		logger.addLog(std::string(typeid(e).name()) + " " + e.what());
 		logger.writeLog();
 	}
 	return 0;

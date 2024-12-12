@@ -19,9 +19,10 @@ void UIText::updateSurface()
     }
     uint16string finalTextInt = wStrToUInt16(finalText);
     SDL_Surface *defaultSurface;
-    if (this->parentElement != NULL && this->wrap)
+    if (this->wrap && (this->parentElement != NULL || this->_wrapSize > 0))
     {
-        defaultSurface = TTF_RenderUNICODE_Blended_Wrapped(this->_font, finalTextInt.c_str(), color, this->parentElement->hitbox->w);
+        defaultSurface = TTF_RenderUNICODE_Blended_Wrapped(this->_font, finalTextInt.c_str(), color,
+                                                           this->_wrapSize > 0 ? this->_wrapSize : this->parentElement->calcW());
     }
     else
     {
@@ -99,9 +100,20 @@ void UIText::setCursorIndex(int cursorIndex)
     this->updateSurface();
 }
 
+int UIText::getWrapSize()
+{
+    return this->_wrapSize;
+}
+
+void UIText::setWrapSize(int wrapSize)
+{
+    this->_wrapSize = wrapSize;
+    this->updateSurface();
+}
+
 UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fontSize, RGBA color) : UIDynamicElement(name, comm),
-                                                                                                     _text(text),
-                                                                                                     _fontSize(fontSize)
+                                                                                                      _text(text),
+                                                                                                      _fontSize(fontSize)
 {
     this->pivotPosH = RelPos::Center;
     this->pivotPosV = RelPos::Center;

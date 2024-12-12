@@ -27,3 +27,33 @@ int Str::distanceToWSpace(const std::wstring &str, int step, int offset)
     Setter::setInRange(distance, 1, (int)(str.length()));
     return distance;
 }
+
+std::string Str::getTailByChar(const std::string &str, const char *c, bool excludeChar)
+{
+    size_t foundIndex = str.find_last_of(c);
+    if (foundIndex < 0)
+    {
+        return std::string();
+    }
+    return str.substr(foundIndex + excludeChar);
+}
+
+std::wstring Str::getTailByChar(const std::wstring &str, const wchar_t *c, bool excludeChar)
+{
+    size_t foundIndex = str.find_last_of(c);
+    if (foundIndex < 0)
+    {
+        return std::wstring();
+    }
+    return str.substr(foundIndex + excludeChar);
+}
+
+std::wstring Str::cutTailByChar(const std::wstring &str, const wchar_t *c, bool excludeChar)
+{
+    size_t foundIndex = str.find_last_of(c);
+    if (foundIndex < 0)
+    {
+        return str;
+    }
+    return str.substr(0, foundIndex + 1 - excludeChar);
+}

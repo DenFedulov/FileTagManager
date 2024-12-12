@@ -49,3 +49,22 @@ std::vector<std::string> getDrivesList()
     delete[] arr;
     return result;
 }
+
+void showFileInExplorer(const std::wstring &path)
+{
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    if (FAILED(hr))
+    {
+        return;
+    }
+    PIDLIST_ABSOLUTE pidlFolder = nullptr;
+    SFGAOF attributes = 0;
+    hr = SHParseDisplayName(path.c_str(), nullptr, &pidlFolder, 0, &attributes);
+
+    if (SUCCEEDED(hr) && pidlFolder)
+    {
+        hr = SHOpenFolderAndSelectItems(pidlFolder, 0, nullptr, 0);
+        CoTaskMemFree(pidlFolder);
+    }
+    CoUninitialize();
+}

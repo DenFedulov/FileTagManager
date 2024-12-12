@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseElements/UIBox.h"
 #include "ElementGroups/ElementGroup.h"
-#include "ElementGroups/FileElement.h"
+#include "ElementGroups/FilesGroup.h"
 #include "WindowsUtils.h"
 
 class FileExplorer : public ElementGroup

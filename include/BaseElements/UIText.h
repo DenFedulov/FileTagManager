@@ -13,6 +13,7 @@ private:
     TTF_Font *_font = nullptr;
     std::string _fontPath;
     int _fontSize = 24;
+    int _wrapSize = 0;
     std::wstring _text = L"";
     int _cursorIndex = -1;
     bool _editing = false;
@@ -20,8 +21,6 @@ private:
     int _historyCursor = 1;
 
     void loadFont(std::string path);
-
-protected:
     void updateSurface();
 
 public:
@@ -34,6 +33,9 @@ public:
     void setText(std::wstring text);
     int getCursorIndex();
     void setCursorIndex(int cursorIndex);
+
+    int getWrapSize();
+    void setWrapSize(int wrapSize);
 
     void undo();
     void redo();

@@ -4,11 +4,6 @@ UIDynamicElement::UIDynamicElement(std::string name, CommonObjects *comm) : UIEl
 {
 }
 
-UIDynamicElement::~UIDynamicElement()
-{
-    this->freeSurface();
-}
-
 void UIDynamicElement::setColor(RGBA color)
 {
     this->_color = color;

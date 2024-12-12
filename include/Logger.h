@@ -1,6 +1,7 @@
 #pragma once
 #include "Filesystem.h"
 #include "date.h"
+#include "type_helpers.h"
 #include <stdexcept>
 
 class Logger

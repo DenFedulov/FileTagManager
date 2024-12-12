@@ -86,8 +86,7 @@ int UIElement::calcCoord(
     RelPos alignPos,
     RelPos pivotPos,
     int pivotDim, // potential overhang
-    int pivotDefault,
-    Direction scrollDirection)
+    int pivotDefault)
 {
     int result;
     if (this->anchors[anchorDirection] && this->parentElement != NULL)
@@ -122,6 +121,10 @@ bool UIElement::hasCropRect()
 
 int UIElement::calcX()
 {
+    if (!this->visible)
+    {
+        return 0;
+    }
     return this->calcCoord(
                this->x,
                Direction::Left,
@@ -135,13 +138,16 @@ int UIElement::calcX()
                this->alignPosV,
                this->pivotPosH,
                this->_w,
-               this->pivot.first,
-               Direction::Right) +
+               this->pivot.first) +
            this->margin[Direction::Left];
 }
 
 int UIElement::calcY()
 {
+    if (!this->visible)
+    {
+        return 0;
+    }
     return this->calcCoord(
                this->y,
                Direction::Up,
@@ -155,8 +161,7 @@ int UIElement::calcY()
                this->alignPosH,
                this->pivotPosV,
                this->_h,
-               this->pivot.second,
-               Direction::Down) +
+               this->pivot.second) +
            this->margin[Direction::Up];
 }
 
@@ -218,24 +223,32 @@ void UIElement::moveScrollV(int step)
     this->setScrollV(this->_scrollV + step);
 }
 
-int UIElement::calcW()
+int UIElement::calcW(bool inner)
 {
+    if (!this->visible)
+    {
+        return 0;
+    }
     int result = this->_w;
     if (this->anchors[Direction::Right] && this->parentElement != NULL)
     {
         return this->parentElement->hitbox->maxX - this->calcX() - this->margin[Direction::Right];
     }
-    return result + this->margin[Direction::Left] + this->margin[Direction::Right];
+    return result + (inner ? 0 : this->margin[Direction::Left] + this->margin[Direction::Right]);
 }
 
-int UIElement::calcH()
+int UIElement::calcH(bool inner)
 {
+    if (!this->visible)
+    {
+        return 0;
+    }
     int result = this->_h;
     if (this->anchors[Direction::Down] && this->parentElement != NULL)
     {
         return this->parentElement->hitbox->maxY - this->calcY() - this->margin[Direction::Down];
     }
-    return result + this->margin[Direction::Up] + this->margin[Direction::Down];
+    return result + (inner ? 0 : this->margin[Direction::Up] + this->margin[Direction::Down]);
 }
 
 int UIElement::getW()
@@ -266,7 +279,7 @@ int UIElement::getZ()
 void UIElement::setZ(int z)
 {
     this->_z = z;
-    for (const auto &child : this->childElements)
+    for (const auto &child : this->childElements.vec)
     {
         child->setZ(z);
     }
@@ -284,22 +297,22 @@ int UIElement::calcPivotOffsetV(RelPos p)
 
 int UIElement::getChildWSum(std::optional<int> upTo)
 {
-    int limit = upTo.value_or(this->childElements.size() - 1);
+    int limit = upTo.value_or(this->childElements.vec.size() - 1);
     int sum = 0;
     for (int i = 0; i <= limit; i++)
     {
-        sum += this->childElements[i]->calcW();
+        sum += this->childElements.vec[i]->calcW();
     }
     return sum;
 }
 
 int UIElement::getChildHSum(std::optional<int> upTo)
 {
-    int limit = upTo.value_or(this->childElements.size() - 1);
+    int limit = upTo.value_or(this->childElements.vec.size() - 1);
     int sum = 0;
     for (int i = 0; i <= limit; i++)
     {
-        sum += this->childElements[i]->calcH();
+        sum += this->childElements.vec[i]->calcH();
     }
     return sum;
 }
@@ -308,7 +321,7 @@ int UIElement::calcChildRealW()
 {
     int min = INT_MAX;
     int max = INT_MIN;
-    for (const auto &child : this->childElements)
+    for (const auto &child : this->childElements.vec)
     {
         int x = child->calcX();
         int x2 = x + child->calcW();
@@ -328,7 +341,7 @@ int UIElement::calcChildRealH()
 {
     int min = INT_MAX;
     int max = INT_MIN;
-    for (const auto &child : this->childElements)
+    for (const auto &child : this->childElements.vec)
     {
         int y = child->calcY();
         int y2 = y + child->calcH();
@@ -347,7 +360,7 @@ int UIElement::calcChildRealH()
 int UIElement::getMaxChildW()
 {
     int max = 0;
-    for (const auto &child : this->childElements)
+    for (const auto &child : this->childElements.vec)
     {
         int width = child->calcW();
         if (max < width)
@@ -361,7 +374,7 @@ int UIElement::getMaxChildW()
 int UIElement::getMaxChildH()
 {
     int max = 0;
-    for (const auto &child : this->childElements)
+    for (const auto &child : this->childElements.vec)
     {
         int height = child->calcH();
         if (max < height)
@@ -372,50 +385,57 @@ int UIElement::getMaxChildH()
     return max;
 }
 
-intPair UIElement::calcChildWrapping(int childInd)
+ChildWrappingData UIElement::calcChildWrapping(size_t toChild)
 {
-    const int directionSize = this->distDirection == DistDirection::column ? this->calcW() : this->calcH();
-    int directionOrder = 0;
-    int offset = 0;
-    for (size_t i = 0; i < this->childElements.size(); i++)
+    const int directionSize = this->distDirection == DistDirection::column ? this->calcW(true) : this->calcH(true);
+    ChildWrappingData result;
+    int prevChildMaxDirectionHight = 0;
+    for (size_t i = 0; i < this->childElements.vec.size(); i++)
     {
-        auto child = this->childElements.at(i);
+        auto child = this->childElements.vec.at(i);
         int childSize = this->distDirection == DistDirection::column ? child->calcW() : child->calcH();
+
         int prevChildSize = 0;
         if (i > 0)
         {
-            auto prevChild = this->childElements.at(i - 1);
+            auto prevChild = this->childElements.vec.at(i - 1);
             prevChildSize = this->distDirection == DistDirection::column ? prevChild->calcW() : prevChild->calcH();
+            int prevChildDirectionHight = this->distDirection == DistDirection::column ? prevChild->calcH() : prevChild->calcW();
+            if (prevChildMaxDirectionHight < prevChildDirectionHight)
+            {
+                prevChildMaxDirectionHight = prevChildDirectionHight;
+            }
         }
-        offset += prevChildSize;
-        if (i > 0 && directionSize - (offset + childSize) < 0)
+        result.mainDirectionOffset += prevChildSize;
+        if (i > 0 && directionSize - (result.mainDirectionOffset + childSize) < 0)
         {
-            directionOrder++;
-            offset = 0;
+            result.mainDirectionOffset = 0;
+            result.otherDirectionOffset += prevChildMaxDirectionHight;
+            prevChildMaxDirectionHight = 0;
         }
-        if (child->childIndex == childInd)
+        if (i >= toChild)
         {
             break;
         }
     }
 
-    return {directionOrder, offset};
+    return result;
 }
 
 int UIElement::calcDistPosH(RelPos p)
 {
-    int childCount = this->parentElement->childElements.size();
-    int wSum = 0;
+    int childCount = this->parentElement->childElements.vec.size();
     int wOffset = 0;
-    if (!this->anchors[Direction::Down])
+    int wSum = 0;
+    if (!this->anchors[Direction::Down] && this->parentElement->distibutionWrapping)
     {
-        wSum = this->parentElement->getChildWSum();
-        wOffset = this->parentElement->calcChildWrapping(this->childIndex).second;
+        wOffset = this->parentElement->calcChildWrapping(this->childIndex).mainDirectionOffset;
+        wSum = this->calcW() + wOffset;
     }
     else
     {
-        wSum = this->parentElement->hitbox->w;
         wOffset = this->parentElement->getChildWSum(this->childIndex - 1);
+        wSum = this->parentElement->hitbox->w;
     }
     return calcRelPos(
         p,
@@ -430,18 +450,18 @@ int UIElement::calcDistPosH(RelPos p)
 
 int UIElement::calcDistPosV(RelPos p)
 {
-    int childCount = this->parentElement->childElements.size();
-    int hSum = 0;
+    int childCount = this->parentElement->childElements.vec.size();
     int hOffset = 0;
-    if (!this->anchors[Direction::Down])
+    int hSum = 0;
+    if (!this->anchors[Direction::Down] && this->parentElement->distibutionWrapping)
     {
-        hSum = this->parentElement->getChildHSum();
-        hOffset = this->parentElement->calcChildWrapping(this->childIndex).second;
+        hOffset = this->parentElement->calcChildWrapping(this->childIndex).mainDirectionOffset;
+        hSum = this->calcH() + hOffset;
     }
     else
     {
-        hSum = this->parentElement->hitbox->h;
         hOffset = this->parentElement->getChildHSum(this->childIndex - 1);
+        hSum = this->parentElement->hitbox->h;
     }
     return calcRelPos(
         p,
@@ -459,7 +479,15 @@ int UIElement::calcAlignPosH(RelPos p)
     RelPos pivotPos = this->pivotPosV != RelPos::None ? this->pivotPosV : this->parentElement->childrenPivotPos;
     int maxH = this->parentElement->getMaxChildH();
     int parentOffset = calcPivotOffset(pivotPos, this->parentElement->hitbox->h, this->pivot.second, maxH) + this->parentElement->hitbox->minY;
-    int childOffset = this->parentElement->calcChildWrapping(this->childIndex).first * maxH;
+    int childOffset = 0;
+    if (this->parentElement->distibutionWrapping)
+    {
+        childOffset = this->parentElement->calcChildWrapping(this->childIndex).otherDirectionOffset;
+    }
+    else
+    {
+        childOffset = this->parentElement->getChildHSum(this->childIndex - 1);
+    }
 
     int result = calcRelPos(
         p,
@@ -478,8 +506,15 @@ int UIElement::calcAlignPosV(RelPos p)
     RelPos pivotPos = this->pivotPosH != RelPos::None ? this->pivotPosH : this->parentElement->childrenPivotPos;
     int maxW = this->parentElement->getMaxChildW();
     int parentOffset = calcPivotOffset(pivotPos, this->parentElement->hitbox->w, this->pivot.first, maxW) + this->parentElement->hitbox->minX;
-    int childOffset = this->parentElement->calcChildWrapping(this->childIndex).first * maxW;
-
+    int childOffset = 0;
+    if (this->parentElement->distibutionWrapping)
+    {
+        childOffset = this->parentElement->calcChildWrapping(this->childIndex).otherDirectionOffset;
+    }
+    else
+    {
+        childOffset = this->parentElement->getChildWSum(this->childIndex - 1);
+    }
     int result = calcRelPos(
         p,
         parentOffset,
@@ -494,10 +529,14 @@ int UIElement::calcAlignPosV(RelPos p)
 
 bool UIElement::checkCollision(int x, int y)
 {
-    int X1 = this->hitbox->minX;
-    int X2 = this->hitbox->maxX;
-    int Y1 = this->hitbox->minY;
-    int Y2 = this->hitbox->maxY;
+    if (!this->visible)
+    {
+        return false;
+    }
+    int X1 = this->_lastDest.x;
+    int X2 = this->_lastDest.x + this->_lastDest.w;
+    int Y1 = this->_lastDest.y;
+    int Y2 = this->_lastDest.y + this->_lastDest.h;
     if (this->hasCropRect())
     {
         Setter::setInMin(X1, this->parentElement->_cropRect->minX);
@@ -534,6 +573,15 @@ void UIElement::freeTexture()
     }
 }
 
+void UIElement::setVisible(bool visible)
+{
+    this->visible = visible;
+    for (const auto &child : this->childElements.vec)
+    {
+        child->setVisible(visible);
+    }
+}
+
 CommonObjects *UIElement::getCommonObjects()
 {
     return this->comm;
@@ -542,36 +590,62 @@ CommonObjects *UIElement::getCommonObjects()
 UIElement::~UIElement()
 {
     this->freeTexture();
+    this->freeSurface();
 }
 
-void UIElement::addChildren(const std::vector<std::shared_ptr<UIElement>> &childElements)
+void UIElement::addChildren(const std::shared_ptr<UIElement> &parentElement, const std::vector<std::shared_ptr<UIElement>> &childElements)
 {
     for (auto &childElement : childElements)
     {
-        childElement->childIndex = this->childElements.size();
-        childElement->parentElement = std::shared_ptr<UIElement>(this);
-        this->childElements.push_back(childElement);
+        childElement->childId = parentElement->childElements.add(childElement);
+        childElement->parentElement = parentElement;
+    }
+    parentElement->updateChildVec();
+    parentElement->setDefaultRenderOrder();
+}
+
+void UIElement::updateChildVec()
+{
+    this->childElements.updateVec();
+    for (size_t i = 0; i < this->childElements.vec.size(); i++)
+    {
+        this->childElements.vec.at(i)->childIndex = i;
     }
 }
 
-void UIElement::removeChild(int id)
+void UIElement::removeChild(size_t id)
 {
-    if (id >= this->childElements.size())
+    this->childElements.erase(id);
+    this->updateChildVec();
+}
+
+void UIElement::setDefaultRenderOrder(int order, bool fromMainParent)
+{
+    if (fromMainParent)
     {
+        this->defaultRenderOrder = order;
+        for (auto &child : this->childElements.vec)
+        {
+            child->setDefaultRenderOrder(order + 1, true);
+        }
         return;
     }
-    auto childElement = this->childElements.at(id);
-    this->childElements.erase(this->childElements.begin() + id);
-    this->parentElement = NULL;
+    if (this->parentElement == nullptr)
+    {
+        this->setDefaultRenderOrder(0, true);
+        return;
+    }
+    this->parentElement->setDefaultRenderOrder();
 }
 
-std::shared_ptr<UIElement> UIElement::getChild(int id)
+std::vector<size_t> UIElement::getFamilyIndicies()
 {
-    if (id < this->childElements.size())
+    std::vector<size_t> result = {this->id};
+    for (const auto &child : this->childElements.vec)
     {
-        return this->childElements.at(id);
+        result = Vect::concat<size_t>(result, child->getFamilyIndicies());
     }
-    return nullptr;
+    return result;
 }
 
 void UIElement::draw()
@@ -585,37 +659,41 @@ void UIElement::draw()
     dimentions.y = this->calcY();
     dimentions.w = this->calcW();
     dimentions.h = this->calcH();
-    if (this->_texture != NULL)
+    this->_lastDest = dimentions;
+    if (this->_texture != nullptr)
     {
-        this->_lastDest = dimentions;
-        int tW, tH;
-        SDL_QueryTexture(this->_texture, NULL, NULL, &tW, &tH);
-        this->_lastCrop.x = 0;
-        this->_lastCrop.y = 0;
-        this->_lastCrop.w = tW;
-        this->_lastCrop.h = tH;
-        if (this->hasCropRect())
-        {
-            double tWCoef = (double)tW / this->_lastDest.w;
-            double tHCoef = (double)tH / this->_lastDest.h;
+        SDL_QueryTexture(this->_texture, NULL, NULL, &this->_lastCrop.w, &this->_lastCrop.h);
+    }
+    else
+    {
+        this->_lastCrop.w = dimentions.w;
+        this->_lastCrop.h = dimentions.h;
+    }
+    this->_lastCrop.x = 0;
+    this->_lastCrop.y = 0;
+    if (this->hasCropRect())
+    {
+        double tWCoef = (double)this->_lastCrop.w / this->_lastDest.w;
+        double tHCoef = (double)this->_lastCrop.h / this->_lastDest.h;
 
-            int offsetH = this->_lastDest.x - this->parentElement->_cropRect->minX;
-            this->_lastDest.x -= Setter::getInMax(this->parentElement->_cropRect->scrollH, offsetH);
-            this->_lastCrop.x = Setter::getInMin(this->parentElement->_cropRect->scrollH - offsetH, 0) * tWCoef;
+        int offsetH = this->_lastDest.x - this->parentElement->_cropRect->minX;
+        int scrollOffsetH = Setter::getInMin(this->parentElement->_cropRect->scrollH - offsetH, 0);
+        this->_lastDest.x -= Setter::getInMax(this->parentElement->_cropRect->scrollH, offsetH);
+        this->_lastCrop.x = scrollOffsetH * tWCoef;
 
-            int offsetV = this->_lastDest.y - this->parentElement->_cropRect->minY;
-            this->_lastDest.y -= Setter::getInMax(this->parentElement->_cropRect->scrollV, offsetV);
-            this->_lastCrop.y = Setter::getInMin(this->parentElement->_cropRect->scrollV - offsetV, 0) * tHCoef;
+        int offsetV = this->_lastDest.y - this->parentElement->_cropRect->minY;
+        int scrollOffsetV = Setter::getInMin(this->parentElement->_cropRect->scrollV - offsetV, 0);
+        this->_lastDest.y -= Setter::getInMax(this->parentElement->_cropRect->scrollV, offsetV);
+        this->_lastCrop.y = scrollOffsetV * tHCoef;
 
-            this->_lastDest.w = Setter::getInMax(this->_lastDest.x + this->_lastDest.w,
-                                                 this->parentElement->_cropRect->maxX) -
-                                this->_lastDest.x;
-            this->_lastDest.h = Setter::getInMax(this->_lastDest.y + this->_lastDest.h,
-                                                 this->parentElement->_cropRect->maxY) -
-                                this->_lastDest.y;
-            this->_lastCrop.w = this->_lastDest.w * tWCoef;
-            this->_lastCrop.h = this->_lastDest.h * tHCoef;
-        }
+        this->_lastDest.w = Setter::getInMax(this->_lastDest.x + this->_lastDest.w,
+                                             this->parentElement->_cropRect->maxX) -
+                            this->_lastDest.x - scrollOffsetH;
+        this->_lastDest.h = Setter::getInMax(this->_lastDest.y + this->_lastDest.h,
+                                             this->parentElement->_cropRect->maxY) -
+                            this->_lastDest.y - scrollOffsetV;
+        this->_lastCrop.w = this->_lastDest.w * tWCoef;
+        this->_lastCrop.h = this->_lastDest.h * tHCoef;
     }
     int winW, winH;
     SDL_GetWindowSize(this->comm->window, &winW, &winH);
@@ -628,7 +706,7 @@ void UIElement::draw()
     this->hitbox->scrollH = this->_scrollH;
     this->hitbox->scrollV = this->_scrollV;
     this->hitbox = hitbox;
-    for (auto &childElement : this->childElements)
+    for (auto &childElement : this->childElements.vec)
     {
         if ((this->hasCropRect()) || this->overflow != OverflowMode::Visible)
         {
@@ -654,21 +732,36 @@ void UIElement::draw()
 }
 void UIElement::render(SDL_Point *rotationPoint, double angle, SDL_RendererFlip flip)
 {
-    if (!this->visible || this->_texture == NULL)
+    if (!this->visible)
     {
         return;
     }
-    SDL_RenderCopyEx(this->comm->renderer, this->_texture, &this->_lastCrop, &this->_lastDest, angle, rotationPoint, flip);
+    if (this->_texture != NULL)
+    {
+        SDL_RenderCopyEx(this->comm->renderer, this->_texture, &this->_lastCrop, &this->_lastDest, angle, rotationPoint, flip);
+    }
     if (this->showHitbox)
     {
-        SDL_SetRenderDrawColor(this->comm->renderer, 226, 255, 18, 255);
+        SDL_SetRenderDrawColor(this->comm->renderer, 226, 255, 18, 100);
         SDL_RenderDrawLine(this->comm->renderer,
-                           this->hitbox->minX, this->hitbox->minY, this->hitbox->maxX, this->hitbox->minY);
+                           this->_lastDest.x,
+                           this->_lastDest.y,
+                           this->_lastDest.x + this->_lastDest.w,
+                           this->_lastDest.y);
         SDL_RenderDrawLine(this->comm->renderer,
-                           this->hitbox->minX, this->hitbox->minY, this->hitbox->minX, this->hitbox->maxY);
+                           this->_lastDest.x,
+                           this->_lastDest.y,
+                           this->_lastDest.x,
+                           this->_lastDest.y + this->_lastDest.h);
         SDL_RenderDrawLine(this->comm->renderer,
-                           this->hitbox->maxX, this->hitbox->minY, this->hitbox->maxX, this->hitbox->maxY);
+                           this->_lastDest.x + this->_lastDest.w,
+                           this->_lastDest.y,
+                           this->_lastDest.x + this->_lastDest.w,
+                           this->_lastDest.y + this->_lastDest.h);
         SDL_RenderDrawLine(this->comm->renderer,
-                           this->hitbox->minX, this->hitbox->maxY, this->hitbox->maxX, this->hitbox->maxY);
+                           this->_lastDest.x,
+                           this->_lastDest.y + this->_lastDest.h,
+                           this->_lastDest.x + this->_lastDest.w,
+                           this->_lastDest.y + this->_lastDest.h);
     }
 }

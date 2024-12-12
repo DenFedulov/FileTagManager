@@ -18,6 +18,7 @@
 #include "CommonObjects.h"
 #include "AppGlobals.h"
 #include "AppEvents.h"
+#include "DynamicMap.h"
 
 struct MouseSelection
 {
@@ -31,12 +32,13 @@ private:
     MouseSelection _mSelection;
     std::unordered_map<std::string, Mix_Chunk *> _loadedSounds;
     std::unordered_map<std::string, Mix_Music *> _loadedMusic;
-    std::vector<std::shared_ptr<UIElement>> _loadedElements;
+    DynamicMap<std::shared_ptr<UIElement>> _loadedElements;
 
     void triggerEvent(const SDL_Event &event);
     void triggerEvent(const std::shared_ptr<AppEvent> &event);
-    bool processEventResults(const std::vector<EventResult<std::shared_ptr<UIElement>>> &results);
-    void sortLoadedElements();
+    void processEventResults(const std::vector<EventResult<std::shared_ptr<UIElement>>> &results);
+    bool checkStopPropagation(const std::vector<EventResult<std::shared_ptr<UIElement>>> &results);
+    void updateLoadedElements();
 
 public:
     CommonObjects *comm = NULL;
@@ -45,8 +47,8 @@ public:
 
     void initResize();
     void initElements();
-    void addElements(const std::vector<std::shared_ptr<UIElement>> &elements, int order = 0, bool sortElements = true);
-    std::shared_ptr<UIElement> getElement(int id);
+    void addElements(const std::vector<std::shared_ptr<UIElement>> &elements, bool updateElements = true);
+    void removeElements(std::vector<size_t> indexes);
     Mix_Chunk *getSound(std::string filename);
     Mix_Music *getMusic(std::string filename);
     void drawCoordsVector(const CoordsVector &coords, int xC, int yC, bool fill = false);

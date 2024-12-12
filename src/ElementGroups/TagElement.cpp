@@ -13,7 +13,7 @@ TagElement::TagElement(CommonObjects *comm, std::string name, RGBA color) : Elem
 void TagElement::setColor(RGBA color)
 {
     this->_color = color;
-    for (const auto &child : this->_parentElement->childElements)
+    for (const auto &child : this->_parentElement->childElements.vec)
     {
         std::shared_ptr<UIDynamicElement> childEl = std::static_pointer_cast<UIDynamicElement>(child);
         childEl->setColor(color);
@@ -44,14 +44,14 @@ void TagElement::createElementGroup()
     auto tagName = std::make_shared<UIText>("tag_name", this->comm, strToWStr(this->_name.c_str()), this->TAG_FONT_SIZE);
     tagName->editable = true;
     body->setW(tagName->getW() + this->SIDE_WIDTH);
-    body->addChildren({tagName});
+    UIElement::addChildren(body, {tagName});
 
     auto tagRight = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "tag_right.png", this->comm);
     tagRight->setColor(this->_color);
     tagRight->setH(this->TAG_HIGHT);
     tagRight->setW(this->SIDE_WIDTH);
 
-    this->_parentElement->addChildren({tagLeft, body, tagRight});
+    UIElement::addChildren(this->_parentElement, {tagLeft, body, tagRight});
     this->_parentElement->setH(this->TAG_HIGHT);
     this->_parentElement->setW(this->_parentElement->getChildWSum());
 }

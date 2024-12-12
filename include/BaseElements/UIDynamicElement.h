@@ -12,5 +12,4 @@ public:
     RGBA getColor();
 
     UIDynamicElement(std::string name, CommonObjects *comm);
-    ~UIDynamicElement() override;
 };

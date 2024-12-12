@@ -7,7 +7,6 @@ FileExplorer::FileExplorer(CommonObjects *comm) : ElementGroup(comm)
 
 void FileExplorer::createElementGroup()
 {
-    auto drives = getDrivesList();
     this->_parentElement = std::make_shared<UIElement>("file explorer", this->comm);
     this->_parentElement->anchors[Direction::Right] = true;
     this->_parentElement->anchors[Direction::Down] = true;
@@ -34,7 +33,7 @@ void FileExplorer::createElementGroup()
         return EventResult<std::shared_ptr<UIElement>>();
     };
     backwardsIcon->events.addHandler((int)CustomEvent::MOUSE_CLICK, addBackward);
-    backwardsButton->addChildren({backwardsIcon});
+    UIElement::addChildren(backwardsButton, {backwardsIcon});
 
     auto forwardsButton = std::make_shared<UIElement>("forwardsButton", this->comm);
     auto forwardsIcon = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "right_arrow.png", this->comm);
@@ -49,7 +48,7 @@ void FileExplorer::createElementGroup()
     };
     forwardsIcon->events.addHandler((int)CustomEvent::MOUSE_CLICK, addForward);
 
-    forwardsButton->addChildren({forwardsIcon});
+    UIElement::addChildren(forwardsButton, {forwardsIcon});
 
     auto folderUpButton = std::make_shared<UIElement>("folderUpButton", this->comm);
     auto folderUpIcon = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "up_arrow.png", this->comm);
@@ -64,7 +63,7 @@ void FileExplorer::createElementGroup()
     };
     folderUpIcon->events.addHandler((int)CustomEvent::MOUSE_CLICK, addFolderUp);
 
-    folderUpButton->addChildren({folderUpIcon});
+    UIElement::addChildren(folderUpButton, {folderUpIcon});
 
     auto currentPath = std::make_shared<UIBox>("currentPath", this->comm, 1, 1, 0, RGBA(20, 20, 20));
     currentPath->anchors[Direction::Right] = true;
@@ -75,43 +74,77 @@ void FileExplorer::createElementGroup()
     currentPath->overflow = OverflowMode::Scroll;
     currentPath->scrollDirection = Direction::Right;
 
-    auto currentPathText = std::make_shared<UIText>("currentPathText", this->comm, strToWStr("<select disk>"), 14);
+    auto currentPathText = std::make_shared<UIText>("currentPathText", this->comm, G_App::DEFAULT_PATH, 14);
     currentPathText->wrap = false;
     auto onBackward = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         std::cout << "text onBackward called" << '\n';
+        std::shared_ptr<AppEvent> newEvent = std::make_shared<AppEvent>(AppEventType::OpenDir);
+        std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
+        textEl->undo();
+        newEvent->newPath = textEl->getText();
+        el->comm->appEventsQueue.push_back(newEvent);
         return EventResult<std::shared_ptr<UIElement>>();
     };
     currentPathText->appEvents.addHandler((int)AppEventType::Backward, onBackward);
     auto onForward = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         std::cout << "text onForward called" << '\n';
+        std::shared_ptr<AppEvent> newEvent = std::make_shared<AppEvent>(AppEventType::OpenDir);
+        std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
+        textEl->redo();
+        newEvent->newPath = textEl->getText();
+        el->comm->appEventsQueue.push_back(newEvent);
         return EventResult<std::shared_ptr<UIElement>>();
     };
     currentPathText->appEvents.addHandler((int)AppEventType::Forward, onForward);
     auto onFolderUp = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         std::cout << "text onFolderUp called" << '\n';
+        std::shared_ptr<AppEvent> newEvent = std::make_shared<AppEvent>(AppEventType::OpenDir);
+        std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
+        if (textEl->getText() == G_App::DEFAULT_PATH)
+        {
+            return EventResult<std::shared_ptr<UIElement>>();
+        }
+        if (textEl->getText().ends_with(L":\\") || textEl->getText().ends_with(L":/"))
+        {
+            newEvent->newPath = G_App::DEFAULT_PATH;
+        }
+        else
+        {
+            newEvent->newPath = Str::cutTailByChar(textEl->getText(), L"\\/", false);
+            if (!newEvent->newPath.ends_with(L":\\") && !newEvent->newPath.ends_with(L":/"))
+            {
+                newEvent->newPath = newEvent->newPath.substr(0, newEvent->newPath.length() - 1);
+            }
+        }
+        el->comm->appEventsQueue.push_back(newEvent);
         return EventResult<std::shared_ptr<UIElement>>();
     };
     currentPathText->appEvents.addHandler((int)AppEventType::FolderUp, onFolderUp);
-    currentPath->addChildren({currentPathText});
-
-    pathControls->addChildren({backwardsButton, forwardsButton, folderUpButton, currentPath});
-
-    auto fileElements = std::make_shared<UIElement>("fileElements", this->comm);
-    fileElements->anchors[Direction::Right] = true;
-    fileElements->anchors[Direction::Down] = true;
-    fileElements->displayMode = DisplayMode::Distribute;
-    fileElements->childrenDistPos = RelPos::Start;
-
-    std::vector<std::shared_ptr<UIElement>> files;
-    for (const auto &drive : drives)
+    currentPathText->groupParentElement = this->_parentElement;
+    auto onNewPath = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
-        FileElement fileEl(this->comm, drive);
-        files.push_back(fileEl.getParentElement());
-    }
-    fileElements->addChildren(files);
+        EventResult<std::shared_ptr<UIElement>> result;
+        std::wcout << "new text path is: " << e->newPath << '\n';
+        std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
+        if (e->newPath != textEl->getText())
+        {
+            textEl->setText(e->newPath);
+        }
+        FilesGroup files(el->comm, e->newPath);
+        UIElement::addChildren(el->groupParentElement, {files.getParentElement()});
+        result.data = files.getParentElement();
+        result.type = (int)EventResultType::AddElement;
+        return result;
+    };
+    currentPathText->appEvents.addHandler((int)AppEventType::OpenDir, onNewPath);
+    UIElement::addChildren(currentPath, {currentPathText});
 
-    this->_parentElement->addChildren({pathControls, fileElements});
+    UIElement::addChildren(pathControls, {backwardsButton, forwardsButton, folderUpButton, currentPath});
+
+    FilesGroup files(this->comm);
+
+    UIElement::addChildren(this->_parentElement, {pathControls, files.getParentElement()});
 }

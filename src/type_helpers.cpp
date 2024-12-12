@@ -13,6 +13,12 @@ std::wstring strToWStr(const char *str)
     return result;
 }
 
+std::string wstrToStr(const std::wstring &wStr)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    return converter.to_bytes(wStr);
+}
+
 RGBA hexStrToRBGA(const char *str)
 {
     uint8_t r, g, b;

@@ -73,8 +73,9 @@ void FileTagManager::initElements()
     });
 }
 
-void FileTagManager::sortLoadedElements()
+void FileTagManager::updateLoadedElements()
 {
+    this->_loadedElements.updateVec();
     auto sortByZ = [](std::shared_ptr<UIElement> a, std::shared_ptr<UIElement> b) -> bool
     {
         if (a->getZ() < b->getZ())
@@ -87,27 +88,31 @@ void FileTagManager::sortLoadedElements()
         }
         return false;
     };
-    std::sort(this->_loadedElements.begin(), this->_loadedElements.end(), sortByZ);
+    std::sort(this->_loadedElements.vec.begin(), this->_loadedElements.vec.end(), sortByZ);
 }
 
-void FileTagManager::addElements(const std::vector<std::shared_ptr<UIElement>> &elements, int order, bool sortElements)
+void FileTagManager::addElements(const std::vector<std::shared_ptr<UIElement>> &elements, bool updateElements)
 {
     for (const auto &element : elements)
     {
-        if (element->id > -1)
-        {
-            continue;
-        }
-        int id = this->_loadedElements.size();
-        element->defaultRenderOrder = order;
-        element->id = id;
-        this->_loadedElements.push_back(element);
-        this->addElements(element->childElements, order + 1, false);
+        element->id = this->_loadedElements.add(element);
+        std::cout << "added element " << element->name << " with id " << element->id << '\n';
+        this->addElements(element->childElements.vec, false);
     }
-    if (sortElements)
+    if (updateElements)
     {
-        this->sortLoadedElements();
+        this->updateLoadedElements();
     }
+}
+
+void FileTagManager::removeElements(std::vector<size_t> indexes)
+{
+    std::cout << "removing elements\n";
+    for (auto id : indexes)
+    {
+        this->_loadedElements.erase(id);
+    }
+    this->updateLoadedElements();
 }
 
 void FileTagManager::drawCoordsVector(const CoordsVector &coords, int xC, int yC, bool fill)
@@ -128,7 +133,8 @@ void FileTagManager::drawCoordsVector(const CoordsVector &coords, int xC, int yC
 
 void FileTagManager::triggerEvent(const SDL_Event &event)
 {
-    for (auto &element : std::ranges::reverse_view(this->_loadedElements))
+    std::vector<EventResult<std::shared_ptr<UIElement>>> allResults;
+    for (auto &element : std::ranges::reverse_view(this->_loadedElements.vec))
     {
         std::vector<EventResult<std::shared_ptr<UIElement>>> results;
         if (event.type == SDL_MOUSEBUTTONUP && element->checkCollision(event.button.x, event.button.y))
@@ -137,29 +143,33 @@ void FileTagManager::triggerEvent(const SDL_Event &event)
         }
 
         results = Vect::concat<EventResult<std::shared_ptr<UIElement>>>(results, element->events.triggerEvent(event.type, element, event));
-        if (this->processEventResults(results))
+        allResults = Vect::concat<EventResult<std::shared_ptr<UIElement>>>(allResults, results);
+        if (this->checkStopPropagation(results))
         {
             break;
         }
     }
+    this->processEventResults(allResults);
 }
 
 void FileTagManager::triggerEvent(const std::shared_ptr<AppEvent> &event)
 {
-    for (auto &element : std::ranges::reverse_view(this->_loadedElements))
+    std::vector<EventResult<std::shared_ptr<UIElement>>> allResults;
+    for (auto &element : std::ranges::reverse_view(this->_loadedElements.vec))
     {
         std::vector<EventResult<std::shared_ptr<UIElement>>> results;
-        results = Vect::concat<EventResult<std::shared_ptr<UIElement>>>(results, element->appEvents.triggerEvent((int)event->type, element, event));
-        if (this->processEventResults(results))
+        results = element->appEvents.triggerEvent((int)event->type, element, event);
+        allResults = Vect::concat<EventResult<std::shared_ptr<UIElement>>>(allResults, results);
+        if (this->checkStopPropagation(results))
         {
             break;
         }
     }
+    this->processEventResults(allResults);
 }
 
-bool FileTagManager::processEventResults(const std::vector<EventResult<std::shared_ptr<UIElement>>> &results)
+void FileTagManager::processEventResults(const std::vector<EventResult<std::shared_ptr<UIElement>>> &results)
 {
-    int stopPropagation = false;
     for (auto result : results)
     {
         switch (result.type)
@@ -167,12 +177,26 @@ bool FileTagManager::processEventResults(const std::vector<EventResult<std::shar
         case (int)EventResultType::Quit:
             this->quitSDL();
             break;
-        case (int)EventResultType::StopPropagation:
-            stopPropagation = true;
+        case (int)EventResultType::RemoveElement:
+            this->removeElements(result.data->getFamilyIndicies());
+            break;
+        case (int)EventResultType::AddElement:
+            this->addElements({result.data}, false);
             break;
         }
     }
-    return stopPropagation;
+}
+
+bool FileTagManager::checkStopPropagation(const std::vector<EventResult<std::shared_ptr<UIElement>>> &results)
+{
+    for (const auto &result : results)
+    {
+        if (result.type == (int)EventResultType::StopPropagation)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool FileTagManager::loop()
@@ -209,26 +233,17 @@ bool FileTagManager::loop()
         this->comm->appEventsQueue.pop_front();
     }
 
-    if (this->_loadedElements.size() > 0)
+    if (this->_loadedElements.map.size() > 0)
     {
-        this->_loadedElements.at(0)->draw();
+        this->_loadedElements.map.at(0)->draw();
     }
-    for (auto &element : this->_loadedElements)
+    for (auto &element : this->_loadedElements.vec)
     {
         element->render();
     }
     SDL_RenderPresent(this->comm->renderer);
 
     return true;
-}
-
-std::shared_ptr<UIElement> FileTagManager::getElement(int id)
-{
-    if (id < this->_loadedElements.size())
-    {
-        return this->_loadedElements.at(id);
-    }
-    return nullptr;
 }
 
 Mix_Chunk *FileTagManager::getSound(std::string filename)

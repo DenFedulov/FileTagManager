@@ -25,12 +25,18 @@ std::string fileRead(std::string filename)
     return output;
 }
 
-std::vector<std::string> scanDir(std::string path)
+std::vector<std::wstring> scanDir(std::wstring path)
 {
-    std::vector<std::string> result;
+    std::vector<std::wstring> result;
     for (const auto &entry : std::filesystem::directory_iterator(path))
     {
-        result.push_back(entry.path().string());
+        std::wstring filepath = entry.path().wstring();
+        auto attr = GetFileAttributesW(filepath.c_str());
+        auto disallow = attr & FILE_ATTRIBUTE_SYSTEM;
+        if (!disallow)
+        {
+            result.push_back(filepath);
+        }
     }
     return result;
 }

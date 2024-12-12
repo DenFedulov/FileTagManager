@@ -61,5 +61,5 @@ if(SDL2_FOUND OR SDL2_image_FOUND OR SDL2_mixer_FOUND OR SDL2_ttf_FOUND)
         )
 endif()
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${SDL2_LIBRARIES} ICU::uc ICU::data SDL2_image::SDL2_image SDL2_mixer::SDL2_mixer SDL2_ttf::SDL2_ttf)
+target_link_libraries(${PROJECT_NAME} PUBLIC Ole32 ${SDL2_LIBRARIES} ICU::uc ICU::data SDL2_image::SDL2_image SDL2_mixer::SDL2_mixer SDL2_ttf::SDL2_ttf)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

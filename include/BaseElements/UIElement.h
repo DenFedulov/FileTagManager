@@ -7,6 +7,8 @@
 #include "EventManager.h"
 #include "Setter.h"
 #include "AppEvents.h"
+#include "vect.h"
+#include "DynamicMap.h"
 
 class UIElement : public Renderable
 {
@@ -26,7 +28,7 @@ protected:
     int calcChildRealH();
     int getMaxChildW();
     int getMaxChildH();
-    intPair calcChildWrapping(int childInd);
+    ChildWrappingData calcChildWrapping(size_t toChild);
     int calcCoordRelToParent(
         int baseCoord,
         int pCalc,
@@ -48,14 +50,14 @@ protected:
                   RelPos alignPos,
                   RelPos pivotPos,
                   int pivotDim,
-                  int pivotDefault,
-                  Direction scrollDirection);
+                  int pivotDefault);
     bool hasCropRect();
 
 public:
     int defaultRenderOrder = 0;
-    int id = -1;
-    int childIndex = -1;
+    size_t id = 0;
+    size_t childId = 0;
+    size_t childIndex = 0;
     int x = 0;
     int y = 0;
     int margin[4] = {0, 0, 0, 0};
@@ -78,8 +80,10 @@ public:
     Direction scrollDirection = Direction::Down;
     DisplayMode displayMode = DisplayMode::Normal;
     DistDirection distDirection = DistDirection::column;
+    bool distibutionWrapping = true;
     std::shared_ptr<UIElement> parentElement = NULL;
-    std::vector<std::shared_ptr<UIElement>> childElements;
+    std::shared_ptr<UIElement> groupParentElement = NULL;
+    DynamicMap<std::shared_ptr<UIElement>> childElements;
     EventManager<EventResult<std::shared_ptr<UIElement>>, std::shared_ptr<UIElement> &, const SDL_Event &> events;
     EventManager<EventResult<std::shared_ptr<UIElement>>, std::shared_ptr<UIElement> &, const std::shared_ptr<AppEvent> &> appEvents;
     CommonObjects *comm;
@@ -87,11 +91,11 @@ public:
     int calcX();
     int calcY();
 
-    int calcW();
+    int calcW(bool inner = false);
     int getW();
     virtual void setW(int w);
 
-    int calcH();
+    int calcH(bool inner = false);
     int getH();
     virtual void setH(int h);
 
@@ -120,13 +124,18 @@ public:
     int getChildWSum(std::optional<int> upTo = std::nullopt);
     int getChildHSum(std::optional<int> upTo = std::nullopt);
 
-    void addChildren(const std::vector<std::shared_ptr<UIElement>> &childElements);
-    void removeChild(int id);
-    std::shared_ptr<UIElement> getChild(int id);
+    static void addChildren(const std::shared_ptr<UIElement> &parentElement, const std::vector<std::shared_ptr<UIElement>> &childElements);
+    void updateChildVec();
+    void removeChild(size_t id);
+    void setDefaultRenderOrder(int order = 0, bool fromMainParent = false);
+
+    std::vector<size_t> getFamilyIndicies();
+
     CommonObjects *getCommonObjects();
     virtual bool checkCollision(int x, int y);
     void freeSurface();
     void freeTexture();
+    void setVisible(bool visible);
     virtual void draw();
     virtual void render(SDL_Point *rotationPoint = nullptr, double angle = 0, SDL_RendererFlip flip = SDL_FLIP_NONE);
     UIElement(std::string name, CommonObjects *comm);

@@ -1,16 +1,21 @@
 #pragma once
+#include <string>
 
 enum class AppEventType
 {
     None,
+    NewChild,
     Forward,
     Backward,
+    OpenDir,
     FolderUp,
 };
 
 struct AppEvent
 {
     AppEventType type = AppEventType::None;
+    std::wstring newPath = L"";
+    bool isDirectory = false;
 };
 
 enum class EventResultType
@@ -18,6 +23,8 @@ enum class EventResultType
     Nothing,
     Quit,
     StopPropagation,
+    RemoveElement,
+    AddElement
 };
 
 template <typename ResultDataType>

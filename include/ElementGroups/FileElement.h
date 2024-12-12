@@ -3,6 +3,8 @@
 #include "BaseElements/UIPictureElement.h"
 #include "ElementGroups/ElementGroup.h"
 #include "WindowsUtils.h"
+#include "FileExtensions.h"
+#include "type_helpers.h"
 
 class FileElement : public ElementGroup
 {
@@ -17,6 +19,9 @@ public:
         File,
         Folder,
         Drive,
+        Image,
+        Video,
+        Audio
     };
     IconType iconType = IconType::Error;
     int iconSize = 64;

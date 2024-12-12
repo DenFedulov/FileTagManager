@@ -4,7 +4,23 @@ FileElement::FileElement(CommonObjects *comm, std::wstring filename) : ElementGr
 {
     if (std::filesystem::is_regular_file(filename))
     {
-        this->iconType = IconType::File;
+        std::string extension = wstrToStr(Str::getTailByChar(filename, L".", false));
+        if (FileExtensions::image.contains(extension))
+        {
+            this->iconType = IconType::Image;
+        }
+        else if (FileExtensions::video.contains(extension))
+        {
+            this->iconType = IconType::Video;
+        }
+        else if (FileExtensions::audio.contains(extension))
+        {
+            this->iconType = IconType::Audio;
+        }
+        else
+        {
+            this->iconType = IconType::File;
+        }
     }
     else if (std::filesystem::is_directory(filename))
     {
@@ -34,6 +50,15 @@ void FileElement::createElementGroup()
         break;
     case IconType::Folder:
         iconPath = G_App::IMAGES_PATH + "folder.png";
+        break;
+    case IconType::Image:
+        iconPath = G_App::IMAGES_PATH + "image.png";
+        break;
+    case IconType::Video:
+        iconPath = G_App::IMAGES_PATH + "video.png";
+        break;
+    case IconType::Audio:
+        iconPath = G_App::IMAGES_PATH + "audio.png";
         break;
     }
     auto icon = std::make_shared<UIPictureElement>(iconPath, this->comm);

@@ -9,6 +9,7 @@ enum class AppEventType
     Backward,
     OpenDir,
     FolderUp,
+    EditText,
 };
 
 struct AppEvent

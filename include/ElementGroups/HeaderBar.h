@@ -7,9 +7,7 @@
 
 class HeaderBar : public ElementGroup
 {
-private:
-    void createElementGroup();
-
 public:
     HeaderBar(CommonObjects *comm);
+    std::shared_ptr<UIElement> getElement();
 };

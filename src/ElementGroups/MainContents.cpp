@@ -2,11 +2,14 @@
 
 MainContents::MainContents(CommonObjects *comm) : ElementGroup(comm)
 {
-    this->createElementGroup();
 }
 
-void MainContents::createElementGroup()
+std::shared_ptr<UIElement> MainContents::getElement()
 {
+    if (this->_parentElement != nullptr)
+    {
+        return this->_parentElement;
+    }
     int w, h;
     SDL_GetWindowSize(this->comm->window, &w, &h);
     this->_parentElement = std::make_shared<UIBox>("mainContent", this->comm, w, h - G_App::HEADER_HEIGHT, 0, RGBA(80, 80, 80));
@@ -16,30 +19,11 @@ void MainContents::createElementGroup()
     this->_parentElement->childrenDistPos = RelPos::Start;
     this->_parentElement->y = G_App::HEADER_HEIGHT;
 
-    auto sidebar = std::make_shared<UIBox>("sidebar", this->comm, this->SIDEBAR_WIDTH, 1, 0, RGBA(100, 100, 100));
-    sidebar->anchors[Direction::Down] = true;
-    sidebar->overflow = OverflowMode::Scroll;
-    std::vector<std::shared_ptr<UIElement>> tags;
-    for (int i = 0; i < 15; i++)
-    {
-        TagElement tag(this->comm, "test tag " + std::to_string(i), RGBA(18, 198, 255, 120));
-        tags.push_back(tag.getParentElement());
-    }
-
-    auto sidebarContents = std::make_shared<UIElement>("sidebarContents", this->comm);
-    sidebarContents->anchors[Direction::Down] = true;
-    sidebarContents->anchors[Direction::Right] = true;
-    sidebarContents->displayMode = DisplayMode::Distribute;
-    sidebarContents->childrenDistPos = RelPos::Start;
-    sidebarContents->childrenAlignPos = RelPos::Start;
-    sidebarContents->margin[Direction::Left] = 5;
-    sidebarContents->margin[Direction::Right] = 5;
-    UIElement::addChildren(sidebarContents, tags);
-
-    UIElement::addChildren(sidebar, {sidebarContents});
+    Sidebar sidebar(this->comm);
 
     FileExplorer explorer(this->comm);
 
-    UIElement::addChildren(this->_parentElement, {sidebar,
-                                                             explorer.getParentElement()});
+    UIElement::addChildren(this->_parentElement, {sidebar.getElement(),
+                                                  explorer.getElement()});
+    return this->_parentElement;
 }

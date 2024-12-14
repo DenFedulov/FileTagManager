@@ -2,11 +2,14 @@
 
 HeaderBar::HeaderBar(CommonObjects *comm) : ElementGroup(comm)
 {
-    this->createElementGroup();
 }
 
-void HeaderBar::createElementGroup()
+std::shared_ptr<UIElement> HeaderBar::getElement()
 {
+    if (this->_parentElement != nullptr)
+    {
+        return this->_parentElement;
+    }
     int w, h;
     SDL_GetWindowSize(this->comm->window, &w, &h);
     this->_parentElement = std::make_shared<UIBox>("header", this->comm, w, G_App::HEADER_HEIGHT, 0, RGBA(60, 60, 60));
@@ -32,4 +35,5 @@ void HeaderBar::createElementGroup()
 
     UIElement::addChildren(this->_parentElement, {title, close});
     this->_parentElement->setZ(0);
+    return this->_parentElement;
 }

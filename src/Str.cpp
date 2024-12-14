@@ -33,7 +33,7 @@ std::string Str::getTailByChar(const std::string &str, const char *c, bool exclu
     size_t foundIndex = str.find_last_of(c);
     if (foundIndex < 0)
     {
-        return std::string();
+        return str;
     }
     return str.substr(foundIndex + excludeChar);
 }
@@ -43,7 +43,7 @@ std::wstring Str::getTailByChar(const std::wstring &str, const wchar_t *c, bool 
     size_t foundIndex = str.find_last_of(c);
     if (foundIndex < 0)
     {
-        return std::wstring();
+        return str;
     }
     return str.substr(foundIndex + excludeChar);
 }

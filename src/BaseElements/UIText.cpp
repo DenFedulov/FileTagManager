@@ -3,17 +3,17 @@
 void UIText::updateSurface()
 {
     this->freeSurface();
-    SDL_Color color = {this->_color.r, this->_color.g, this->_color.b};
-    std::wstring finalText = this->_text;
+    SDL_Color color = {this->_color.r, this->_color.g, this->_color.b, (uint8_t)((this->_text == L"") ? 80 : 255)};
+    std::wstring finalText = this->_text == L"" ? this->_placeholder : this->_text;
     if (finalText == L"")
     {
         finalText = L" ";
     }
     if (this->_editing)
     {
-        if (this->_cursorIndex < 0 || finalText.length() < this->_cursorIndex)
+        if (this->_cursorIndex < 0 || this->_text.length() < this->_cursorIndex)
         {
-            this->_cursorIndex = finalText.length();
+            this->_cursorIndex = this->_text.length();
         }
         finalText.insert(this->_cursorIndex, L"|");
     }
@@ -72,6 +72,17 @@ void UIText::setFont(std::optional<int> fontSize, std::optional<std::string> pat
     }
 }
 
+std::wstring UIText::getPlaceholder()
+{
+    return this->_placeholder;
+}
+
+void UIText::setPlaceholder(std::wstring placeholder)
+{
+    this->_placeholder = placeholder;
+    this->updateSurface();
+}
+
 std::wstring UIText::getText()
 {
     return this->_text;
@@ -87,6 +98,7 @@ void UIText::setText(std::wstring text)
     this->_historyCursor = this->_textHistory.size();
     this->_textHistory.push_back(text);
     this->updateSurface();
+    // std::cout << wstrToHex(this->_text) << '\n';
 }
 
 int UIText::getCursorIndex()
@@ -112,8 +124,8 @@ void UIText::setWrapSize(int wrapSize)
 }
 
 UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fontSize, RGBA color) : UIDynamicElement(name, comm),
-                                                                                                      _text(text),
-                                                                                                      _fontSize(fontSize)
+                                                                                                     _text(text),
+                                                                                                     _fontSize(fontSize)
 {
     this->pivotPosH = RelPos::Center;
     this->pivotPosV = RelPos::Center;
@@ -142,6 +154,20 @@ UIText::UIText(std::string name, CommonObjects *comm, std::wstring text, int fon
         return EventResult<std::shared_ptr<UIElement>>();
     };
     this->events.addHandler(SDL_MOUSEBUTTONUP, editEnable);
+
+    auto appEditText = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
+    {
+        std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
+        if (!textEl->editable)
+        {
+            return EventResult<std::shared_ptr<UIElement>>();
+        }
+        textEl->_cursorIndex = -1;
+        textEl->_editing = true;
+        textEl->updateSurface();
+        return EventResult<std::shared_ptr<UIElement>>();
+    };
+    this->appEvents.addHandler((int)AppEventType::EditText, appEditText);
 
     auto textInput = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {

@@ -11,6 +11,5 @@ protected:
 public:
     ElementGroup(CommonObjects *comm);
     virtual ~ElementGroup() {};
-    virtual void createElementGroup() = 0;
-    std::shared_ptr<UIElement> getParentElement();
+    virtual std::shared_ptr<UIElement> getElement() = 0;
 };

@@ -2,11 +2,14 @@
 
 FileExplorer::FileExplorer(CommonObjects *comm) : ElementGroup(comm)
 {
-    this->createElementGroup();
 }
 
-void FileExplorer::createElementGroup()
+std::shared_ptr<UIElement> FileExplorer::getElement()
 {
+    if (this->_parentElement != nullptr)
+    {
+        return this->_parentElement;
+    }
     this->_parentElement = std::make_shared<UIElement>("file explorer", this->comm);
     this->_parentElement->anchors[Direction::Right] = true;
     this->_parentElement->anchors[Direction::Down] = true;
@@ -133,9 +136,10 @@ void FileExplorer::createElementGroup()
         {
             textEl->setText(e->newPath);
         }
-        FilesGroup files(el->comm, e->newPath);
-        UIElement::addChildren(el->groupParentElement, {files.getParentElement()});
-        result.data = files.getParentElement();
+        FilesGroup files(el->comm);
+        files.folderPath = e->newPath;
+        UIElement::addChildren(el->groupParentElement, {files.getElement()});
+        result.data = files.getElement();
         result.type = (int)EventResultType::AddElement;
         return result;
     };
@@ -146,5 +150,6 @@ void FileExplorer::createElementGroup()
 
     FilesGroup files(this->comm);
 
-    UIElement::addChildren(this->_parentElement, {pathControls, files.getParentElement()});
+    UIElement::addChildren(this->_parentElement, {pathControls, files.getElement()});
+    return this->_parentElement;
 }

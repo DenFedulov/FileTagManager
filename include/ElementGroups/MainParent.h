@@ -8,9 +8,7 @@
 
 class MainParent : public ElementGroup
 {
-private:
-    void createElementGroup();
-
 public:
     MainParent(CommonObjects *comm);
+    std::shared_ptr<UIElement> getElement();
 };

@@ -1,12 +1,15 @@
 #include "ElementGroups/FilesGroup.h"
 
-FilesGroup::FilesGroup(CommonObjects *comm, std::wstring folderPath) : ElementGroup(comm), folderPath(folderPath)
+FilesGroup::FilesGroup(CommonObjects *comm) : ElementGroup(comm)
 {
-    this->createElementGroup();
 }
 
-void FilesGroup::createElementGroup()
+std::shared_ptr<UIElement> FilesGroup::getElement()
 {
+    if (this->_parentElement != nullptr)
+    {
+        return this->_parentElement;
+    }
     this->_parentElement = std::make_shared<UIElement>("file group", this->comm);
     this->_parentElement->anchors[Direction::Right] = true;
     this->_parentElement->anchors[Direction::Down] = true;
@@ -31,7 +34,7 @@ void FilesGroup::createElementGroup()
     for (const auto &filePath : filePaths)
     {
         FileElement fileEl(this->comm, filePath);
-        files.push_back(fileEl.getParentElement());
+        files.push_back(fileEl.getElement());
     }
     UIElement::addChildren(this->_parentElement, files);
     auto onNewPath = [thisPath = this->folderPath](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
@@ -47,4 +50,5 @@ void FilesGroup::createElementGroup()
         return result;
     };
     this->_parentElement->appEvents.addHandler((int)AppEventType::OpenDir, onNewPath);
+    return this->_parentElement;
 }

@@ -15,6 +15,7 @@ private:
     int _fontSize = 24;
     int _wrapSize = 0;
     std::wstring _text = L"";
+    std::wstring _placeholder = L"";
     int _cursorIndex = -1;
     bool _editing = false;
     std::vector<std::wstring> _textHistory;
@@ -31,6 +32,8 @@ public:
     void setFont(std::optional<int> fontSize = std::nullopt, std::optional<std::string> path = std::nullopt);
     std::wstring getText();
     void setText(std::wstring text);
+    std::wstring getPlaceholder();
+    void setPlaceholder(std::wstring placeholder);
     int getCursorIndex();
     void setCursorIndex(int cursorIndex);
 

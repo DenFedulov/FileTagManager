@@ -69,7 +69,7 @@ void FileTagManager::initElements()
     MainParent mainParent(this->comm);
 
     this->addElements({
-        mainParent.getParentElement(),
+        mainParent.getElement(),
     });
 }
 

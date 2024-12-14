@@ -10,7 +10,7 @@ UIElement::UIElement(std::string name, CommonObjects *comm) : name(name), comm(c
             // std::cout << e.wheel.mouseX << '\n';
             // std::cout << e.wheel.mouseY << '\n';
             // std::cout << e.wheel.y << '\n';
-            int scrollAmount = -e.wheel.y * 15; // TODO: maybe make it configurable/take from windows settings
+            int scrollAmount = -e.wheel.y * 50; // TODO: maybe make it configurable/take from windows settings
             switch (el->scrollDirection)
             {
             case Direction::Down:

@@ -6,10 +6,8 @@
 
 class FilesGroup : public ElementGroup
 {
-private:
-    void createElementGroup();
-
 public:
-    std::wstring folderPath;
-    FilesGroup(CommonObjects *comm, std::wstring folderPath = G_App::DEFAULT_PATH);
+    std::wstring folderPath = G_App::DEFAULT_PATH;
+    FilesGroup(CommonObjects *comm);
+    std::shared_ptr<UIElement> getElement();
 };

@@ -30,13 +30,15 @@ FileElement::FileElement(CommonObjects *comm, std::wstring filename) : ElementGr
             this->iconType = IconType::Drive;
         }
     }
-
-    this->createElementGroup();
 }
 
-void FileElement::createElementGroup()
+std::shared_ptr<UIElement> FileElement::getElement()
 {
-    this->_parentElement = std::make_shared<UIElement>(wstrToStr(filename), this->comm);
+    if (this->_parentElement != nullptr)
+    {
+        return this->_parentElement;
+    }
+    this->_parentElement = std::make_shared<UIElement>(wstrToStr(this->filename), this->comm);
     this->_parentElement->displayMode = DisplayMode::Distribute;
     this->_parentElement->childrenDistPos = RelPos::Center;
     this->_parentElement->childrenAlignPos = RelPos::Start;
@@ -92,4 +94,6 @@ void FileElement::createElementGroup()
     UIElement::addChildren(this->_parentElement, {icon, nameEl});
     this->_parentElement->setW(this->iconSize);
     this->_parentElement->setH(this->iconSize + nameEl->calcH());
+
+    return this->_parentElement;
 }

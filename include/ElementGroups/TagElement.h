@@ -8,16 +8,15 @@
 class TagElement : public ElementGroup
 {
 private:
-    void createElementGroup();
-    RGBA _color;
-    std::string _name;
 
 public:
+    RGBA color;
+    std::wstring name;
     const int TAG_HIGHT = 22;
     const int TAG_FONT_SIZE = 14;
     const int SIDE_WIDTH = 8;
-    TagElement(CommonObjects *comm, std::string name);
-    TagElement(CommonObjects *comm, std::string name, RGBA color);
+    TagElement(CommonObjects *comm, std::wstring name);
+    std::shared_ptr<UIElement> getElement();
 
     void setColor(RGBA color);
     RGBA getColor();

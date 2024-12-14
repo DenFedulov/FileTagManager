@@ -5,13 +5,11 @@
 #include "ElementGroups/ElementGroup.h"
 #include "ElementGroups/TagElement.h"
 #include "ElementGroups/FileExplorer.h"
+#include "ElementGroups/Sidebar.h"
 
 class MainContents : public ElementGroup
 {
-private:
-    void createElementGroup();
-
 public:
-    const int SIDEBAR_WIDTH = 350;
     MainContents(CommonObjects *comm);
+    std::shared_ptr<UIElement> getElement();
 };

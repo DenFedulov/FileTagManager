@@ -8,9 +8,6 @@
 
 class FileElement : public ElementGroup
 {
-private:
-    void createElementGroup();
-
 public:
     std::wstring filename;
     enum IconType
@@ -27,4 +24,5 @@ public:
     int iconSize = 64;
     int fontSize = 12;
     FileElement(CommonObjects *comm, std::wstring filename);
+    std::shared_ptr<UIElement> getElement();
 };

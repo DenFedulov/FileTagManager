@@ -2,11 +2,14 @@
 
 MainParent::MainParent(CommonObjects *comm) : ElementGroup(comm)
 {
-    this->createElementGroup();
 }
 
-void MainParent::createElementGroup()
+std::shared_ptr<UIElement> MainParent::getElement()
 {
+    if (this->_parentElement != nullptr)
+    {
+        return this->_parentElement;
+    }
     int w, h;
     SDL_GetWindowSize(this->comm->window, &w, &h);
     this->_parentElement = std::make_shared<UIElement>("mainParent", this->comm);
@@ -25,5 +28,6 @@ void MainParent::createElementGroup()
     HeaderBar headerBar(this->comm);
     MainContents contents(this->comm);
 
-    UIElement::addChildren(this->_parentElement, {headerBar.getParentElement(), contents.getParentElement()});
+    UIElement::addChildren(this->_parentElement, {headerBar.getElement(), contents.getElement()});
+    return this->_parentElement;
 }

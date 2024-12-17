@@ -17,4 +17,5 @@ public:
     bool addTag(std::wstring tagName, RGBA color);
     bool addTag(std::wstring tagName, std::string color);
     TableData getTags();
+    bool addTagToFile(std::wstring tagName, std::wstring filePath);
 };

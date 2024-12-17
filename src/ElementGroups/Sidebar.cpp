@@ -28,10 +28,18 @@ std::shared_ptr<UIElement> Sidebar::getElement()
         tags.push_back(tag.getElement());
     }
 
-    auto controls = std::make_shared<UIBox>("sidebarControls", this->comm, this->width, 24, 0, RGBA(40, 40, 40));
+    auto controls = std::make_shared<UIBox>("sidebarControls", this->comm, this->width, 1, 0, RGBA(40, 40, 40));
     controls->displayMode = DisplayMode::Distribute;
+    controls->distDirection = DistDirection::row;
     controls->childrenDistPos = RelPos::Start;
     controls->childrenAlignPos = RelPos::Start;
+
+    auto addTagField = std::make_shared<UIElement>("addTagField", this->comm);
+    addTagField->setH(this->controlsFieldHight);
+    addTagField->anchors[Direction::Right] = true;
+    addTagField->displayMode = DisplayMode::Distribute;
+    addTagField->childrenDistPos = RelPos::Start;
+    addTagField->childrenAlignPos = RelPos::Start;
 
     InputBox addTagInputName(this->comm, 140);
     InputBox addTagInputColor(this->comm, 70);
@@ -44,7 +52,31 @@ std::shared_ptr<UIElement> Sidebar::getElement()
         return EventResult<std::shared_ptr<UIElement>>();
     };
     addTagButton.getElement()->events.addHandler((int)CustomEvent::MOUSE_CLICK, addTag);
-    UIElement::addChildren(controls, {addTagButton.getElement(), addTagInputName.getElement(), addTagInputColor.getElement()});
+    UIElement::addChildren(addTagField, {addTagButton.getElement(), addTagInputName.getElement(), addTagInputColor.getElement()});
+
+    auto tagActionModeField = std::make_shared<UIElement>("tagActionModeField", this->comm);
+    tagActionModeField->setH(this->controlsFieldHight);
+    tagActionModeField->anchors[Direction::Right] = true;
+    tagActionModeField->displayMode = DisplayMode::Distribute;
+    tagActionModeField->childrenDistPos = RelPos::Start;
+    tagActionModeField->childrenAlignPos = RelPos::Start;
+
+    UIButton currentActionTitle(this->comm, L"Current tag action ->", 12, RGBA(0, 0, 0, 0), 5);
+    InputBox currentActionName(this->comm, 140);
+    currentActionName.getInputElement()->editable = false;
+    currentActionName.getInputElement()->setText(G_App::TAG_ACTION_MODE_NAMES.at(this->comm->state->tagActionMode));
+    auto onActionChange = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
+    {
+        std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
+        textEl->setText(G_App::TAG_ACTION_MODE_NAMES.at(el->comm->state->tagActionMode));
+        return EventResult<std::shared_ptr<UIElement>>();
+    };
+    currentActionName.getInputElement()->appEvents.addHandler((int)AppEventType::TagActionChange, onActionChange);
+
+    UIElement::addChildren(tagActionModeField, {currentActionTitle.getElement(), currentActionName.getElement()});
+
+    UIElement::addChildren(controls, {addTagField, tagActionModeField});
+    controls->setH(controls->getChildHSum());
 
     auto tagList = std::make_shared<UIElement>("tagList", this->comm);
     tagList->setW(this->width);

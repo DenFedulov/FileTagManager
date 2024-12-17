@@ -125,6 +125,10 @@ int UIElement::calcX()
     {
         return 0;
     }
+    if (this->posMode == PositionMode::Absolute)
+    {
+        return this->x;
+    }
     return this->calcCoord(
                this->x,
                Direction::Left,
@@ -147,6 +151,10 @@ int UIElement::calcY()
     if (!this->visible)
     {
         return 0;
+    }
+    if (this->posMode == PositionMode::Absolute)
+    {
+        return this->y;
     }
     return this->calcCoord(
                this->y,
@@ -230,6 +238,10 @@ int UIElement::calcW(bool inner)
         return 0;
     }
     int result = this->_w;
+    if (this->posMode == PositionMode::Absolute)
+    {
+        return result;
+    }
     if (this->anchors[Direction::Right] && this->parentElement != NULL)
     {
         return this->parentElement->hitbox->maxX - this->calcX() - this->margin[Direction::Right];
@@ -244,6 +256,10 @@ int UIElement::calcH(bool inner)
         return 0;
     }
     int result = this->_h;
+    if (this->posMode == PositionMode::Absolute)
+    {
+        return result;
+    }
     if (this->anchors[Direction::Down] && this->parentElement != NULL)
     {
         return this->parentElement->hitbox->maxY - this->calcY() - this->margin[Direction::Down];
@@ -301,6 +317,10 @@ int UIElement::getChildWSum(std::optional<int> upTo)
     int sum = 0;
     for (int i = 0; i <= limit; i++)
     {
+        if (this->childElements.vec[i]->posMode == PositionMode::Absolute)
+        {
+            continue;
+        }
         sum += this->childElements.vec[i]->calcW();
     }
     return sum;
@@ -312,6 +332,10 @@ int UIElement::getChildHSum(std::optional<int> upTo)
     int sum = 0;
     for (int i = 0; i <= limit; i++)
     {
+        if (this->childElements.vec[i]->posMode == PositionMode::Absolute)
+        {
+            continue;
+        }
         sum += this->childElements.vec[i]->calcH();
     }
     return sum;
@@ -323,6 +347,10 @@ int UIElement::calcChildRealW()
     int max = INT_MIN;
     for (const auto &child : this->childElements.vec)
     {
+        if (child->posMode == PositionMode::Absolute)
+        {
+            continue;
+        }
         int x = child->calcX();
         int x2 = x + child->calcW();
         if (min > x)
@@ -343,6 +371,10 @@ int UIElement::calcChildRealH()
     int max = INT_MIN;
     for (const auto &child : this->childElements.vec)
     {
+        if (child->posMode == PositionMode::Absolute)
+        {
+            continue;
+        }
         int y = child->calcY();
         int y2 = y + child->calcH();
         if (min > y)
@@ -362,6 +394,10 @@ int UIElement::getMaxChildW()
     int max = 0;
     for (const auto &child : this->childElements.vec)
     {
+        if (child->posMode == PositionMode::Absolute)
+        {
+            continue;
+        }
         int width = child->calcW();
         if (max < width)
         {
@@ -376,6 +412,10 @@ int UIElement::getMaxChildH()
     int max = 0;
     for (const auto &child : this->childElements.vec)
     {
+        if (child->posMode == PositionMode::Absolute)
+        {
+            continue;
+        }
         int height = child->calcH();
         if (max < height)
         {
@@ -393,6 +433,10 @@ ChildWrappingData UIElement::calcChildWrapping(size_t toChild)
     for (size_t i = 0; i < this->childElements.vec.size(); i++)
     {
         auto child = this->childElements.vec.at(i);
+        if (child->posMode == PositionMode::Absolute)
+        {
+            continue;
+        }
         int childSize = this->distDirection == DistDirection::column ? child->calcW() : child->calcH();
 
         int prevChildSize = 0;
@@ -400,7 +444,15 @@ ChildWrappingData UIElement::calcChildWrapping(size_t toChild)
         {
             auto prevChild = this->childElements.vec.at(i - 1);
             prevChildSize = this->distDirection == DistDirection::column ? prevChild->calcW() : prevChild->calcH();
-            int prevChildDirectionHight = this->distDirection == DistDirection::column ? prevChild->calcH() : prevChild->calcW();
+            int prevChildDirectionHight = 0;
+            if (this->distDirection == DistDirection::column)
+            {
+                prevChildDirectionHight = !prevChild->anchors[Direction::Down] ? prevChild->calcH() : this->hitbox->h;
+            }
+            else if (this->distDirection == DistDirection::row)
+            {
+                prevChildDirectionHight = !prevChild->anchors[Direction::Right] ? prevChild->calcW() : this->hitbox->w;
+            }
             if (prevChildMaxDirectionHight < prevChildDirectionHight)
             {
                 prevChildMaxDirectionHight = prevChildDirectionHight;
@@ -424,10 +476,10 @@ ChildWrappingData UIElement::calcChildWrapping(size_t toChild)
 
 int UIElement::calcDistPosH(RelPos p)
 {
-    int childCount = this->parentElement->childElements.vec.size();
+    int childCount = this->parentElement->countRelativeChildren();
     int wOffset = 0;
     int wSum = 0;
-    if (!this->anchors[Direction::Down] && this->parentElement->distibutionWrapping)
+    if (!this->anchors[Direction::Right] && this->parentElement->distibutionWrapping)
     {
         wOffset = this->parentElement->calcChildWrapping(this->childIndex).mainDirectionOffset;
         wSum = this->calcW() + wOffset;
@@ -450,7 +502,7 @@ int UIElement::calcDistPosH(RelPos p)
 
 int UIElement::calcDistPosV(RelPos p)
 {
-    int childCount = this->parentElement->childElements.vec.size();
+    int childCount = this->parentElement->countRelativeChildren();
     int hOffset = 0;
     int hSum = 0;
     if (!this->anchors[Direction::Down] && this->parentElement->distibutionWrapping)
@@ -477,10 +529,10 @@ int UIElement::calcDistPosV(RelPos p)
 int UIElement::calcAlignPosH(RelPos p)
 {
     RelPos pivotPos = this->pivotPosV != RelPos::None ? this->pivotPosV : this->parentElement->childrenPivotPos;
-    int maxH = this->parentElement->getMaxChildH();
+    int maxH = this->parentElement->hitbox->h;
     int parentOffset = calcPivotOffset(pivotPos, this->parentElement->hitbox->h, this->pivot.second, maxH) + this->parentElement->hitbox->minY;
     int childOffset = 0;
-    if (this->parentElement->distibutionWrapping)
+    if (!this->anchors[Direction::Down] && this->parentElement->distibutionWrapping)
     {
         childOffset = this->parentElement->calcChildWrapping(this->childIndex).otherDirectionOffset;
     }
@@ -492,10 +544,10 @@ int UIElement::calcAlignPosH(RelPos p)
     int result = calcRelPos(
         p,
         parentOffset,
-        this->parentElement->getMaxChildH(),
+        maxH,
         0,
         1,
-        this->calcH(),
+        !this->anchors[Direction::Down] ? this->calcH() : this->parentElement->hitbox->h,
         childOffset,
         this->pivot.second);
     return result;
@@ -504,7 +556,7 @@ int UIElement::calcAlignPosH(RelPos p)
 int UIElement::calcAlignPosV(RelPos p)
 {
     RelPos pivotPos = this->pivotPosH != RelPos::None ? this->pivotPosH : this->parentElement->childrenPivotPos;
-    int maxW = this->parentElement->getMaxChildW();
+    int maxW = this->parentElement->hitbox->w;
     int parentOffset = calcPivotOffset(pivotPos, this->parentElement->hitbox->w, this->pivot.first, maxW) + this->parentElement->hitbox->minX;
     int childOffset = 0;
     if (this->parentElement->distibutionWrapping)
@@ -521,7 +573,7 @@ int UIElement::calcAlignPosV(RelPos p)
         maxW,
         0,
         1,
-        this->calcW(),
+        !this->anchors[Direction::Right] ? this->calcW() : this->parentElement->hitbox->w,
         childOffset,
         this->pivot.first);
     return result;
@@ -591,6 +643,19 @@ UIElement::~UIElement()
 {
     this->freeTexture();
     this->freeSurface();
+}
+
+int UIElement::countRelativeChildren()
+{
+    int count = 0;
+    for (const auto &child : this->childElements.vec)
+    {
+        if (child->posMode == PositionMode::Relative)
+        {
+            count++;
+        }
+    }
+    return count;
 }
 
 void UIElement::addChildren(const std::shared_ptr<UIElement> &parentElement, const std::vector<std::shared_ptr<UIElement>> &childElements)

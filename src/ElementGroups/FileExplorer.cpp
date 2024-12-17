@@ -85,7 +85,7 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
         std::shared_ptr<AppEvent> newEvent = std::make_shared<AppEvent>(AppEventType::OpenDir);
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         textEl->undo();
-        newEvent->newPath = textEl->getText();
+        newEvent->eventPath = textEl->getText();
         el->comm->appEventsQueue.push_back(newEvent);
         return EventResult<std::shared_ptr<UIElement>>();
     };
@@ -96,7 +96,7 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
         std::shared_ptr<AppEvent> newEvent = std::make_shared<AppEvent>(AppEventType::OpenDir);
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         textEl->redo();
-        newEvent->newPath = textEl->getText();
+        newEvent->eventPath = textEl->getText();
         el->comm->appEventsQueue.push_back(newEvent);
         return EventResult<std::shared_ptr<UIElement>>();
     };
@@ -112,14 +112,14 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
         }
         if (textEl->getText().ends_with(L":\\") || textEl->getText().ends_with(L":/"))
         {
-            newEvent->newPath = G_App::DEFAULT_PATH;
+            newEvent->eventPath = G_App::DEFAULT_PATH;
         }
         else
         {
-            newEvent->newPath = Str::cutTailByChar(textEl->getText(), L"\\/", false);
-            if (!newEvent->newPath.ends_with(L":\\") && !newEvent->newPath.ends_with(L":/"))
+            newEvent->eventPath = Str::cutTailByChar(textEl->getText(), L"\\/", false);
+            if (!newEvent->eventPath.ends_with(L":\\") && !newEvent->eventPath.ends_with(L":/"))
             {
-                newEvent->newPath = newEvent->newPath.substr(0, newEvent->newPath.length() - 1);
+                newEvent->eventPath = newEvent->eventPath.substr(0, newEvent->eventPath.length() - 1);
             }
         }
         el->comm->appEventsQueue.push_back(newEvent);
@@ -130,14 +130,14 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
     auto onNewPath = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         EventResult<std::shared_ptr<UIElement>> result;
-        std::wcout << "new text path is: " << e->newPath << '\n';
+        std::wcout << "new text path is: " << e->eventPath << '\n';
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
-        if (e->newPath != textEl->getText())
+        if (e->eventPath != textEl->getText())
         {
-            textEl->setText(e->newPath);
+            textEl->setText(e->eventPath);
         }
         FilesGroup files(el->comm);
-        files.folderPath = e->newPath;
+        files.folderPath = e->eventPath;
         UIElement::addChildren(el->groupParentElement, {files.getElement()});
         result.data = files.getElement();
         result.type = (int)EventResultType::AddElement;

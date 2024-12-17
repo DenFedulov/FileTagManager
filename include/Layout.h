@@ -31,6 +31,12 @@ enum class OverflowMode
     Scroll,
 };
 
+enum class PositionMode
+{
+    Relative,
+    Absolute,
+};
+
 struct Hitbox
 {
     int minX = 0;

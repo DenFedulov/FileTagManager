@@ -74,19 +74,31 @@ std::shared_ptr<UIElement> FileElement::getElement()
     nameEl->pivotPosV = RelPos::Start;
     // nameEl->showHitbox = true;
 
-    auto sendNewPath = [newPath = this->filename](std::shared_ptr<UIElement> &el, const SDL_Event &e)
+    auto sendNewPath = [eventPath = this->filename](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
-        if (std::filesystem::is_directory(newPath))
+        EventResult<std::shared_ptr<UIElement>> result;
+        if (e.button.button == (int)MouseButtons::Left)
         {
-            std::shared_ptr<AppEvent> newEvent = std::make_shared<AppEvent>(AppEventType::OpenDir);
-            newEvent->newPath = newPath;
-            el->comm->appEventsQueue.push_back(newEvent);
+            if (std::filesystem::is_directory(eventPath))
+            {
+                std::shared_ptr<AppEvent> newEvent = std::make_shared<AppEvent>(AppEventType::OpenDir);
+                newEvent->eventPath = eventPath;
+                el->comm->appEventsQueue.push_back(newEvent);
+            }
+            else
+            {
+                showFileInExplorer(eventPath);
+            }
         }
-        else
+        else if (e.button.button == (int)MouseButtons::Right)
         {
-            showFileInExplorer(newPath);
+            FileContextMenu options(el->comm, eventPath);
+            BaseContextMenu files(el->comm, {options.make()}, e.button.x, e.button.y);
+            result.data = files.getElement();
+            result.type = (int)EventResultType::AddElementToMain;
         }
-        return EventResult<std::shared_ptr<UIElement>>();
+        std::cout << "file event\n";
+        return result;
     };
     this->_parentElement->events.addHandler((int)CustomEvent::MOUSE_CLICK, sendNewPath);
     // this->_parentElement->showHitbox = true;

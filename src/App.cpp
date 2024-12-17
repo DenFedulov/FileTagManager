@@ -178,10 +178,15 @@ void FileTagManager::processEventResults(const std::vector<EventResult<std::shar
             this->quitSDL();
             break;
         case (int)EventResultType::RemoveElement:
+            result.data->parentElement->removeChild(result.data->childId);
             this->removeElements(result.data->getFamilyIndicies());
             break;
         case (int)EventResultType::AddElement:
             this->addElements({result.data}, false);
+            break;
+        case (int)EventResultType::AddElementToMain:
+            UIElement::addChildren(this->_loadedElements.map.at(0), {result.data});
+            this->addElements({result.data});
             break;
         }
     }

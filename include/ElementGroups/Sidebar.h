@@ -11,6 +11,7 @@ class Sidebar : public ElementGroup
 {
 public:
     const int width = 350;
+    const int controlsFieldHight = 24;
     Sidebar(CommonObjects *comm);
     std::shared_ptr<UIElement> getElement();
 };

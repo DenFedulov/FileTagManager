@@ -40,12 +40,10 @@ std::shared_ptr<UIElement> FilesGroup::getElement()
     auto onNewPath = [thisPath = this->folderPath](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         EventResult<std::shared_ptr<UIElement>> result;
-        std::cout << "file group fired\n";
-        if (e->newPath != thisPath)
+        if (e->eventPath != thisPath)
         {
             result.type = (int)EventResultType::RemoveElement;
             result.data = el;
-            el->parentElement->removeChild(el->childId);
         }
         return result;
     };

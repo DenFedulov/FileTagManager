@@ -80,6 +80,7 @@ public:
     Direction scrollDirection = Direction::Down;
     DisplayMode displayMode = DisplayMode::Normal;
     DistDirection distDirection = DistDirection::column;
+    PositionMode posMode = PositionMode::Relative;
     bool distibutionWrapping = true;
     std::shared_ptr<UIElement> parentElement = NULL;
     std::shared_ptr<UIElement> groupParentElement = NULL;
@@ -123,6 +124,8 @@ public:
 
     int getChildWSum(std::optional<int> upTo = std::nullopt);
     int getChildHSum(std::optional<int> upTo = std::nullopt);
+
+    int countRelativeChildren();
 
     static void addChildren(const std::shared_ptr<UIElement> &parentElement, const std::vector<std::shared_ptr<UIElement>> &childElements);
     void updateChildVec();

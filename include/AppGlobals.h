@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <unordered_map>
+#include "AppState.h"
 
 namespace G_App
 {
@@ -14,4 +16,8 @@ namespace G_App
     const std::string CONFIG_FILENAME = "config.json";
     const std::string DB_FILENAME = APP_NAME + ".db";
     const std::wstring DEFAULT_PATH = L"<select disk>";
+    const std::unordered_map<int, std::wstring> TAG_ACTION_MODE_NAMES = {
+        {(int)TagActionMode::Select, L"Select"},
+        {(int)TagActionMode::Add, L"Add"},
+    };
 }

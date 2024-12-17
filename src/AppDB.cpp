@@ -28,3 +28,10 @@ TableData AppDB::getTags()
 {
     return this->_db->query("SELECT * FROM tags");
 }
+
+bool AppDB::addTagToFile(std::wstring tagName, std::wstring filePath)
+{
+    std::string query = std::format("INSERT INTO file_tags (tag_name,filepath) VALUES('{}', '{}');",
+                                    wstrToHex(tagName), wstrToHex(filePath));
+    return this->_db->exec(query.c_str());
+}

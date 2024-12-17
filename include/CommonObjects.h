@@ -5,6 +5,7 @@
 #include "Config.h"
 #include "SDL.h"
 #include "AppDB.h"
+#include "AppState.h"
 
 struct CommonObjects
 {
@@ -13,5 +14,6 @@ struct CommonObjects
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
     AppDB *db = NULL;
+    AppState *state = NULL;
     std::deque<std::shared_ptr<AppEvent>> appEventsQueue;
 };

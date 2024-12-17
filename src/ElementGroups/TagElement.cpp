@@ -35,7 +35,6 @@ std::shared_ptr<UIElement> TagElement::getElement()
     body->childrenDistPos = RelPos::Center;
     body->childrenAlignPos = RelPos::Center;
     auto tagName = std::make_shared<UIText>("tag_name", this->comm, this->name, this->TAG_FONT_SIZE);
-    tagName->editable = true;
     body->setW(tagName->getW() + this->SIDE_WIDTH);
     UIElement::addChildren(body, {tagName});
 
@@ -47,5 +46,20 @@ std::shared_ptr<UIElement> TagElement::getElement()
     UIElement::addChildren(this->_parentElement, {tagLeft, body, tagRight});
     this->_parentElement->setH(this->TAG_HIGHT);
     this->_parentElement->setW(this->_parentElement->getChildWSum());
+    auto action = [tagName = this->name](std::shared_ptr<UIElement> &el, const SDL_Event &e)
+    {
+        EventResult<std::shared_ptr<UIElement>> result;
+        if (el->comm->state->tagActionMode == (int)TagActionMode::Add)
+        {
+            if (el->comm->db->addTagToFile(tagName, el->comm->state->addTagPath))
+            {
+                el->comm->state->tagActionMode = (int)TagActionMode::Select;
+                el->comm->state->addTagPath = L"";
+                el->comm->appEventsQueue.push_back(std::make_shared<AppEvent>(AppEventType::TagActionChange));
+            }
+        }
+        return result;
+    };
+    this->_parentElement->events.addHandler(SDL_MOUSEBUTTONUP, action);
     return this->_parentElement;
 }

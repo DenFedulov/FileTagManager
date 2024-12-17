@@ -25,6 +25,8 @@ int main(int argc, char *argv[])
 		comm.config = &config;
 		AppDB db(G_App::DB_FILENAME);
 		comm.db = &db;
+		AppState state;
+		comm.state = &state;
 		FileTagManager app(&comm);
 		app.initResize();
 		app.initElements();

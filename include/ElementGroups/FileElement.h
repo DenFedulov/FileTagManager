@@ -2,6 +2,8 @@
 #include "BaseElements/UIText.h"
 #include "BaseElements/UIPictureElement.h"
 #include "ElementGroups/ElementGroup.h"
+#include "ElementGroups/BaseContextMenu.h"
+#include "ContextMenus/FileContextMenu.h"
 #include "WindowsUtils.h"
 #include "FileExtensions.h"
 #include "type_helpers.h"

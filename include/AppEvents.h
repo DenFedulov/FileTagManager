@@ -10,12 +10,14 @@ enum class AppEventType
     OpenDir,
     FolderUp,
     EditText,
+    CloseContextMenu,
+    TagActionChange,
 };
 
 struct AppEvent
 {
     AppEventType type = AppEventType::None;
-    std::wstring newPath = L"";
+    std::wstring eventPath = L"";
     bool isDirectory = false;
 };
 
@@ -25,7 +27,8 @@ enum class EventResultType
     Quit,
     StopPropagation,
     RemoveElement,
-    AddElement
+    AddElement,
+    AddElementToMain,
 };
 
 template <typename ResultDataType>

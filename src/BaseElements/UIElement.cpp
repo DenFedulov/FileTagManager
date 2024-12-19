@@ -658,6 +658,12 @@ int UIElement::countRelativeChildren()
     return count;
 }
 
+void UIElement::sortChildVec(bool (*sortFunc)(std::shared_ptr<UIElement>, std::shared_ptr<UIElement>))
+{
+    std::sort(this->childElements.vec.begin(), this->childElements.vec.end(), sortFunc);
+    this->updateChildVec();
+}
+
 void UIElement::addChildren(const std::shared_ptr<UIElement> &parentElement, const std::vector<std::shared_ptr<UIElement>> &childElements)
 {
     for (auto &childElement : childElements)
@@ -665,13 +671,13 @@ void UIElement::addChildren(const std::shared_ptr<UIElement> &parentElement, con
         childElement->childId = parentElement->childElements.add(childElement);
         childElement->parentElement = parentElement;
     }
+    parentElement->childElements.updateVec();
     parentElement->updateChildVec();
     parentElement->setDefaultRenderOrder();
 }
 
 void UIElement::updateChildVec()
 {
-    this->childElements.updateVec();
     for (size_t i = 0; i < this->childElements.vec.size(); i++)
     {
         this->childElements.vec.at(i)->childIndex = i;
@@ -681,6 +687,7 @@ void UIElement::updateChildVec()
 void UIElement::removeChild(size_t id)
 {
     this->childElements.erase(id);
+    this->childElements.updateVec();
     this->updateChildVec();
 }
 

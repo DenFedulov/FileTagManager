@@ -12,6 +12,7 @@ enum class AppEventType
     EditText,
     CloseContextMenu,
     TagActionChange,
+    SortChange,
 };
 
 struct AppEvent

@@ -11,6 +11,8 @@ public:
     int fontSize;
     RGBA color;
     int borderRadius;
-    UIButton(CommonObjects *comm, std::wstring buttonText, int fontSize, RGBA color, int borderRadius = 0);
+    int borderWidth;
+    RGBA borderColor;
+    UIButton(CommonObjects *comm, std::wstring buttonText, int fontSize, RGBA color, int borderRadius = 0, int borderWidth = 0, RGBA borderColor = RGBA(100, 100, 100));
     std::shared_ptr<UIElement> getElement();
 };

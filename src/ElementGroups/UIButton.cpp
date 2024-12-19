@@ -1,10 +1,12 @@
 #include "ElementGroups/UIButton.h"
 
-UIButton::UIButton(CommonObjects *comm, std::wstring buttonText, int fontSize, RGBA color, int borderRadius)
+UIButton::UIButton(CommonObjects *comm, std::wstring buttonText, int fontSize, RGBA color, int borderRadius, int borderWidth, RGBA borderColor)
     : ElementGroup(comm),
       buttonText(buttonText),
       fontSize(fontSize),
       borderRadius(borderRadius),
+      borderWidth(borderWidth),
+      borderColor(borderColor),
       color(color)
 {
 }
@@ -15,7 +17,7 @@ std::shared_ptr<UIElement> UIButton::getElement()
     {
         return this->_parentElement;
     }
-    this->_parentElement = std::make_shared<UIBox>("button", this->comm, 1, 1, this->borderRadius, this->color);
+    this->_parentElement = std::make_shared<UIBox>("button", this->comm, 1, 1, this->borderRadius, this->color, this->borderWidth, this->borderColor);
     this->_parentElement->displayMode = DisplayMode::Distribute;
     this->_parentElement->childrenDistPos = RelPos::Center;
     this->_parentElement->childrenAlignPos = RelPos::Center;

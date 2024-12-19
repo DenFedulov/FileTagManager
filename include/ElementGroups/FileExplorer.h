@@ -7,7 +7,7 @@
 class FileExplorer : public ElementGroup
 {
 public:
-    int pathControlsHight = 24;
+    int controlsHight = 24;
     int elementsGap = 4;
     FileExplorer(CommonObjects *comm);
     std::shared_ptr<UIElement> getElement();

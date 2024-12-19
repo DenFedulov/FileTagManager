@@ -1,5 +1,6 @@
 #pragma once
 #include <optional>
+#include <algorithm>
 #include "CommonObjects.h"
 #include "BaseElements/Renderable.h"
 #include "Layout.h"
@@ -130,6 +131,7 @@ public:
     static void addChildren(const std::shared_ptr<UIElement> &parentElement, const std::vector<std::shared_ptr<UIElement>> &childElements);
     void updateChildVec();
     void removeChild(size_t id);
+    void sortChildVec(bool (*sortFunc)(std::shared_ptr<UIElement>, std::shared_ptr<UIElement>));
     void setDefaultRenderOrder(int order = 0, bool fromMainParent = false);
 
     std::vector<size_t> getFamilyIndicies();

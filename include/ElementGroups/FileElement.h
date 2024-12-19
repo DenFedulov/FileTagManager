@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseElements/UIText.h"
 #include "BaseElements/UIPictureElement.h"
+#include "Elements/UIFileElement.h"
 #include "ElementGroups/ElementGroup.h"
 #include "ElementGroups/BaseContextMenu.h"
 #include "ContextMenus/FileContextMenu.h"
@@ -11,7 +12,7 @@
 class FileElement : public ElementGroup
 {
 public:
-    std::wstring filename;
+    std::wstring filePath;
     enum IconType
     {
         Error,
@@ -25,6 +26,6 @@ public:
     IconType iconType = IconType::Error;
     int iconSize = 64;
     int fontSize = 12;
-    FileElement(CommonObjects *comm, std::wstring filename);
+    FileElement(CommonObjects *comm, std::wstring filePath);
     std::shared_ptr<UIElement> getElement();
 };

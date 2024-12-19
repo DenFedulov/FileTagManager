@@ -19,16 +19,15 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
 
     auto pathControls = std::make_shared<UIBox>("pathControls", this->comm, 1, 1, 0, RGBA(50, 50, 50));
     pathControls->anchors[Direction::Right] = true;
-    pathControls->setH(this->pathControlsHight);
+    pathControls->setH(this->controlsHight);
     pathControls->displayMode = DisplayMode::Distribute;
-    pathControls->distDirection = DistDirection::column;
     pathControls->childrenDistPos = RelPos::Start;
 
     auto backwardsButton = std::make_shared<UIElement>("backwardsButton", this->comm);
     auto backwardsIcon = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "left_arrow.png", this->comm);
-    backwardsButton->setW(this->pathControlsHight);
-    backwardsIcon->setW(this->pathControlsHight);
-    backwardsIcon->setH(this->pathControlsHight);
+    backwardsButton->setW(this->controlsHight);
+    backwardsIcon->setW(this->controlsHight);
+    backwardsIcon->setH(this->controlsHight);
     backwardsButton->margin[Direction::Right] = this->elementsGap;
     auto addBackward = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
@@ -40,9 +39,9 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
 
     auto forwardsButton = std::make_shared<UIElement>("forwardsButton", this->comm);
     auto forwardsIcon = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "right_arrow.png", this->comm);
-    forwardsButton->setW(this->pathControlsHight);
-    forwardsIcon->setW(this->pathControlsHight);
-    forwardsIcon->setH(this->pathControlsHight);
+    forwardsButton->setW(this->controlsHight);
+    forwardsIcon->setW(this->controlsHight);
+    forwardsIcon->setH(this->controlsHight);
     forwardsButton->margin[Direction::Right] = this->elementsGap;
     auto addForward = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
@@ -55,9 +54,9 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
 
     auto folderUpButton = std::make_shared<UIElement>("folderUpButton", this->comm);
     auto folderUpIcon = std::make_shared<UIPictureElement>(G_App::IMAGES_PATH + "up_arrow.png", this->comm);
-    folderUpButton->setW(this->pathControlsHight);
-    folderUpIcon->setW(this->pathControlsHight);
-    folderUpIcon->setH(this->pathControlsHight);
+    folderUpButton->setW(this->controlsHight);
+    folderUpIcon->setW(this->controlsHight);
+    folderUpIcon->setH(this->controlsHight);
     folderUpButton->margin[Direction::Right] = this->elementsGap;
     auto addFolderUp = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
@@ -145,11 +144,63 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
     };
     currentPathText->appEvents.addHandler((int)AppEventType::OpenDir, onNewPath);
     UIElement::addChildren(currentPath, {currentPathText});
-
     UIElement::addChildren(pathControls, {backwardsButton, forwardsButton, folderUpButton, currentPath});
 
     FilesGroup files(this->comm);
 
-    UIElement::addChildren(this->_parentElement, {pathControls, files.getElement()});
+    auto viewControls = std::make_shared<UIBox>("viewControls", this->comm, 1, 1, 0, RGBA(50, 50, 50));
+    viewControls->anchors[Direction::Right] = true;
+    viewControls->setH(this->controlsHight);
+    viewControls->displayMode = DisplayMode::Distribute;
+    viewControls->childrenDistPos = RelPos::Start;
+
+    UIButton sortTitle(this->comm, L"Sort by", 12, RGBA(0, 0, 0, 0));
+    UIButton sortByTypeButton(this->comm, L"Type", 12, RGBA(100, 100, 100), 5, 2, RGBA(0, 255, 0, 100));
+    auto sortByType = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
+    {
+        std::shared_ptr<UIBox> boxEl = std::static_pointer_cast<UIBox>(el);
+        switch (el->comm->state->typeSortMode)
+        {
+        case (int)SortMode::Ascending:
+            el->comm->state->typeSortMode = (int)SortMode::Descending;
+            boxEl->setBorderColor(RGBA(255, 0, 0, 100));
+            break;
+        case (int)SortMode::Descending:
+            el->comm->state->typeSortMode = (int)SortMode::None;
+            boxEl->setBorderColor(RGBA(0, 0, 0, 0));
+            break;
+        case (int)SortMode::None:
+            el->comm->state->typeSortMode = (int)SortMode::Ascending;
+            boxEl->setBorderColor(RGBA(0, 255, 0, 100));
+            break;
+        }
+        el->comm->appEventsQueue.push_back(std::make_shared<AppEvent>(AppEventType::SortChange));
+        return EventResult<std::shared_ptr<UIElement>>();
+    };
+    sortByTypeButton.getElement()->events.addHandler((int)CustomEvent::MOUSE_CLICK, sortByType);
+
+    UIButton sortByNameButton(this->comm, L"Name", 12, RGBA(100, 100, 100), 5, 2, RGBA(0, 255, 0, 100));
+    auto sortByName = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
+    {
+        std::shared_ptr<UIBox> boxEl = std::static_pointer_cast<UIBox>(el);
+        switch (el->comm->state->nameSortMode)
+        {
+        case (int)SortMode::Ascending:
+            el->comm->state->nameSortMode = (int)SortMode::Descending;
+            boxEl->setBorderColor(RGBA(255, 0, 0, 100));
+            break;
+        case (int)SortMode::Descending:
+            el->comm->state->nameSortMode = (int)SortMode::Ascending;
+            boxEl->setBorderColor(RGBA(0, 255, 0, 100));
+            break;
+        }
+        el->comm->appEventsQueue.push_back(std::make_shared<AppEvent>(AppEventType::SortChange));
+        return EventResult<std::shared_ptr<UIElement>>();
+    };
+    sortByNameButton.getElement()->events.addHandler((int)CustomEvent::MOUSE_CLICK, sortByName);
+
+    UIElement::addChildren(viewControls, {sortTitle.getElement(), sortByTypeButton.getElement(), sortByNameButton.getElement()});
+
+    UIElement::addChildren(this->_parentElement, {pathControls, viewControls, files.getElement()});
     return this->_parentElement;
 }

@@ -1,10 +1,10 @@
 #include "ElementGroups/FileElement.h"
 
-FileElement::FileElement(CommonObjects *comm, std::wstring filename) : ElementGroup(comm), filename(filename)
+FileElement::FileElement(CommonObjects *comm, std::wstring filePath) : ElementGroup(comm), filePath(filePath)
 {
-    if (std::filesystem::is_regular_file(filename))
+    if (std::filesystem::is_regular_file(filePath))
     {
-        std::string extension = wstrToStr(Str::getTailByChar(filename, L".", false));
+        std::string extension = wstrToStr(Str::getTailByChar(filePath, std::wstring(L"."), false));
         if (FileExtensions::image.contains(extension))
         {
             this->iconType = IconType::Image;
@@ -22,10 +22,10 @@ FileElement::FileElement(CommonObjects *comm, std::wstring filename) : ElementGr
             this->iconType = IconType::File;
         }
     }
-    else if (std::filesystem::is_directory(filename))
+    else if (std::filesystem::is_directory(filePath))
     {
         this->iconType = IconType::Folder;
-        if (filename.ends_with(L":\\") || filename.ends_with(L":/"))
+        if (filePath.ends_with(L":\\") || filePath.ends_with(L":/"))
         {
             this->iconType = IconType::Drive;
         }
@@ -38,7 +38,7 @@ std::shared_ptr<UIElement> FileElement::getElement()
     {
         return this->_parentElement;
     }
-    this->_parentElement = std::make_shared<UIElement>(wstrToStr(this->filename), this->comm);
+    this->_parentElement = std::make_shared<UIFileElement>(wstrToStr(this->filePath), this->comm, this->filePath);
     this->_parentElement->displayMode = DisplayMode::Distribute;
     this->_parentElement->childrenDistPos = RelPos::Center;
     this->_parentElement->childrenAlignPos = RelPos::Start;
@@ -67,14 +67,14 @@ std::shared_ptr<UIElement> FileElement::getElement()
     icon->setH(this->iconSize);
     icon->setW(this->iconSize);
 
-    std::wstring name = Str::getTailByChar(this->filename, L"\\/");
-    name = name == L"" ? this->filename : name;
-    auto nameEl = std::make_shared<UIText>("filename", this->comm, name, this->fontSize);
+    std::wstring name = Str::getTailByChar(this->filePath, std::wstring(L"\\/"));
+    name = name == L"" ? this->filePath : name;
+    auto nameEl = std::make_shared<UIText>("filePath", this->comm, name, this->fontSize);
     nameEl->setWrapSize(this->iconSize);
     nameEl->pivotPosV = RelPos::Start;
     // nameEl->showHitbox = true;
 
-    auto sendNewPath = [eventPath = this->filename](std::shared_ptr<UIElement> &el, const SDL_Event &e)
+    auto sendNewPath = [eventPath = this->filePath](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
         EventResult<std::shared_ptr<UIElement>> result;
         if (e.button.button == (int)MouseButtons::Left)

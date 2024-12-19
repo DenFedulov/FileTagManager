@@ -28,25 +28,18 @@ int Str::distanceToWSpace(const std::wstring &str, int step, int offset)
     return distance;
 }
 
-std::string Str::getTailByChar(const std::string &str, const char *c, bool excludeChar)
+template <typename T>
+T Str::getTailByChar(const T &str, const T &c, bool excludeChar, bool returnSource)
 {
     size_t foundIndex = str.find_last_of(c);
-    if (foundIndex < 0)
+    if (foundIndex == T::npos)
     {
-        return str;
+        return returnSource ? str : T();
     }
     return str.substr(foundIndex + excludeChar);
 }
-
-std::wstring Str::getTailByChar(const std::wstring &str, const wchar_t *c, bool excludeChar)
-{
-    size_t foundIndex = str.find_last_of(c);
-    if (foundIndex < 0)
-    {
-        return str;
-    }
-    return str.substr(foundIndex + excludeChar);
-}
+template std::string Str::getTailByChar(const std::string &str, const std::string &c, bool excludeChar, bool returnSource);
+template std::wstring Str::getTailByChar(const std::wstring &str, const std::wstring &c, bool excludeChar, bool returnSource);
 
 std::wstring Str::cutTailByChar(const std::wstring &str, const wchar_t *c, bool excludeChar)
 {
@@ -56,4 +49,15 @@ std::wstring Str::cutTailByChar(const std::wstring &str, const wchar_t *c, bool 
         return str;
     }
     return str.substr(0, foundIndex + 1 - excludeChar);
+}
+
+template std::string Str::toLowerCase(std::string str);
+template std::wstring Str::toLowerCase(std::wstring str);
+template <typename T>
+T Str::toLowerCase(T str)
+{
+    std::transform(str.begin(), str.end(), str.begin(),
+                   [](uint8_t c)
+                   { return std::tolower(c); });
+    return str;
 }

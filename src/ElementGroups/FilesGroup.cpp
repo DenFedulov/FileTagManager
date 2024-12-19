@@ -48,5 +48,44 @@ std::shared_ptr<UIElement> FilesGroup::getElement()
         return result;
     };
     this->_parentElement->appEvents.addHandler((int)AppEventType::OpenDir, onNewPath);
+
+    auto sort = [](std::shared_ptr<UIElement> a, std::shared_ptr<UIElement> b) -> bool
+    {
+        std::shared_ptr<UIFileElement> fileA = std::static_pointer_cast<UIFileElement>(a);
+        std::shared_ptr<UIFileElement> fileB = std::static_pointer_cast<UIFileElement>(b);
+        std::wstring extensionA = L"";
+        std::wstring extensionB = L"";
+        if (std::filesystem::is_regular_file(fileA->filePath))
+        {
+            extensionA = Str::getTailByChar(fileA->filePath, std::wstring(L"."), false, false);
+        }
+        if (std::filesystem::is_regular_file(fileB->filePath))
+        {
+            extensionB = Str::getTailByChar(fileB->filePath, std::wstring(L"."), false, false);
+        }
+        if (a->comm->state->typeSortMode != 0)
+        {
+            if (extensionA < extensionB)
+            {
+                return a->comm->state->typeSortMode == (int)SortMode::Ascending;
+            }
+            else if (extensionA > extensionB)
+            {
+                return !(a->comm->state->typeSortMode == (int)SortMode::Ascending);
+            }
+        }
+        return a->comm->state->nameSortMode == (int)SortMode::Ascending
+                   ? fileA->filePath < fileB->filePath
+                   : fileA->filePath > fileB->filePath;
+    };
+    this->_parentElement->sortChildVec(sort);
+    auto onSortChange = [&sort](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
+    {
+        EventResult<std::shared_ptr<UIElement>> result;
+        el->sortChildVec(sort);
+        return result;
+    };
+    this->_parentElement->appEvents.addHandler((int)AppEventType::SortChange, onSortChange);
+
     return this->_parentElement;
 }

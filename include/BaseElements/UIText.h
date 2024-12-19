@@ -31,7 +31,7 @@ public:
     std::string getFontPath();
     void setFont(std::optional<int> fontSize = std::nullopt, std::optional<std::string> path = std::nullopt);
     std::wstring getText();
-    void setText(std::wstring text);
+    virtual void setText(std::wstring text);
     std::wstring getPlaceholder();
     void setPlaceholder(std::wstring placeholder);
     int getCursorIndex();

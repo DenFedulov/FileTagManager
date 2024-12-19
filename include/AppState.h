@@ -20,4 +20,5 @@ struct AppState
     std::wstring addTagPath = L"";
     int typeSortMode = (int)SortMode::Ascending;
     int nameSortMode = (int)SortMode::Ascending;
+    std::wstring fileFilter = L"";
 };

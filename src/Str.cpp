@@ -44,7 +44,7 @@ template std::wstring Str::getTailByChar(const std::wstring &str, const std::wst
 std::wstring Str::cutTailByChar(const std::wstring &str, const wchar_t *c, bool excludeChar)
 {
     size_t foundIndex = str.find_last_of(c);
-    if (foundIndex < 0)
+    if (foundIndex == std::wstring::npos)
     {
         return str;
     }
@@ -60,4 +60,29 @@ T Str::toLowerCase(T str)
                    [](uint8_t c)
                    { return std::tolower(c); });
     return str;
+}
+
+template std::vector<std::string> Str::explode(const std::string &str, const std::string &separator);
+template std::vector<std::wstring> Str::explode(const std::wstring &str, const std::wstring &separator);
+template <typename T>
+std::vector<T> Str::explode(const T &str, const T &separator)
+{
+	std::vector<T> result;
+	T remainder = str;
+	size_t foundIndex = std::wstring::npos;
+	do
+	{
+		foundIndex = remainder.find(separator);
+		if (foundIndex != std::wstring::npos)
+		{
+			result.push_back(remainder.substr(0, foundIndex));
+			remainder = (foundIndex + 1) < remainder.size() ? remainder.substr(foundIndex + 1) : T();
+		}
+		else
+		{
+			result.push_back(remainder);
+		}
+	} while (foundIndex != std::wstring::npos);
+
+	return result;
 }

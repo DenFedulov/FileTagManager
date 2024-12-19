@@ -2,6 +2,8 @@
 #include "BaseElements/UIBox.h"
 #include "ElementGroups/ElementGroup.h"
 #include "ElementGroups/FilesGroup.h"
+#include "ElementGroups/InputBox.h"
+#include "Elements/FilterElement.h"
 #include "WindowsUtils.h"
 
 class FileExplorer : public ElementGroup

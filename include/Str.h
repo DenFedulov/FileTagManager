@@ -3,6 +3,7 @@
 #include <cwctype>
 #include <algorithm>
 #include <cctype>
+#include <vector>
 #include "Setter.h"
 
 namespace Str
@@ -14,4 +15,6 @@ namespace Str
     std::wstring cutTailByChar(const std::wstring &str, const wchar_t *c, bool excludeChar = true);
     template <typename T>
     T toLowerCase(T str);
+    template <typename T>
+    std::vector<T> explode(const T &str, const T &separator);
 }

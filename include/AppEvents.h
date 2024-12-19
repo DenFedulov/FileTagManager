@@ -13,13 +13,14 @@ enum class AppEventType
     CloseContextMenu,
     TagActionChange,
     SortChange,
+    FilterChange,
+    TagSelected,
 };
 
 struct AppEvent
 {
     AppEventType type = AppEventType::None;
-    std::wstring eventPath = L"";
-    bool isDirectory = false;
+    std::wstring eventText = L"";
 };
 
 enum class EventResultType

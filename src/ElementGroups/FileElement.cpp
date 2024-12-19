@@ -74,25 +74,25 @@ std::shared_ptr<UIElement> FileElement::getElement()
     nameEl->pivotPosV = RelPos::Start;
     // nameEl->showHitbox = true;
 
-    auto sendNewPath = [eventPath = this->filePath](std::shared_ptr<UIElement> &el, const SDL_Event &e)
+    auto sendNewPath = [eventText = this->filePath](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
         EventResult<std::shared_ptr<UIElement>> result;
         if (e.button.button == (int)MouseButtons::Left)
         {
-            if (std::filesystem::is_directory(eventPath))
+            if (std::filesystem::is_directory(eventText))
             {
                 std::shared_ptr<AppEvent> newEvent = std::make_shared<AppEvent>(AppEventType::OpenDir);
-                newEvent->eventPath = eventPath;
+                newEvent->eventText = eventText;
                 el->comm->appEventsQueue.push_back(newEvent);
             }
             else
             {
-                showFileInExplorer(eventPath);
+                showFileInExplorer(eventText);
             }
         }
         else if (e.button.button == (int)MouseButtons::Right)
         {
-            FileContextMenu options(el->comm, eventPath);
+            FileContextMenu options(el->comm, eventText);
             BaseContextMenu files(el->comm, {options.make()}, e.button.x, e.button.y);
             result.data = files.getElement();
             result.type = (int)EventResultType::AddElementToMain;
@@ -106,6 +106,24 @@ std::shared_ptr<UIElement> FileElement::getElement()
     UIElement::addChildren(this->_parentElement, {icon, nameEl});
     this->_parentElement->setW(this->iconSize);
     this->_parentElement->setH(this->iconSize + nameEl->calcH());
+
+    auto onFilterChange = [name = name](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
+    {
+        EventResult<std::shared_ptr<UIElement>> result;
+        auto filterWords = Str::explode(el->comm->state->fileFilter, std::wstring(L" "));
+        bool show = false;
+        for (const auto &word : filterWords)
+        {
+            if (Str::toLowerCase(name).find(Str::toLowerCase(word)) != std::wstring::npos)
+            {
+                show = true;
+                break;
+            }
+        }
+        el->setVisible(show);
+        return result;
+    };
+    this->_parentElement->appEvents.addHandler((int)AppEventType::FilterChange, onFilterChange);
 
     return this->_parentElement;
 }

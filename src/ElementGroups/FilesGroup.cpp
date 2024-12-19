@@ -40,7 +40,7 @@ std::shared_ptr<UIElement> FilesGroup::getElement()
     auto onNewPath = [thisPath = this->folderPath](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         EventResult<std::shared_ptr<UIElement>> result;
-        if (e->eventPath != thisPath)
+        if (e->eventText != thisPath)
         {
             result.type = (int)EventResultType::RemoveElement;
             result.data = el;
@@ -86,6 +86,15 @@ std::shared_ptr<UIElement> FilesGroup::getElement()
         return result;
     };
     this->_parentElement->appEvents.addHandler((int)AppEventType::SortChange, onSortChange);
+    auto onFilterChange = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
+    {
+        EventResult<std::shared_ptr<UIElement>> result;
+        std::cout << "deleting old file group on tag change\n";
+        result.type = (int)EventResultType::RemoveElement;
+        result.data = el;
+        return result;
+    };
+    this->_parentElement->appEvents.addHandler((int)AppEventType::TagSelected, onFilterChange);
 
     return this->_parentElement;
 }

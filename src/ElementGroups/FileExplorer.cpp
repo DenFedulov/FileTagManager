@@ -84,7 +84,7 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
         std::shared_ptr<AppEvent> newEvent = std::make_shared<AppEvent>(AppEventType::OpenDir);
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         textEl->undo();
-        newEvent->eventPath = textEl->getText();
+        newEvent->eventText = textEl->getText();
         el->comm->appEventsQueue.push_back(newEvent);
         return EventResult<std::shared_ptr<UIElement>>();
     };
@@ -95,7 +95,7 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
         std::shared_ptr<AppEvent> newEvent = std::make_shared<AppEvent>(AppEventType::OpenDir);
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
         textEl->redo();
-        newEvent->eventPath = textEl->getText();
+        newEvent->eventText = textEl->getText();
         el->comm->appEventsQueue.push_back(newEvent);
         return EventResult<std::shared_ptr<UIElement>>();
     };
@@ -111,14 +111,14 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
         }
         if (textEl->getText().ends_with(L":\\") || textEl->getText().ends_with(L":/"))
         {
-            newEvent->eventPath = G_App::DEFAULT_PATH;
+            newEvent->eventText = G_App::DEFAULT_PATH;
         }
         else
         {
-            newEvent->eventPath = Str::cutTailByChar(textEl->getText(), L"\\/", false);
-            if (!newEvent->eventPath.ends_with(L":\\") && !newEvent->eventPath.ends_with(L":/"))
+            newEvent->eventText = Str::cutTailByChar(textEl->getText(), L"\\/", false);
+            if (!newEvent->eventText.ends_with(L":\\") && !newEvent->eventText.ends_with(L":/"))
             {
-                newEvent->eventPath = newEvent->eventPath.substr(0, newEvent->eventPath.length() - 1);
+                newEvent->eventText = newEvent->eventText.substr(0, newEvent->eventText.length() - 1);
             }
         }
         el->comm->appEventsQueue.push_back(newEvent);
@@ -129,20 +129,21 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
     auto onNewPath = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         EventResult<std::shared_ptr<UIElement>> result;
-        std::wcout << "new text path is: " << e->eventPath << '\n';
+        std::wcout << "new text path is: " << e->eventText << '\n';
         std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el);
-        if (e->eventPath != textEl->getText())
+        if (e->eventText != textEl->getText())
         {
-            textEl->setText(e->eventPath);
+            textEl->setText(e->eventText);
         }
         FilesGroup files(el->comm);
-        files.folderPath = e->eventPath;
+        files.folderPath = e->eventText;
         UIElement::addChildren(el->groupParentElement, {files.getElement()});
         result.data = files.getElement();
         result.type = (int)EventResultType::AddElement;
         return result;
     };
     currentPathText->appEvents.addHandler((int)AppEventType::OpenDir, onNewPath);
+
     UIElement::addChildren(currentPath, {currentPathText});
     UIElement::addChildren(pathControls, {backwardsButton, forwardsButton, folderUpButton, currentPath});
 
@@ -199,7 +200,28 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
     };
     sortByNameButton.getElement()->events.addHandler((int)CustomEvent::MOUSE_CLICK, sortByName);
 
-    UIElement::addChildren(viewControls, {sortTitle.getElement(), sortByTypeButton.getElement(), sortByNameButton.getElement()});
+    auto filterElement = std::make_shared<FilterElement>("filterElement", this->comm, L"", 14, RGBA(0, 0, 0));
+    InputBox filterInput(this->comm, 4000, filterElement);
+    filterInput.borderRadius = 0;
+    filterInput.borderWidth = 0;
+    filterInput.getElement()->anchors[Direction::Right] = true;
+    filterInput.getInputElement()->setPlaceholder(L"filter");
+
+    auto onFilterChange = [currentPathText = currentPathText](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
+    {
+        EventResult<std::shared_ptr<UIElement>> result;
+        std::cout << "creating new file group on tag change\n";
+        FilesGroup files(el->comm);
+        files.folderPath = currentPathText->getText();
+        UIElement::addChildren(el, {files.getElement()});
+        result.data = files.getElement();
+        result.type = (int)EventResultType::AddElement;
+
+        return result;
+    };
+    this->_parentElement->appEvents.addHandler((int)AppEventType::TagSelected, onFilterChange);
+
+    UIElement::addChildren(viewControls, {sortTitle.getElement(), sortByTypeButton.getElement(), sortByNameButton.getElement(), filterInput.getElement()});
 
     UIElement::addChildren(this->_parentElement, {pathControls, viewControls, files.getElement()});
     return this->_parentElement;

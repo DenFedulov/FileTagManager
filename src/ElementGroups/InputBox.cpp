@@ -1,7 +1,8 @@
 #include "ElementGroups/InputBox.h"
 
-InputBox::InputBox(CommonObjects *comm, int w)
+InputBox::InputBox(CommonObjects *comm, int w, std::shared_ptr<UIText> inputElement)
     : ElementGroup(comm),
+      _inputElement(inputElement),
       w(w)
 {
 }
@@ -12,7 +13,7 @@ std::shared_ptr<UIElement> InputBox::getElement()
     {
         return this->_parentElement;
     }
-    this->_parentElement = std::make_shared<UIBox>("inputBox", this->comm, this->w, this->h, 5, RGBA(), 2);
+    this->_parentElement = std::make_shared<UIBox>("inputBox", this->comm, this->w, this->h, this->borderRadius, RGBA(), this->borderWidth);
     this->_parentElement->displayMode = DisplayMode::Distribute;
     this->_parentElement->childrenDistPos = RelPos::Start;
     this->_parentElement->childrenAlignPos = RelPos::Center;
@@ -25,7 +26,10 @@ std::shared_ptr<UIElement> InputBox::getElement()
     inputWrap->childrenAlignPos = RelPos::Center;
     inputWrap->margin[Direction::Left] = 4;
 
-    this->_inputElement = std::make_shared<UIText>("input", this->comm, L"", this->fontSize, RGBA(0, 0, 0));
+    if (this->_inputElement == nullptr)
+    {
+        this->_inputElement = std::make_shared<UIText>("input", this->comm, L"", this->fontSize, RGBA(0, 0, 0));
+    }
     this->_inputElement->setPlaceholder(this->placeholder);
     this->_inputElement->editable = true;
     UIElement::addChildren(inputWrap, {this->_inputElement});
@@ -39,6 +43,7 @@ std::shared_ptr<UIElement> InputBox::getElement()
     this->_parentElement->events.addHandler((int)CustomEvent::MOUSE_CLICK, editinput);
     return this->_parentElement;
 }
+
 std::shared_ptr<UIText> InputBox::getInputElement()
 {
     if (this->_parentElement == nullptr)

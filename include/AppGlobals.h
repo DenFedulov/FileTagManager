@@ -18,6 +18,7 @@ namespace G_App
     const std::wstring DEFAULT_PATH = L"<select disk>";
     const std::unordered_map<int, std::wstring> TAG_ACTION_MODE_NAMES = {
         {(int)TagActionMode::Select, L"Select"},
-        {(int)TagActionMode::Add, L"Add"},
+        {(int)TagActionMode::AddToFile, L"Add to file"},
+        {(int)TagActionMode::Delete, L"Delete"},
     };
 }

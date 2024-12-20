@@ -85,10 +85,6 @@ std::shared_ptr<UIElement> FileElement::getElement()
                 newEvent->eventText = eventText;
                 el->comm->appEventsQueue.push_back(newEvent);
             }
-            else
-            {
-                showFileInExplorer(eventText);
-            }
         }
         else if (e.button.button == (int)MouseButtons::Right)
         {

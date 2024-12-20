@@ -1,10 +1,12 @@
 #pragma once
 #include <string>
+#include <unordered_set>
 
 enum class TagActionMode
 {
     Select,
-    Add,
+    AddToFile,
+    Delete,
 };
 
 enum class SortMode
@@ -14,6 +16,12 @@ enum class SortMode
     Descending
 };
 
+enum class TagFilterMode
+{
+    Any,
+    All
+};
+
 struct AppState
 {
     int tagActionMode = (int)TagActionMode::Select;
@@ -21,4 +29,6 @@ struct AppState
     int typeSortMode = (int)SortMode::Ascending;
     int nameSortMode = (int)SortMode::Ascending;
     std::wstring fileFilter = L"";
+    std::unordered_set<std::string> selectedTags;
+    bool tagFilterMode = (bool)TagFilterMode::Any;
 };

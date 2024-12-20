@@ -19,15 +19,29 @@ std::shared_ptr<UIElement> FilesGroup::getElement()
     this->_parentElement->overflow = OverflowMode::Scroll;
 
     std::vector<std::wstring> filePaths;
-    if (this->folderPath != G_App::DEFAULT_PATH)
+    if (this->comm->state->selectedTags.size() > 0)
     {
-        filePaths = scanDir(this->folderPath);
+        std::vector<std::string> selectedTags(this->comm->state->selectedTags.begin(), this->comm->state->selectedTags.end());
+        TableData taggedFiles = this->comm->db->getFileTags(selectedTags, this->comm->state->tagFilterMode);
+        std::unordered_set<std::wstring> foundFilePaths;
+        for (const auto &row : taggedFiles.data)
+        {
+            foundFilePaths.insert(hexStrToWStr(row.at(1)));
+        }
+        filePaths = std::vector<std::wstring>(foundFilePaths.begin(), foundFilePaths.end());
     }
     else
     {
-        for (const auto &disk : getDrivesList())
+        if (this->folderPath != G_App::DEFAULT_PATH)
         {
-            filePaths.push_back(strToWStr(disk.c_str()));
+            filePaths = scanDir(this->folderPath);
+        }
+        else
+        {
+            for (const auto &disk : getDrivesList())
+            {
+                filePaths.push_back(strToWStr(disk.c_str()));
+            }
         }
     }
     std::vector<std::shared_ptr<UIElement>> files;
@@ -86,7 +100,7 @@ std::shared_ptr<UIElement> FilesGroup::getElement()
         return result;
     };
     this->_parentElement->appEvents.addHandler((int)AppEventType::SortChange, onSortChange);
-    auto onFilterChange = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
+    auto onTagFilterChange = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         EventResult<std::shared_ptr<UIElement>> result;
         std::cout << "deleting old file group on tag change\n";
@@ -94,7 +108,7 @@ std::shared_ptr<UIElement> FilesGroup::getElement()
         result.data = el;
         return result;
     };
-    this->_parentElement->appEvents.addHandler((int)AppEventType::TagSelected, onFilterChange);
+    this->_parentElement->appEvents.addHandler((int)AppEventType::TagFilterChanged, onTagFilterChange);
 
     return this->_parentElement;
 }

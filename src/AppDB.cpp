@@ -24,9 +24,35 @@ bool AppDB::addTag(std::wstring tagName, std::string color)
     return this->_db->exec(query.c_str());
 }
 
+bool AppDB::deleteTag(std::wstring tagName)
+{
+    std::string query = std::format("DELETE FROM tags WHERE tag_name='{}'",
+                                    wstrToHex(tagName));
+    return this->_db->exec(query.c_str());
+}
+
 TableData AppDB::getTags()
 {
     return this->_db->query("SELECT * FROM tags");
+}
+
+TableData AppDB::getFileTags(const std::vector<std::string> &tags, bool tagFilterMode)
+{
+    std::string where = "";
+    for (size_t i = 0; i < tags.size(); i++)
+    {
+        if (i == 0)
+        {
+            where = " WHERE";
+        }
+        else
+        {
+            where += (tagFilterMode ? " AND" : " OR");
+        }
+        where += " tag_name = '" + tags.at(i) + "'";
+    }
+    std::string query = "SELECT * FROM file_tags" + where;
+    return this->_db->query(query.c_str());
 }
 
 bool AppDB::addTagToFile(std::wstring tagName, std::wstring filePath)

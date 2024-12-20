@@ -17,16 +17,6 @@ std::shared_ptr<UIElement> Sidebar::getElement()
     this->_parentElement->distDirection = DistDirection::row;
     this->_parentElement->childrenDistPos = RelPos::Start;
     this->_parentElement->childrenAlignPos = RelPos::Start;
-    std::vector<std::shared_ptr<UIElement>> tags;
-    auto tagData = this->comm->db->getTags();
-    for (const auto &row : tagData.data)
-    {
-        RGBA color = hexStrToRGBA(row.at(1).c_str());
-        color.a = 120;
-        TagElement tag(this->comm, hexStrToWStr(row.at(0)));
-        tag.color = color;
-        tags.push_back(tag.getElement());
-    }
 
     auto controls = std::make_shared<UIBox>("sidebarControls", this->comm, this->width, 1, 0, RGBA(40, 40, 40));
     controls->displayMode = DisplayMode::Distribute;
@@ -48,21 +38,51 @@ std::shared_ptr<UIElement> Sidebar::getElement()
     UIButton addTagButton(this->comm, L"Add tag", 12, RGBA(100, 100, 100), 5);
     auto addTag = [nameTextEl = addTagInputName.getInputElement(), colorTextEl = addTagInputColor.getInputElement()](std::shared_ptr<UIElement> &el, const SDL_Event &e)
     {
-        el->comm->db->addTag(nameTextEl->getText(), wstrToStr(colorTextEl->getText()));
+        if (el->comm->db->addTag(nameTextEl->getText(), wstrToStr(colorTextEl->getText())))
+        {
+            el->comm->appEventsQueue.push_back(std::make_shared<AppEvent>(AppEventType::TagsChanged));
+        }
         return EventResult<std::shared_ptr<UIElement>>();
     };
     addTagButton.getElement()->events.addHandler((int)CustomEvent::MOUSE_CLICK, addTag);
-    UIElement::addChildren(addTagField, {addTagButton.getElement(), addTagInputName.getElement(), addTagInputColor.getElement()});
 
-    auto tagActionModeField = std::make_shared<UIElement>("tagActionModeField", this->comm);
-    tagActionModeField->setH(this->controlsFieldHight);
-    tagActionModeField->anchors[Direction::Right] = true;
-    tagActionModeField->displayMode = DisplayMode::Distribute;
-    tagActionModeField->childrenDistPos = RelPos::Start;
-    tagActionModeField->childrenAlignPos = RelPos::Start;
+    UIButton deleteTagButton(this->comm, L"Delete tag", 12, RGBA(100, 100, 100), 5);
+    auto deteleTag = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
+    {
+        el->comm->state->tagActionMode = (int)TagActionMode::Delete;
+        el->comm->appEventsQueue.push_back(std::make_shared<AppEvent>(AppEventType::TagActionChange));
+        return EventResult<std::shared_ptr<UIElement>>();
+    };
+    deleteTagButton.getElement()->events.addHandler((int)CustomEvent::MOUSE_CLICK, deteleTag);
+    UIElement::addChildren(addTagField, {addTagButton.getElement(), addTagInputName.getElement(), addTagInputColor.getElement(), deleteTagButton.getElement()});
 
-    UIButton currentActionTitle(this->comm, L"Current tag action ->", 12, RGBA(0, 0, 0, 0), 5);
-    InputBox currentActionName(this->comm, 140);
+    auto tagModsField = std::make_shared<UIElement>("tagModsField", this->comm);
+    tagModsField->setH(this->controlsFieldHight);
+    tagModsField->anchors[Direction::Right] = true;
+    tagModsField->displayMode = DisplayMode::Distribute;
+    tagModsField->childrenDistPos = RelPos::Start;
+    tagModsField->childrenAlignPos = RelPos::Start;
+
+    UIButton currentFilterTitle(this->comm, L"Tag filter mode", 12, RGBA(0, 0, 0, 0), 5);
+    UIButton currentFilterName(this->comm, L"Any", 12, RGBA(100, 100, 100));
+    auto changeTagFilterMode = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
+    {
+        el->comm->state->tagFilterMode = !el->comm->state->tagFilterMode;
+        std::shared_ptr<UIText> textEl = std::static_pointer_cast<UIText>(el->childElements.vec.at(0));
+        textEl->setText(el->comm->state->tagFilterMode ? L"All" : L"Any");
+        if (el->comm->state->selectedTags.size() > 1)
+        {
+            el->comm->appEventsQueue.push_back(std::make_shared<AppEvent>(AppEventType::TagFilterChanged));
+            std::cout << "TagFilterChanged\n";
+        }
+        std::cout << "changed filter mode\n";
+        return EventResult<std::shared_ptr<UIElement>>();
+    };
+    currentFilterName.getElement()->events.addHandler((int)CustomEvent::MOUSE_CLICK, changeTagFilterMode);
+    UIElement::addChildren(tagModsField, {currentFilterTitle.getElement(), currentFilterName.getElement()});
+
+    UIButton currentActionTitle(this->comm, L"Tag action", 12, RGBA(0, 0, 0, 0), 5);
+    InputBox currentActionName(this->comm, 80);
     currentActionName.getInputElement()->editable = false;
     currentActionName.getInputElement()->setText(G_App::TAG_ACTION_MODE_NAMES.at(this->comm->state->tagActionMode));
     auto onActionChange = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
@@ -72,22 +92,38 @@ std::shared_ptr<UIElement> Sidebar::getElement()
         return EventResult<std::shared_ptr<UIElement>>();
     };
     currentActionName.getInputElement()->appEvents.addHandler((int)AppEventType::TagActionChange, onActionChange);
+    UIButton resetTagActionButton(this->comm, L"Reset", 12, RGBA(100, 100, 100), 5);
+    auto resetTag = [](std::shared_ptr<UIElement> &el, const SDL_Event &e)
+    {
+        el->comm->state->tagActionMode = (int)TagActionMode::Select;
+        el->comm->state->addTagPath = L"";
+        el->comm->state->selectedTags.clear();
+        el->comm->appEventsQueue.push_back(std::make_shared<AppEvent>(AppEventType::TagActionChange));
+        el->comm->appEventsQueue.push_back(std::make_shared<AppEvent>(AppEventType::TagFilterChanged));
+        return EventResult<std::shared_ptr<UIElement>>();
+    };
+    resetTagActionButton.getElement()->events.addHandler((int)CustomEvent::MOUSE_CLICK, resetTag);
 
-    UIElement::addChildren(tagActionModeField, {currentActionTitle.getElement(), currentActionName.getElement()});
+    UIElement::addChildren(tagModsField, {currentActionTitle.getElement(), currentActionName.getElement(), resetTagActionButton.getElement()});
 
-    UIElement::addChildren(controls, {addTagField, tagActionModeField});
+    UIElement::addChildren(controls, {addTagField, tagModsField});
     controls->setH(controls->getChildHSum());
 
-    auto tagList = std::make_shared<UIElement>("tagList", this->comm);
-    tagList->setW(this->width);
-    tagList->anchors[Direction::Down] = true;
-    tagList->displayMode = DisplayMode::Distribute;
-    tagList->childrenDistPos = RelPos::Start;
-    tagList->childrenAlignPos = RelPos::Start;
-    tagList->margin[Direction::Left] = 5;
-    tagList->margin[Direction::Right] = 5;
-    UIElement::addChildren(tagList, tags);
+    TagList tagList(this->comm, this->width);
 
-    UIElement::addChildren(this->_parentElement, {controls, tagList});
+    auto onTagsChange = [width = this->width](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
+    {
+        EventResult<std::shared_ptr<UIElement>> result;
+        std::cout << "creating new tag list on tag change\n";
+        TagList files(el->comm, width);
+        UIElement::addChildren(el, {files.getElement()});
+        result.data = files.getElement();
+        result.type = (int)EventResultType::AddElement;
+
+        return result;
+    };
+    this->_parentElement->appEvents.addHandler((int)AppEventType::TagsChanged, onTagsChange);
+
+    UIElement::addChildren(this->_parentElement, {controls, tagList.getElement()});
     return this->_parentElement;
 }

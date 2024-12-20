@@ -14,7 +14,8 @@ enum class AppEventType
     TagActionChange,
     SortChange,
     FilterChange,
-    TagSelected,
+    TagsChanged,
+    TagFilterChanged,
 };
 
 struct AppEvent

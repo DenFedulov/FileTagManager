@@ -3,6 +3,8 @@
 UIPictureElement::UIPictureElement(std::string name, CommonObjects *comm) : UIDynamicElement(name, comm)
 {
     this->updateSurface();
+    this->_w = this->_surface->w;
+    this->_h = this->_surface->h;
 }
 
 SDL_Surface *UIPictureElement::loadPicture(std::string path)
@@ -19,8 +21,6 @@ void UIPictureElement::updateSurface()
     this->freeSurface();
     SDL_Surface *defaultSurface = this->loadPicture(this->name);
     this->_surface = SDL_ConvertSurfaceFormat(defaultSurface, SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32, 0);
-    this->_w = this->_surface->w;
-    this->_h = this->_surface->h;
     SDL_FreeSurface(defaultSurface);
     SurfaceEditor editor(this->_surface);
     editor.multiply(this->_color);

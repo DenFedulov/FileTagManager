@@ -207,7 +207,7 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
     filterInput.getElement()->anchors[Direction::Right] = true;
     filterInput.getInputElement()->setPlaceholder(L"filter");
 
-    auto onFilterChange = [currentPathText = currentPathText](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
+    auto onTagFilterChange = [currentPathText = currentPathText](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {
         EventResult<std::shared_ptr<UIElement>> result;
         std::cout << "creating new file group on tag change\n";
@@ -219,7 +219,7 @@ std::shared_ptr<UIElement> FileExplorer::getElement()
 
         return result;
     };
-    this->_parentElement->appEvents.addHandler((int)AppEventType::TagSelected, onFilterChange);
+    this->_parentElement->appEvents.addHandler((int)AppEventType::TagFilterChanged, onTagFilterChange);
 
     UIElement::addChildren(viewControls, {sortTitle.getElement(), sortByTypeButton.getElement(), sortByNameButton.getElement(), filterInput.getElement()});
 

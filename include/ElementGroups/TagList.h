@@ -5,14 +5,12 @@
 #include "ElementGroups/TagElement.h"
 #include "ElementGroups/UIButton.h"
 #include "ElementGroups/InputBox.h"
-#include "ElementGroups/TagList.h"
 #include "WindowsUtils.h"
 
-class Sidebar : public ElementGroup
+class TagList : public ElementGroup
 {
 public:
-    const int width = 350;
-    const int controlsFieldHight = 24;
-    Sidebar(CommonObjects *comm);
+    int w;
+    TagList(CommonObjects *comm, int w);
     std::shared_ptr<UIElement> getElement();
 };

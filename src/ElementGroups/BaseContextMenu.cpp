@@ -19,6 +19,7 @@ std::shared_ptr<UIElement> BaseContextMenu::getElement()
     this->_parentElement = std::make_shared<UIBox>("context menu", this->comm, this->width, 1, 0, RGBA(60, 60, 60), 2, RGBA(140, 140, 140));
     this->_parentElement->posMode = PositionMode::Absolute;
     this->_parentElement->displayMode = DisplayMode::Distribute;
+    this->_parentElement->distDirection = DistDirection::row;
     this->_parentElement->childrenDistPos = RelPos::Start;
     this->_parentElement->childrenAlignPos = RelPos::Start;
 

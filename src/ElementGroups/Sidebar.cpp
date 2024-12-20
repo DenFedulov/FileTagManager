@@ -82,7 +82,7 @@ std::shared_ptr<UIElement> Sidebar::getElement()
     UIElement::addChildren(tagModsField, {currentFilterTitle.getElement(), currentFilterName.getElement()});
 
     UIButton currentActionTitle(this->comm, L"Tag action", 12, RGBA(0, 0, 0, 0), 5);
-    InputBox currentActionName(this->comm, 80);
+    InputBox currentActionName(this->comm, 110);
     currentActionName.getInputElement()->editable = false;
     currentActionName.getInputElement()->setText(G_App::TAG_ACTION_MODE_NAMES.at(this->comm->state->tagActionMode));
     auto onActionChange = [](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
@@ -115,9 +115,9 @@ std::shared_ptr<UIElement> Sidebar::getElement()
     {
         EventResult<std::shared_ptr<UIElement>> result;
         std::cout << "creating new tag list on tag change\n";
-        TagList files(el->comm, width);
-        UIElement::addChildren(el, {files.getElement()});
-        result.data = files.getElement();
+        TagList tagList(el->comm, width);
+        UIElement::addChildren(el, {tagList.getElement()});
+        result.data = tagList.getElement();
         result.type = (int)EventResultType::AddElement;
 
         return result;

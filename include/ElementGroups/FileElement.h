@@ -4,6 +4,7 @@
 #include "Elements/UIFileElement.h"
 #include "ElementGroups/ElementGroup.h"
 #include "ElementGroups/BaseContextMenu.h"
+#include "ElementGroups/TagList.h"
 #include "ContextMenus/FileContextMenu.h"
 #include "WindowsUtils.h"
 #include "FileExtensions.h"

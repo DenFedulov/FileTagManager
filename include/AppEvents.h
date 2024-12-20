@@ -16,12 +16,14 @@ enum class AppEventType
     FilterChange,
     TagsChanged,
     TagFilterChanged,
+    FileTagChanged,
 };
 
 struct AppEvent
 {
     AppEventType type = AppEventType::None;
     std::wstring eventText = L"";
+    std::wstring eventText2 = L"";
 };
 
 enum class EventResultType

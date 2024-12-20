@@ -39,6 +39,10 @@ public:
         }
         return false;
     }
+    void clearHandlers()
+    {
+        this->_eventHandlers.clear();
+    }
     std::vector<EventResultType> triggerEvent(const int &eventTypeEnum, Args... args)
     {
         std::vector<EventResultType> results;

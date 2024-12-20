@@ -22,7 +22,7 @@ std::shared_ptr<UIElement> FilesGroup::getElement()
     if (this->comm->state->selectedTags.size() > 0)
     {
         std::vector<std::string> selectedTags(this->comm->state->selectedTags.begin(), this->comm->state->selectedTags.end());
-        TableData taggedFiles = this->comm->db->getFileTags(selectedTags, this->comm->state->tagFilterMode);
+        TableData taggedFiles = this->comm->db->getFilesWithTags(selectedTags, this->comm->state->tagFilterMode);
         std::unordered_set<std::wstring> foundFilePaths;
         for (const auto &row : taggedFiles.data)
         {

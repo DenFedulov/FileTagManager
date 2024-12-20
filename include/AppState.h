@@ -6,6 +6,7 @@ enum class TagActionMode
 {
     Select,
     AddToFile,
+    DeleteFromFile,
     Delete,
 };
 

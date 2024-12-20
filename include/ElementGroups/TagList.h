@@ -10,7 +10,13 @@
 class TagList : public ElementGroup
 {
 public:
-    int w;
-    TagList(CommonObjects *comm, int w);
+    int listSize;
+    bool tagsClickable = true;
+    Direction anchorDirection = Direction::Down;
+    int tagHight = 22;
+    int tagFontSize = 14;
+    int tagSideWidth = 8;
+    std::wstring ofFile = L"";
+    TagList(CommonObjects *comm, int listSize, std::wstring ofFile = L"");
     std::shared_ptr<UIElement> getElement();
 };

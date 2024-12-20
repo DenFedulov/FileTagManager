@@ -31,12 +31,26 @@ bool AppDB::deleteTag(std::wstring tagName)
     return this->_db->exec(query.c_str());
 }
 
-TableData AppDB::getTags()
+TableData AppDB::getTags(std::vector<std::string> tags)
 {
-    return this->_db->query("SELECT * FROM tags");
+    std::string where = "";
+    for (size_t i = 0; i < tags.size(); i++)
+    {
+        if (i == 0)
+        {
+            where = " WHERE";
+        }
+        else
+        {
+            where += " OR";
+        }
+        where += " tag_name = '" + tags.at(i) + "'";
+    }
+    std::string query = "SELECT * FROM tags" + where;
+    return this->_db->query(query.c_str());
 }
 
-TableData AppDB::getFileTags(const std::vector<std::string> &tags, bool tagFilterMode)
+TableData AppDB::getFilesWithTags(const std::vector<std::string> &tags, bool tagFilterMode)
 {
     std::string where = "";
     for (size_t i = 0; i < tags.size(); i++)
@@ -55,9 +69,23 @@ TableData AppDB::getFileTags(const std::vector<std::string> &tags, bool tagFilte
     return this->_db->query(query.c_str());
 }
 
+TableData AppDB::getTagsOfFile(std::wstring file)
+{
+    std::string query = std::format("SELECT * FROM file_tags WHERE filepath='{}'",
+                                    wstrToHex(file));
+    return this->_db->query(query.c_str());
+}
+
 bool AppDB::addTagToFile(std::wstring tagName, std::wstring filePath)
 {
     std::string query = std::format("INSERT INTO file_tags (tag_name,filepath) VALUES('{}', '{}');",
+                                    wstrToHex(tagName), wstrToHex(filePath));
+    return this->_db->exec(query.c_str());
+}
+
+bool AppDB::deleteTagFromFile(std::wstring tagName, std::wstring filePath)
+{
+    std::string query = std::format("DELETE FROM file_tags WHERE tag_name='{}' AND filepath='{}'",
                                     wstrToHex(tagName), wstrToHex(filePath));
     return this->_db->exec(query.c_str());
 }

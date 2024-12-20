@@ -40,8 +40,9 @@ std::shared_ptr<UIElement> FileElement::getElement()
     }
     this->_parentElement = std::make_shared<UIFileElement>(wstrToStr(this->filePath), this->comm, this->filePath);
     this->_parentElement->displayMode = DisplayMode::Distribute;
-    this->_parentElement->childrenDistPos = RelPos::Center;
-    this->_parentElement->childrenAlignPos = RelPos::Start;
+    this->_parentElement->distDirection = DistDirection::row;
+    this->_parentElement->childrenDistPos = RelPos::Start;
+    this->_parentElement->childrenAlignPos = RelPos::Center;
     this->_parentElement->setMargin(5);
 
     std::string iconPath = G_App::IMAGES_PATH + "file.png";
@@ -99,9 +100,40 @@ std::shared_ptr<UIElement> FileElement::getElement()
     this->_parentElement->events.addHandler((int)CustomEvent::MOUSE_CLICK, sendNewPath);
     // this->_parentElement->showHitbox = true;
 
-    UIElement::addChildren(this->_parentElement, {icon, nameEl});
+    TagList tagList(this->comm, 1, this->filePath);
+    tagList.anchorDirection = Direction::Right;
+    tagList.tagFontSize = 7;
+    tagList.tagHight = 10;
+    tagList.tagsClickable = false;
+    tagList.tagSideWidth = 2;
+
+    UIElement::addChildren(this->_parentElement, {icon, nameEl, tagList.getElement()});
+
+    auto onTagsChange = [filePath = this->filePath](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
+    {
+        EventResult<std::shared_ptr<UIElement>> result;
+        if (e->type == AppEventType::FileTagChanged && filePath != e->eventText2)
+        {
+            return result;
+        }
+        TagList tagList(el->comm, 1, filePath);
+        tagList.anchorDirection = Direction::Right;
+        tagList.tagFontSize = 7;
+        tagList.tagHight = 10;
+        tagList.tagsClickable = false;
+        tagList.tagSideWidth = 2;
+        UIElement::addChildren(el, {tagList.getElement()});
+        el->setH(el->getChildHSum());
+        result.data = tagList.getElement();
+        result.type = (int)EventResultType::AddElement;
+
+        return result;
+    };
+    this->_parentElement->appEvents.addHandler((int)AppEventType::FileTagChanged, onTagsChange);
+    this->_parentElement->appEvents.addHandler((int)AppEventType::TagsChanged, onTagsChange);
+
     this->_parentElement->setW(this->iconSize);
-    this->_parentElement->setH(this->iconSize + nameEl->calcH());
+    this->_parentElement->setH(this->_parentElement->getChildHSum());
 
     auto onFilterChange = [name = name](std::shared_ptr<UIElement> &el, const std::shared_ptr<AppEvent> &e)
     {

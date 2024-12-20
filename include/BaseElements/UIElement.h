@@ -25,8 +25,6 @@ protected:
     int _scrollH = 0;
     int _scrollV = 0;
 
-    int calcChildRealW();
-    int calcChildRealH();
     int getMaxChildW();
     int getMaxChildH();
     ChildWrappingData calcChildWrapping(size_t toChild);
@@ -125,6 +123,8 @@ public:
 
     int getChildWSum(std::optional<int> upTo = std::nullopt);
     int getChildHSum(std::optional<int> upTo = std::nullopt);
+    int calcChildRealW();
+    int calcChildRealH();
 
     int countRelativeChildren();
 

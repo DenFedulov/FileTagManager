@@ -61,11 +61,12 @@ TableData AppDB::getFilesWithTags(const std::vector<std::string> &tags, bool tag
         }
         else
         {
-            where += (tagFilterMode ? " AND" : " OR");
+            where += " OR";
         }
         where += " tag_name = '" + tags.at(i) + "'";
     }
-    std::string query = "SELECT * FROM file_tags" + where;
+    std::string query = "SELECT *, COUNT(filepath) as c FROM file_tags" + where + " GROUP BY filepath" +
+                        (tagFilterMode ? " HAVING c = " + std::to_string(tags.size()) : "");
     return this->_db->query(query.c_str());
 }
 
